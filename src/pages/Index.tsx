@@ -17,7 +17,7 @@ import cookingClass from "@/assets/cooking-class.jpg";
 
 const mockExperiences = [
   {
-    id: "1",
+    id: "550e8400-e29b-41d4-a716-446655440001",
     title: "Pottery Workshop for Beginners",
     image: potteryClass,
     category: "Arts & Crafts",
@@ -31,7 +31,7 @@ const mockExperiences = [
     isNew: true,
   },
   {
-    id: "2",
+    id: "550e8400-e29b-41d4-a716-446655440002",
     title: "Farmers Market Food Tour",
     image: farmersMarket,
     category: "Food & Drink",
@@ -44,7 +44,7 @@ const mockExperiences = [
     maxGuests: 12,
   },
   {
-    id: "3",
+    id: "550e8400-e29b-41d4-a716-446655440003",
     title: "Italian Cooking Masterclass",
     image: cookingClass,
     category: "Food & Drink",
