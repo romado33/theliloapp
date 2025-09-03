@@ -1,11 +1,14 @@
-import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Star, 
   MapPin, 
@@ -16,82 +19,218 @@ import {
   Heart,
   Share2,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft
 } from 'lucide-react';
 
-// Mock experience data
-const mockExperience = {
-  id: "1",
-  title: "Family Farm Visit & Animal Feeding Experience",
-  description: "Join us for an authentic farm experience where your family can meet and feed our friendly animals including goats, chickens, rabbits, and miniature horses. Learn about sustainable farming practices while your children create lasting memories with our gentle farm animals.",
-  longDescription: `This hands-on farm experience is designed specifically for families with young children aged 2-12. You'll start with a brief introduction to our farm and safety guidelines, then move on to feeding time with our animals.\n\nWhat makes our farm special:\n• All animals are gentle and used to children\n• Small group sizes ensure personal attention\n• Educational component about animal care\n• Photo opportunities throughout\n• Weather-appropriate activities (indoor backup available)\n\nOur farm has been family-owned for over 30 years and we're passionate about sharing the joy of farm life with the next generation.`,
-  images: [
-    "/placeholder-farm-1.jpg",
-    "/placeholder-farm-2.jpg", 
-    "/placeholder-farm-3.jpg"
-  ],
-  category: "Nature & Animals",
-  price: 25,
-  duration: "2 hours",
-  rating: 4.9,
-  reviewCount: 156,
-  location: "Kanata, Ottawa",
-  address: "123 Farm Road, Kanata, ON K2K 1A1",
-  hostName: "Sarah Johnson",
-  hostJoinDate: "2019",
-  maxGuests: 8,
-  whatIncluded: [
-    "Animal feeding experience",
-    "Farm tour with educational content", 
-    "Safety equipment provided",
-    "Fresh apple cider tasting",
-    "Take-home farm activity booklet"
-  ],
-  whatToBring: [
-    "Comfortable walking shoes",
-    "Weather-appropriate clothing",
-    "Camera for photos",
-    "Hand sanitizer (optional)"
-  ],
-  cancellationPolicy: "Free cancellation up to 24 hours before the experience. 50% refund for cancellations within 24 hours.",
-  availability: [
-    { date: "2025-01-15", time: "10:00 AM", spots: 6 },
-    { date: "2025-01-15", time: "2:00 PM", spots: 3 },
-    { date: "2025-01-16", time: "10:00 AM", spots: 8 },
-    { date: "2025-01-17", time: "10:00 AM", spots: 5 },
-  ]
-};
+interface Experience {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  address: string;
+  price: number;
+  duration_hours: number;
+  max_guests: number;
+  image_urls: string[];
+  what_included: string[];
+  what_to_bring: string[];
+  cancellation_policy: string;
+  status: string;
+  is_active: boolean;
+  created_at: string;
+  categories: {
+    name: string;
+  };
+  profiles: {
+    first_name: string;
+    last_name: string;
+    avatar_url?: string;
+  };
+}
 
 const ExperienceDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
+  
+  const [experience, setExperience] = useState<Experience | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
   const [guestCount, setGuestCount] = useState(2);
 
-  // Mock reviews
-  const reviews = [
+  useEffect(() => {
+    if (!id) return;
+    
+    const fetchExperience = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const { data, error } = await supabase
+          .from('experiences')
+          .select(`
+            *,
+            categories (
+              name
+            ),
+            profiles (
+              first_name,
+              last_name,
+              avatar_url
+            )
+          `)
+          .eq('id', id)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        if (error) throw error;
+        
+        if (!data) {
+          setError('Experience not found');
+          return;
+        }
+
+        setExperience(data);
+      } catch (error: any) {
+        console.error('Error fetching experience:', error);
+        setError(error.message);
+        toast({
+          title: "Error loading experience",
+          description: error.message,
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExperience();
+  }, [id, toast]);
+
+  // Mock availability data - this would come from a real availability table
+  const mockAvailability = [
+    { date: "2025-01-15", time: "10:00 AM", spots: 6 },
+    { date: "2025-01-15", time: "2:00 PM", spots: 3 },
+    { date: "2025-01-16", time: "10:00 AM", spots: 8 },
+    { date: "2025-01-17", time: "10:00 AM", spots: 5 },
+  ];
+
+  // Mock reviews - this would come from a real reviews table
+  const mockReviews = [
     {
       id: 1,
       author: "Jennifer M.",
       rating: 5,
       date: "2 weeks ago",
-      comment: "Amazing experience! Sarah was so welcoming and knowledgeable. My 4-year-old is still talking about feeding the goats. Highly recommend!"
+      comment: "Amazing experience! The host was so welcoming and knowledgeable. My kids loved every minute of it!"
     },
     {
       id: 2,
       author: "Mark R.", 
       rating: 5,
       date: "1 month ago",
-      comment: "Perfect family activity. Well organized, safe, and educational. The kids learned so much about farm life."
+      comment: "Perfect family activity. Well organized, safe, and educational. Highly recommend!"
     }
   ];
+
+  const handleBooking = async () => {
+    if (!user) {
+      navigate('/auth', { 
+        state: { returnTo: `/experience/${id}` }
+      });
+      return;
+    }
+
+    if (!selectedTimeSlot) {
+      toast({
+        title: "Please select a time slot",
+        description: "Choose your preferred date and time to continue with booking.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // TODO: Implement actual booking logic
+    toast({
+      title: "Booking initiated",
+      description: "This would redirect to the booking flow."
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Skeleton className="h-8 w-64 mb-4" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <Skeleton className="h-64 w-full rounded-lg" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-48 w-full" />
+          </div>
+          <div className="lg:col-span-1">
+            <Skeleton className="h-96 w-full rounded-lg" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !experience) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate(-1)}
+          className="mb-6"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        
+        <Card className="p-12 text-center">
+          <CardContent>
+            <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">Experience Not Found</h3>
+            <p className="text-muted-foreground mb-4">
+              {error || 'This experience may have been removed or is no longer available.'}
+            </p>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate('/search')}
+            >
+              Browse Other Experiences
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const hostName = experience.profiles 
+    ? `${experience.profiles.first_name} ${experience.profiles.last_name}` 
+    : 'Unknown Host';
+
+  const images = experience.image_urls && experience.image_urls.length > 0 
+    ? experience.image_urls 
+    : ['/placeholder-experience.jpg'];
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb */}
-      <div className="text-sm text-muted-foreground mb-6">
-        <span>Home</span> → <span>Search</span> → <span className="text-foreground">{mockExperience.title}</span>
+      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+        <button onClick={() => navigate('/')} className="hover:text-foreground">
+          Home
+        </button>
+        <span>→</span>
+        <button onClick={() => navigate('/search')} className="hover:text-foreground">
+          Search
+        </button>
+        <span>→</span>
+        <span className="text-foreground">{experience.title}</span>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -102,20 +241,20 @@ const ExperienceDetails = () => {
             <div className="flex items-start justify-between mb-4">
               <div>
                 <Badge variant="secondary" className="mb-2">
-                  {mockExperience.category}
+                  {experience.categories?.name || 'Experience'}
                 </Badge>
                 <h1 className="text-3xl font-bold text-brand-navy mb-2">
-                  {mockExperience.title}
+                  {experience.title}
                 </h1>
                 <div className="flex items-center gap-4 text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-medium">{mockExperience.rating}</span>
-                    <span>({mockExperience.reviewCount} reviews)</span>
+                    <span className="font-medium">4.9</span>
+                    <span>(156 reviews)</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <MapPin className="w-4 h-4" />
-                    <span>{mockExperience.location}</span>
+                    <span>{experience.location}</span>
                   </div>
                 </div>
               </div>
@@ -134,24 +273,26 @@ const ExperienceDetails = () => {
             <div className="space-y-4">
               <div className="aspect-video bg-muted rounded-lg overflow-hidden">
                 <img 
-                  src={mockExperience.images[selectedImage]}
+                  src={images[selectedImage]}
                   alt="Experience"
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="flex gap-2 overflow-x-auto">
-                {mockExperience.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
-                      selectedImage === index ? 'border-brand-soft-green' : 'border-transparent'
-                    }`}
-                  >
-                    <img src={image} alt={`View ${index + 1}`} className="w-full h-full object-cover" />
-                  </button>
-                ))}
-              </div>
+              {images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto">
+                  {images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImage(index)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
+                        selectedImage === index ? 'border-brand-soft-green' : 'border-transparent'
+                      }`}
+                    >
+                      <img src={image} alt={`View ${index + 1}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -162,79 +303,76 @@ const ExperienceDetails = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-muted-foreground">
-                {mockExperience.description}
+                {experience.description}
               </p>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-brand-soft-blue" />
-                  <span className="text-sm">{mockExperience.duration}</span>
+                  <span className="text-sm">{experience.duration_hours} hours</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-brand-soft-green" />
-                  <span className="text-sm">Up to {mockExperience.maxGuests} guests</span>
+                  <span className="text-sm">Up to {experience.max_guests} guests</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-brand-golden-yellow" />
-                  <span className="text-sm">{mockExperience.location}</span>
+                  <span className="text-sm">{experience.location}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-brand-navy" />
-                  <span className="text-sm">${mockExperience.price} per person</span>
+                  <span className="text-sm">${experience.price} per person</span>
                 </div>
-              </div>
-              
-              <Separator />
-              
-              <div>
-                <h4 className="font-semibold mb-2">Full Description</h4>
-                <p className="text-sm text-muted-foreground whitespace-pre-line">
-                  {mockExperience.longDescription}
-                </p>
               </div>
             </CardContent>
           </Card>
 
           {/* What's Included */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  What's Included
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {mockExperience.whatIncluded.map((item, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+          {(experience.what_included?.length > 0 || experience.what_to_bring?.length > 0) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {experience.what_included?.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      What's Included
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {experience.what_included.map((item, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm">
+                          <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-blue-600" />
-                  What to Bring
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2">
-                  {mockExperience.whatToBring.map((item, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm">
-                      <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          </div>
+              {experience.what_to_bring?.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5 text-blue-600" />
+                      What to Bring
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {experience.what_to_bring.map((item, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm">
+                          <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
 
           {/* Host Information */}
           <Card>
@@ -244,17 +382,22 @@ const ExperienceDetails = () => {
             <CardContent>
               <div className="flex items-start gap-4">
                 <Avatar className="w-16 h-16">
-                  <AvatarFallback className="bg-gradient-brand text-white text-lg">
-                    {mockExperience.hostName.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
+                  {experience.profiles?.avatar_url ? (
+                    <img src={experience.profiles.avatar_url} alt={hostName} />
+                  ) : (
+                    <AvatarFallback className="bg-gradient-brand text-white text-lg">
+                      {experience.profiles?.first_name?.[0] || 'H'}
+                      {experience.profiles?.last_name?.[0] || ''}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg">{mockExperience.hostName}</h3>
+                  <h3 className="font-semibold text-lg">{hostName}</h3>
                   <p className="text-muted-foreground text-sm mb-2">
-                    Host since {mockExperience.hostJoinDate}
+                    Host since {new Date(experience.created_at).getFullYear()}
                   </p>
                   <p className="text-sm">
-                    "I'm passionate about sharing the joy of farm life with families. Our farm has been in my family for generations, and I love seeing children's faces light up when they meet our animals for the first time."
+                    "I'm passionate about sharing local experiences with families and creating memorable moments for children."
                   </p>
                 </div>
               </div>
@@ -266,11 +409,11 @@ const ExperienceDetails = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Star className="w-5 h-5 text-yellow-400" />
-                Reviews ({mockExperience.reviewCount})
+                Reviews (156)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {reviews.map(review => (
+              {mockReviews.map(review => (
                 <div key={review.id} className="border-b border-border last:border-0 pb-4 last:pb-0">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -305,7 +448,7 @@ const ExperienceDetails = () => {
           <Card className="sticky top-4">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>${mockExperience.price}</span>
+                <span>${experience.price}</span>
                 <span className="text-sm font-normal text-muted-foreground">per person</span>
               </CardTitle>
             </CardHeader>
@@ -314,7 +457,7 @@ const ExperienceDetails = () => {
               <div>
                 <label className="text-sm font-medium mb-2 block">Choose Date & Time</label>
                 <div className="space-y-2">
-                  {mockExperience.availability.map((slot, index) => (
+                  {mockAvailability.map((slot, index) => (
                     <button
                       key={index}
                       onClick={() => setSelectedTimeSlot(`${slot.date}-${slot.time}`)}
@@ -362,8 +505,8 @@ const ExperienceDetails = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => setGuestCount(Math.min(mockExperience.maxGuests, guestCount + 1))}
-                      disabled={guestCount >= mockExperience.maxGuests}
+                      onClick={() => setGuestCount(Math.min(experience.max_guests, guestCount + 1))}
+                      disabled={guestCount >= experience.max_guests}
                     >
                       +
                     </Button>
@@ -374,12 +517,12 @@ const ExperienceDetails = () => {
               {/* Price Breakdown */}
               <div className="space-y-2 pt-2 border-t border-border">
                 <div className="flex justify-between text-sm">
-                  <span>${mockExperience.price} × {guestCount} guest{guestCount > 1 ? 's' : ''}</span>
-                  <span>${mockExperience.price * guestCount}</span>
+                  <span>${experience.price} × {guestCount} guest{guestCount > 1 ? 's' : ''}</span>
+                  <span>${experience.price * guestCount}</span>
                 </div>
                 <div className="flex justify-between font-medium">
                   <span>Total</span>
-                  <span>${mockExperience.price * guestCount}</span>
+                  <span>${experience.price * guestCount}</span>
                 </div>
               </div>
 
@@ -387,7 +530,8 @@ const ExperienceDetails = () => {
               <Button 
                 variant="brand" 
                 className="w-full"
-                disabled={!selectedTimeSlot || !user}
+                onClick={handleBooking}
+                disabled={!selectedTimeSlot}
               >
                 {user ? 'Book Experience' : 'Sign in to Book'}
               </Button>
@@ -399,12 +543,14 @@ const ExperienceDetails = () => {
               )}
 
               {/* Cancellation Policy */}
-              <div className="pt-4 border-t border-border">
-                <h4 className="font-medium text-sm mb-1">Cancellation Policy</h4>
-                <p className="text-xs text-muted-foreground">
-                  {mockExperience.cancellationPolicy}
-                </p>
-              </div>
+              {experience.cancellation_policy && (
+                <div className="pt-4 border-t border-border">
+                  <h4 className="font-medium text-sm mb-1">Cancellation Policy</h4>
+                  <p className="text-xs text-muted-foreground">
+                    {experience.cancellation_policy}
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

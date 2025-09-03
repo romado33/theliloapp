@@ -1,7 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Clock, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Star, MapPin, Clock, Users, Heart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface ExperienceCardProps {
   id: string;
@@ -19,6 +20,7 @@ interface ExperienceCardProps {
 }
 
 const ExperienceCard = ({ 
+  id,
   title, 
   image, 
   category, 
@@ -29,10 +31,26 @@ const ExperienceCard = ({
   location, 
   hostName,
   maxGuests,
-  isNew = false 
+  isNew = false
 }: ExperienceCardProps) => {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/experience/${id}`);
+  };
+
+  const handleSaveClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent navigation when clicking heart
+    // TODO: Implement save functionality
+  };
+
+  const handleBookClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent navigation when clicking book button
+    navigate(`/experience/${id}`);
+  };
+
   return (
-    <Card className="group overflow-hidden border-0 shadow-soft hover:shadow-medium transition-all duration-300 hover:-translate-y-1 bg-gradient-card">
+    <Card className="group overflow-hidden border-0 shadow-soft hover:shadow-medium transition-all duration-300 hover:-translate-y-1 bg-gradient-card cursor-pointer" onClick={handleCardClick}>
       <div className="relative">
         <img 
           src={image} 
@@ -49,9 +67,17 @@ const ExperienceCard = ({
           <span className="font-medium">{rating}</span>
           <span className="text-muted-foreground">({reviewCount})</span>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleSaveClick}
+          className="absolute top-3 left-3 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm hover:bg-background/90 border-0 shadow-sm"
+        >
+          <Heart className="h-4 w-4" />
+        </Button>
       </div>
       
-      <div className="p-4 space-y-3">
+      <CardContent className="p-4 space-y-3">
         <div className="space-y-2">
           <Badge variant="secondary" className="text-xs">
             {category}
@@ -82,11 +108,15 @@ const ExperienceCard = ({
             <span className="text-xl font-bold">${price}</span>
             <span className="text-sm text-muted-foreground">per person</span>
           </div>
-          <Button size="sm" className="bg-primary hover:bg-primary-dark">
+          <Button 
+            size="sm" 
+            className="bg-primary hover:bg-primary-dark"
+            onClick={handleBookClick}
+          >
             Book Now
           </Button>
         </div>
-      </div>
+      </CardContent>
     </Card>
   );
 };
