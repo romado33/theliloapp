@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { HostExperienceForm } from "@/components/HostExperienceForm";
-import Header from "@/components/Header";
 import ExperienceCard from "@/components/ExperienceCard";
 import CategoryFilter from "@/components/CategoryFilter";
 import DevDataSeeder from "@/components/DevDataSeeder";
@@ -91,7 +90,6 @@ const Index = () => {
   if (user && profile && currentRole === 'host') {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <main className="container mx-auto px-4 py-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-lilo-navy mb-4">Host Dashboard</h1>
@@ -140,8 +138,6 @@ const Index = () => {
   // Guest view - regular home page
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
       {/* Hero Section */}
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
         <div 

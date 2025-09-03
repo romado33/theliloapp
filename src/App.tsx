@@ -1,11 +1,18 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ExperienceSearch from "./pages/ExperienceSearch";
+import ExperienceDetails from "./pages/ExperienceDetails";
+import UserDashboard from "./pages/UserDashboard";
+import Messages from "./pages/Messages";
+import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -17,12 +24,40 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <SidebarProvider defaultOpen={true}>
+            <div className="min-h-screen flex w-full">
+              {/* Global sidebar trigger - always visible */}
+              <header className="fixed top-4 left-4 z-50 md:hidden">
+                <SidebarTrigger className="bg-background/80 backdrop-blur-sm border border-border rounded-lg p-2 shadow-md" />
+              </header>
+
+              <AppSidebar />
+              
+              <main className="flex-1 overflow-auto">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/search" element={<ExperienceSearch />} />
+                  <Route path="/experience/:id" element={<ExperienceDetails />} />
+                  <Route path="/bookings" element={<UserDashboard />} />
+                  <Route path="/profile" element={<UserDashboard />} />
+                  <Route path="/messages" element={<Messages />} />
+                  <Route path="/settings" element={<UserDashboard />} />
+                  <Route path="/support" element={<Support />} />
+                  
+                  {/* Host Routes */}
+                  <Route path="/host" element={<Index />} />
+                  <Route path="/host/experiences" element={<UserDashboard />} />
+                  <Route path="/host/create" element={<Index />} />
+                  <Route path="/host/bookings" element={<UserDashboard />} />
+                  <Route path="/host/messages" element={<Messages />} />
+                  
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+            </div>
+          </SidebarProvider>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
