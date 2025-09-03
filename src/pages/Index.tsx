@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Header from "@/components/Header";
 import ExperienceCard from "@/components/ExperienceCard";
 import CategoryFilter from "@/components/CategoryFilter";
-import SupabaseTest from "@/components/SupabaseTest";
 import { Search, MapPin, TrendingUp, Heart } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
@@ -57,6 +57,7 @@ const mockExperiences = [
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const { user } = useAuth();
 
   const filteredExperiences = mockExperiences.filter(experience => {
     const matchesCategory = selectedCategory === "all" || 
@@ -118,14 +119,6 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Supabase Test Section */}
-      <section className="container mx-auto px-4 py-8 bg-yellow-100 border-2 border-yellow-400">
-        <div className="text-center mb-4">
-          <h2 className="text-xl font-bold text-yellow-800">🔧 SUPABASE CONNECTION TEST</h2>
-        </div>
-        <SupabaseTest />
       </section>
 
       {/* Main Content */}
