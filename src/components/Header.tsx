@@ -8,13 +8,12 @@ const Header = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-hero rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">L</span>
-            </div>
-            <h1 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-              Lilo
-            </h1>
+          <div className="flex items-center gap-3">
+            <img 
+              src="/lovable-uploads/6dfadda4-fb06-470c-940d-2bccb95a8f8f.png" 
+              alt="Lilo - Live Local" 
+              className="h-10 w-auto"
+            />
           </div>
 
           {/* Search Bar - Hidden on mobile */}

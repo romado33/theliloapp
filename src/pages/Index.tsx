@@ -180,11 +180,12 @@ const Index = () => {
       <footer className="bg-card/50 border-t border-border mt-20">
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-muted-foreground">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <div className="w-6 h-6 bg-gradient-hero rounded flex items-center justify-center">
-                <span className="text-white font-bold text-sm">L</span>
-              </div>
-              <span className="font-semibold">Lilo</span>
+            <div className="flex items-center justify-center mb-4">
+              <img 
+                src="/lovable-uploads/6dfadda4-fb06-470c-940d-2bccb95a8f8f.png" 
+                alt="Lilo - Live Local" 
+                className="h-12 w-auto opacity-70"
+              />
             </div>
             <p>Connecting communities through local experiences</p>
           </div>
