@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import Header from "@/components/Header";
 import ExperienceCard from "@/components/ExperienceCard";
 import CategoryFilter from "@/components/CategoryFilter";
-import { Search, MapPin, TrendingUp, Heart } from "lucide-react";
+import DevDataSeeder from "@/components/DevDataSeeder";
+import { Search, MapPin, TrendingUp, Heart, Database } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
 import farmersMarket from "@/assets/farmers-market.jpg";
@@ -164,6 +165,17 @@ const Index = () => {
               </div>
             )}
           </div>
+
+          {/* Developer Data Seeder - Only show when signed in */}
+          {user && (
+            <div className="animate-fade-in">
+              <div className="flex items-center gap-2 mb-6">
+                <Database className="w-5 h-5" />
+                <h2 className="text-2xl font-bold">Developer Tools</h2>
+              </div>
+              <DevDataSeeder />
+            </div>
+          )}
 
           {/* CTA Section */}
           <div className="bg-gradient-accent rounded-2xl p-8 md:p-12 text-center text-white animate-fade-in">
