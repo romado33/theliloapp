@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin, User, LogOut } from "lucide-react";
+import { Search, MapPin, User as UserIcon, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Header = () => {
@@ -62,7 +62,7 @@ const Header = () => {
               </div>
             ) : (
               <Button variant="outline" size="sm" className="gap-2" onClick={handleAuthClick}>
-                <User className="w-4 h-4" />
+                <UserIcon className="w-4 h-4" />
                 <span className="hidden sm:inline">Sign in</span>
               </Button>
             )}
