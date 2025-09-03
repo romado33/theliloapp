@@ -60,8 +60,8 @@ export function AppSidebar() {
   const getNavClassName = ({ isActive }: { isActive: boolean }) =>
     `flex items-center w-full transition-all duration-300 ${
       isActive 
-        ? "bg-gradient-to-r from-lilo-green/20 to-lilo-blue/20 text-lilo-green border-r-4 border-lilo-green shadow-soft" 
-        : "text-muted-foreground hover:text-lilo-navy hover:bg-gradient-to-r hover:from-lilo-green/10 hover:to-lilo-blue/10 hover:shadow-soft"
+        ? "bg-lilo-navy/10 text-lilo-navy border-r-4 border-lilo-navy shadow-soft font-medium" 
+        : "text-lilo-navy/60 hover:text-lilo-navy hover:bg-lilo-navy/5 hover:shadow-soft"
     }`;
 
   const renderMenuItems = (items: typeof guestItems) => (
@@ -84,20 +84,22 @@ export function AppSidebar() {
   );
 
   return (
-    <Sidebar className="border-r border-lilo-green/20 w-56 bg-gradient-to-b from-background via-lilo-green/5 to-lilo-blue/10 shadow-medium">
-      <SidebarContent>
+    <Sidebar className="border-r border-border/30 w-56 bg-white shadow-medium">
+      <SidebarContent className="bg-white">
         {/* Brand Header */}
-        <div className="p-4 border-b border-lilo-green/20 bg-gradient-to-r from-lilo-green/10 to-lilo-blue/10">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-brand rounded-lg flex items-center justify-center shadow-soft">
-              <span className="text-white font-bold text-sm">L</span>
-            </div>
+        <div className="p-4 border-b border-border/50 bg-white">
+          <div className="flex items-center space-x-3">
+            <img 
+              src="/lovable-uploads/6dfadda4-fb06-470c-940d-2bccb95a8f8f.png" 
+              alt="LiLo - Live Local" 
+              className="h-10 w-auto"
+            />
             {open && (
               <div>
-                <h1 className="font-bold text-lilo-navy bg-gradient-brand bg-clip-text text-transparent">
+                <h1 className="font-bold text-lilo-navy text-lg">
                   LiLo
                 </h1>
-                <p className="text-xs text-muted-foreground">Live Local</p>
+                <p className="text-xs text-lilo-navy/60">Live Local</p>
               </div>
             )}
           </div>
@@ -136,16 +138,16 @@ export function AppSidebar() {
         {user && profile && open && (
           <SidebarGroup className="mt-auto">
             <SidebarGroupContent>
-              <div className="p-3 border-t border-lilo-green/20 bg-gradient-to-r from-lilo-green/5 to-lilo-blue/5">
+              <div className="p-3 border-t border-border/30 bg-white">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-brand rounded-full flex items-center justify-center text-white text-sm font-medium shadow-medium ring-2 ring-lilo-green/20">
+                  <div className="w-10 h-10 bg-gradient-brand rounded-full flex items-center justify-center text-white text-sm font-medium shadow-medium">
                     {profile.first_name?.[0]?.toUpperCase() || 'U'}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate text-lilo-navy">
                       {profile.first_name} {profile.last_name}
                     </p>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className="text-xs text-lilo-navy/60 truncate">
                       {currentRole === 'host' ? 'Host Account' : 'Guest Account'}
                     </p>
                   </div>
