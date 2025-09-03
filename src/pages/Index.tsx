@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import Header from "@/components/Header";
 import ExperienceCard from "@/components/ExperienceCard";
 import CategoryFilter from "@/components/CategoryFilter";
+import SupabaseTest from "@/components/SupabaseTest";
 import { Search, MapPin, TrendingUp, Heart } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
@@ -117,6 +118,11 @@ const Index = () => {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Supabase Test Section */}
+      <section className="container mx-auto px-4 py-8">
+        <SupabaseTest />
       </section>
 
       {/* Main Content */}
