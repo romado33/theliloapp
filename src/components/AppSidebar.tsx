@@ -58,10 +58,10 @@ export function AppSidebar() {
   };
 
   const getNavClassName = ({ isActive }: { isActive: boolean }) =>
-    `flex items-center w-full ${
+    `flex items-center w-full transition-all duration-300 ${
       isActive 
-        ? "bg-brand-soft-green/20 text-brand-soft-green border-r-2 border-brand-soft-green" 
-        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+        ? "bg-gradient-to-r from-lilo-green/20 to-lilo-blue/20 text-lilo-green border-r-4 border-lilo-green shadow-soft" 
+        : "text-muted-foreground hover:text-lilo-navy hover:bg-gradient-to-r hover:from-lilo-green/10 hover:to-lilo-blue/10 hover:shadow-soft"
     }`;
 
   const renderMenuItems = (items: typeof guestItems) => (
@@ -84,14 +84,31 @@ export function AppSidebar() {
   );
 
   return (
-    <Sidebar className="border-r border-border w-56">
+    <Sidebar className="border-r border-lilo-green/20 w-56 bg-gradient-to-b from-background via-lilo-green/5 to-lilo-blue/10 shadow-medium">
       <SidebarContent>
+        {/* Brand Header */}
+        <div className="p-4 border-b border-lilo-green/20 bg-gradient-to-r from-lilo-green/10 to-lilo-blue/10">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-brand rounded-lg flex items-center justify-center shadow-soft">
+              <span className="text-white font-bold text-sm">L</span>
+            </div>
+            {open && (
+              <div>
+                <h1 className="font-bold text-lilo-navy bg-gradient-brand bg-clip-text text-transparent">
+                  LiLo
+                </h1>
+                <p className="text-xs text-muted-foreground">Live Local</p>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel className={open ? "block" : "sr-only"}>
+          <SidebarGroupLabel className={`${open ? "block" : "sr-only"} text-lilo-navy font-semibold px-3 py-2`}>
             {currentRole === 'host' ? 'Host Menu' : 'Main Menu'}
           </SidebarGroupLabel>
-          <SidebarGroupContent>
+          <SidebarGroupContent className="px-2">
             {user ? (
               currentRole === 'host' ? renderMenuItems(hostItems) : renderMenuItems(guestItems)
             ) : (
@@ -106,10 +123,10 @@ export function AppSidebar() {
         {/* Settings & Support */}
         {user && (
           <SidebarGroup>
-            <SidebarGroupLabel className={open ? "block" : "sr-only"}>
+            <SidebarGroupLabel className={`${open ? "block" : "sr-only"} text-lilo-navy font-semibold px-3 py-2`}>
               Support
             </SidebarGroupLabel>
-            <SidebarGroupContent>
+            <SidebarGroupContent className="px-2">
               {renderMenuItems(commonItems)}
             </SidebarGroupContent>
           </SidebarGroup>
@@ -119,13 +136,13 @@ export function AppSidebar() {
         {user && profile && open && (
           <SidebarGroup className="mt-auto">
             <SidebarGroupContent>
-              <div className="p-3 border-t border-border">
+              <div className="p-3 border-t border-lilo-green/20 bg-gradient-to-r from-lilo-green/5 to-lilo-blue/5">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-brand rounded-full flex items-center justify-center text-white text-sm font-medium">
+                  <div className="w-10 h-10 bg-gradient-brand rounded-full flex items-center justify-center text-white text-sm font-medium shadow-medium ring-2 ring-lilo-green/20">
                     {profile.first_name?.[0]?.toUpperCase() || 'U'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
+                    <p className="text-sm font-medium truncate text-lilo-navy">
                       {profile.first_name} {profile.last_name}
                     </p>
                     <p className="text-xs text-muted-foreground truncate">
