@@ -8,43 +8,51 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* LiLo Brand Colors */
     --background: 0 0% 99%;
-    --foreground: 215 27% 15%;
+    --foreground: 220 45% 20%; /* Navy text */
 
     --card: 0 0% 100%;
-    --card-foreground: 215 27% 15%;
+    --card-foreground: 220 45% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 27% 15%;
+    --popover-foreground: 220 45% 20%;
 
-    --primary: 180 54% 45%;
+    --primary: 155 40% 55%; /* Soft green */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 11% 96%;
-    --secondary-foreground: 215 27% 15%;
+    --secondary: 205 35% 75%; /* Soft blue */
+    --secondary-foreground: 220 45% 20%;
 
-    --muted: 210 11% 96%;
-    --muted-foreground: 215 13% 50%;
+    --muted: 210 15% 94%;
+    --muted-foreground: 220 25% 45%;
 
-    --accent: 18 90% 68%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 50 85% 65%; /* Golden yellow */
+    --accent-foreground: 220 45% 20%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 210 11% 91%;
-    --input: 210 11% 91%;
-    --ring: 180 54% 45%;
+    --border: 210 15% 88%;
+    --input: 210 15% 88%;
+    --ring: 155 40% 55%;
 
-    /* Custom design tokens */
-    --primary-light: 180 54% 55%;
-    --primary-dark: 180 54% 35%;
-    --accent-light: 18 90% 78%;
-    --accent-dark: 18 90% 58%;
+    /* LiLo Brand Design Tokens */
+    --lilo-green: 155 40% 55%;
+    --lilo-green-light: 155 40% 65%;
+    --lilo-green-dark: 155 40% 45%;
+    --lilo-blue: 205 35% 75%;
+    --lilo-blue-light: 205 35% 85%;
+    --lilo-blue-dark: 205 35% 65%;
+    --lilo-yellow: 50 85% 65%;
+    --lilo-yellow-light: 50 85% 75%;
+    --lilo-yellow-dark: 50 85% 55%;
+    --lilo-navy: 220 45% 20%;
     
-    --gradient-hero: linear-gradient(135deg, hsl(180 54% 45%), hsl(18 90% 68%));
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 11% 98%));
-    --gradient-accent: linear-gradient(135deg, hsl(18 90% 68%), hsl(25 95% 75%));
+    --gradient-hero: linear-gradient(135deg, hsl(155 40% 55%), hsl(205 35% 75%), hsl(50 85% 65%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(155 40% 98%));
+    --gradient-accent: linear-gradient(135deg, hsl(50 85% 65%), hsl(155 40% 55%));
+    --gradient-brand: linear-gradient(135deg, hsl(155 40% 55%) 0%, hsl(205 35% 75%) 50%, hsl(50 85% 65%) 100%);
     
     --shadow-soft: 0 4px 12px hsl(215 27% 15% / 0.08);
     --shadow-medium: 0 8px 24px hsl(215 27% 15% / 0.12);
@@ -73,43 +81,51 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 215 28% 8%;
-    --foreground: 210 11% 96%;
+    /* LiLo Dark Mode */
+    --background: 220 35% 8%;
+    --foreground: 155 25% 85%;
 
-    --card: 215 28% 10%;
-    --card-foreground: 210 11% 96%;
+    --card: 220 35% 10%;
+    --card-foreground: 155 25% 85%;
 
-    --popover: 215 28% 10%;
-    --popover-foreground: 210 11% 96%;
+    --popover: 220 35% 10%;
+    --popover-foreground: 155 25% 85%;
 
-    --primary: 180 54% 55%;
-    --primary-foreground: 215 28% 8%;
+    --primary: 155 40% 65%; /* Brighter soft green for dark mode */
+    --primary-foreground: 220 35% 8%;
 
-    --secondary: 215 20% 16%;
-    --secondary-foreground: 210 11% 96%;
+    --secondary: 205 35% 65%; /* Adjusted soft blue for dark mode */
+    --secondary-foreground: 155 25% 85%;
 
-    --muted: 215 20% 16%;
-    --muted-foreground: 215 13% 65%;
+    --muted: 220 25% 16%;
+    --muted-foreground: 205 20% 65%;
 
-    --accent: 18 90% 68%;
-    --accent-foreground: 215 28% 8%;
+    --accent: 50 85% 70%; /* Brighter golden yellow for dark mode */
+    --accent-foreground: 220 35% 8%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 11% 96%;
+    --destructive-foreground: 155 25% 85%;
 
-    --border: 215 20% 16%;
-    --input: 215 20% 16%;
-    --ring: 180 54% 55%;
+    --border: 220 25% 18%;
+    --input: 220 25% 18%;
+    --ring: 155 40% 65%;
 
-    /* Dark mode custom tokens */
-    --primary-light: 180 54% 65%;
-    --primary-dark: 180 54% 45%;
-    --accent-light: 18 90% 78%;
-    --accent-dark: 18 90% 58%;
+    /* LiLo Dark Mode Brand Tokens */
+    --lilo-green: 155 40% 65%;
+    --lilo-green-light: 155 40% 75%;
+    --lilo-green-dark: 155 40% 55%;
+    --lilo-blue: 205 35% 65%;
+    --lilo-blue-light: 205 35% 75%;
+    --lilo-blue-dark: 205 35% 55%;
+    --lilo-yellow: 50 85% 70%;
+    --lilo-yellow-light: 50 85% 80%;
+    --lilo-yellow-dark: 50 85% 60%;
+    --lilo-navy: 155 25% 85%;
     
-    --gradient-hero: linear-gradient(135deg, hsl(180 54% 55%), hsl(18 90% 68%));
-    --gradient-card: linear-gradient(180deg, hsl(215 28% 10%), hsl(215 20% 12%));
-    --gradient-accent: linear-gradient(135deg, hsl(18 90% 68%), hsl(25 95% 75%));
+    --gradient-hero: linear-gradient(135deg, hsl(155 40% 65%), hsl(205 35% 65%), hsl(50 85% 70%));
+    --gradient-card: linear-gradient(180deg, hsl(220 35% 10%), hsl(220 25% 12%));
+    --gradient-accent: linear-gradient(135deg, hsl(50 85% 70%), hsl(155 40% 65%));
+    --gradient-brand: linear-gradient(135deg, hsl(155 40% 65%) 0%, hsl(205 35% 65%) 50%, hsl(50 85% 70%) 100%);
     
     --shadow-soft: 0 4px 12px hsl(215 28% 8% / 0.5);
     --shadow-medium: 0 8px 24px hsl(215 28% 8% / 0.6);

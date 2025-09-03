@@ -85,36 +85,36 @@ const Index = () => {
         <div className="relative z-10 text-center max-w-4xl mx-auto px-4 py-20">
           <div className="animate-fade-in">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              Live <span className="bg-gradient-hero bg-clip-text text-transparent">Local</span>
+              Live <span className="bg-gradient-brand bg-clip-text text-transparent">Local</span>
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-lilo-navy/80 mb-8 max-w-2xl mx-auto">
               Discover unique experiences in your neighborhood. Connect with local businesses and create unforgettable memories.
             </p>
             
             {/* Hero Search */}
             <div className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto mb-8">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lilo-green w-5 h-5" />
                 <Input 
                   placeholder="What would you like to try?" 
-                  className="pl-12 h-12 text-lg bg-background/90 backdrop-blur-sm border-2 border-primary/20 focus:border-primary"
+                  className="pl-12 h-12 text-lg bg-background/90 backdrop-blur-sm border-2 border-lilo-green/30 focus:border-lilo-green"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Button size="lg" variant="hero" className="h-12 px-8 text-lg">
+              <Button size="lg" variant="brand" className="h-12 px-8 text-lg shadow-lg">
                 <MapPin className="w-5 h-5" />
                 Explore
               </Button>
             </div>
             
-            <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+            <div className="flex flex-wrap justify-center gap-4 text-sm text-lilo-navy/70">
               <div className="flex items-center gap-1">
-                <TrendingUp className="w-4 h-4" />
+                <TrendingUp className="w-4 h-4 text-lilo-green" />
                 <span>500+ local experiences</span>
               </div>
               <div className="flex items-center gap-1">
-                <Heart className="w-4 h-4" />
+                <Heart className="w-4 h-4 text-lilo-yellow" />
                 <span>Trusted by locals</span>
               </div>
             </div>
@@ -178,12 +178,12 @@ const Index = () => {
           )}
 
           {/* CTA Section */}
-          <div className="bg-gradient-accent rounded-2xl p-8 md:p-12 text-center text-white animate-fade-in">
+          <div className="bg-gradient-brand rounded-2xl p-8 md:p-12 text-center text-white animate-fade-in shadow-strong">
             <h3 className="text-3xl font-bold mb-4">Share Your Passion</h3>
-            <p className="text-xl mb-6 opacity-90">
+            <p className="text-xl mb-6 opacity-95">
               Turn your skills into income by hosting experiences in your community
             </p>
-            <Button size="lg" variant="secondary" className="bg-background text-foreground hover:bg-background/90">
+            <Button size="lg" variant="secondary" className="bg-white text-lilo-navy hover:bg-white/90 shadow-medium">
               Become a Host
             </Button>
           </div>
@@ -191,17 +191,23 @@ const Index = () => {
       </section>
       
       {/* Footer */}
-      <footer className="bg-card/50 border-t border-border mt-20">
+      <footer className="bg-gradient-to-r from-lilo-green/5 via-lilo-blue/5 to-lilo-yellow/5 border-t border-lilo-green/20 mt-20">
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-muted-foreground">
-            <div className="flex items-center justify-center mb-4">
-              <img 
-                src="/lovable-uploads/6dfadda4-fb06-470c-940d-2bccb95a8f8f.png" 
-                alt="Lilo - Live Local" 
-                className="h-12 w-auto opacity-70"
-              />
+          <div className="text-center text-lilo-navy/70">
+            <div className="flex items-center justify-center mb-4 group">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-brand rounded-full opacity-10 group-hover:opacity-20 transition-opacity blur-lg"></div>
+                <img 
+                  src="/lovable-uploads/6dfadda4-fb06-470c-940d-2bccb95a8f8f.png" 
+                  alt="LiLo - Live Local" 
+                  className="h-12 w-auto relative z-10 group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
             </div>
-            <p>Connecting communities through local experiences</p>
+            <p className="font-medium">Connecting communities through local experiences</p>
+            <div className="mt-2 text-sm">
+              <span className="bg-gradient-brand bg-clip-text text-transparent font-semibold">Live Local, Love Local</span>
+            </div>
           </div>
         </div>
       </footer>

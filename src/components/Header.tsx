@@ -17,51 +17,62 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-card/80 backdrop-blur-sm border-b border-border sticky top-0 z-50">
-      <div className="container mx-auto px-4 py-4">
+    <header className="bg-gradient-to-r from-background via-lilo-green/5 to-lilo-blue/5 backdrop-blur-sm border-b border-lilo-green/20 sticky top-0 z-50">
+      <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <img 
-              src="/lovable-uploads/6dfadda4-fb06-470c-940d-2bccb95a8f8f.png" 
-              alt="Lilo - Live Local" 
-              className="h-10 w-auto"
-            />
+          {/* Logo - Much more prominent */}
+          <div className="flex items-center gap-4 cursor-pointer group" onClick={() => navigate('/')}>
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-brand rounded-full opacity-10 group-hover:opacity-20 transition-opacity blur-xl"></div>
+              <img 
+                src="/lovable-uploads/6dfadda4-fb06-470c-940d-2bccb95a8f8f.png" 
+                alt="LiLo - Live Local" 
+                className="h-14 w-auto relative z-10 drop-shadow-lg group-hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+            <div className="hidden sm:block">
+              <div className="text-2xl font-bold bg-gradient-brand bg-clip-text text-transparent">
+                LiLo
+              </div>
+              <div className="text-xs text-lilo-navy/70 font-medium tracking-wide">
+                Live Local
+              </div>
+            </div>
           </div>
 
           {/* Search Bar - Hidden on mobile */}
           <div className="hidden md:flex items-center gap-4 flex-1 max-w-lg mx-8">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lilo-green w-4 h-4" />
               <Input 
                 placeholder="Find local experiences..." 
-                className="pl-10 bg-background/50"
+                className="pl-10 bg-background/80 border-lilo-green/30 focus:border-lilo-green"
               />
             </div>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2 border-lilo-blue/40 text-lilo-blue hover:bg-lilo-blue/10">
               <MapPin className="w-4 h-4" />
               Location
             </Button>
           </div>
 
           {/* User Actions */}
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="hidden md:flex">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" className="hidden md:flex text-lilo-green hover:bg-lilo-green/10 hover:text-lilo-green-dark">
               Host an experience
             </Button>
             
             {user ? (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground hidden sm:inline">
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-lilo-navy/80 hidden sm:inline font-medium">
                   Hi, {user.user_metadata?.first_name || user.email?.split('@')[0]}
                 </span>
-                <Button variant="outline" size="sm" className="gap-2" onClick={handleSignOut}>
+                <Button variant="outline" size="sm" className="gap-2 border-lilo-navy/30 text-lilo-navy hover:bg-lilo-navy/10" onClick={handleSignOut}>
                   <LogOut className="w-4 h-4" />
                   <span className="hidden sm:inline">Sign out</span>
                 </Button>
               </div>
             ) : (
-              <Button variant="outline" size="sm" className="gap-2" onClick={handleAuthClick}>
+              <Button variant="brand" size="sm" className="gap-2 shadow-lg" onClick={handleAuthClick}>
                 <LogIn className="w-4 h-4" />
                 <span className="hidden sm:inline">Sign in</span>
               </Button>
@@ -72,10 +83,10 @@ const Header = () => {
         {/* Mobile Search */}
         <div className="md:hidden mt-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lilo-green w-4 h-4" />
             <Input 
               placeholder="Find local experiences..." 
-              className="pl-10 bg-background/50"
+              className="pl-10 bg-background/80 border-lilo-green/30 focus:border-lilo-green"
             />
           </div>
         </div>

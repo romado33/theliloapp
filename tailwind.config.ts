@@ -26,9 +26,7 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))',
-					light: 'hsl(var(--primary-light))',
-					dark: 'hsl(var(--primary-dark))'
+					foreground: 'hsl(var(--primary-foreground))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -44,9 +42,7 @@ export default {
 				},
 				accent: {
 					DEFAULT: 'hsl(var(--accent))',
-					foreground: 'hsl(var(--accent-foreground))',
-					light: 'hsl(var(--accent-light))',
-					dark: 'hsl(var(--accent-dark))'
+					foreground: 'hsl(var(--accent-foreground))'
 				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
@@ -55,6 +51,19 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				// LiLo Brand Colors
+				lilo: {
+					green: 'hsl(var(--lilo-green))',
+					'green-light': 'hsl(var(--lilo-green-light))',
+					'green-dark': 'hsl(var(--lilo-green-dark))',
+					blue: 'hsl(var(--lilo-blue))',
+					'blue-light': 'hsl(var(--lilo-blue-light))',
+					'blue-dark': 'hsl(var(--lilo-blue-dark))',
+					yellow: 'hsl(var(--lilo-yellow))',
+					'yellow-light': 'hsl(var(--lilo-yellow-light))',
+					'yellow-dark': 'hsl(var(--lilo-yellow-dark))',
+					navy: 'hsl(var(--lilo-navy))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -131,7 +140,8 @@ export default {
 			backgroundImage: {
 				'gradient-hero': 'var(--gradient-hero)',
 				'gradient-card': 'var(--gradient-card)',
-				'gradient-accent': 'var(--gradient-accent)'
+				'gradient-accent': 'var(--gradient-accent)',
+				'gradient-brand': 'var(--gradient-brand)'
 			},
 			boxShadow: {
 				'soft': 'var(--shadow-soft)',
