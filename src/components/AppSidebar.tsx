@@ -84,7 +84,7 @@ export function AppSidebar() {
   );
 
   return (
-    <Sidebar className="border-r border-border">
+    <Sidebar className="border-r border-border w-56">
       <SidebarContent>
         {/* Main Navigation */}
         <SidebarGroup>
