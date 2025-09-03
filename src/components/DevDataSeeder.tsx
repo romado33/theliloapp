@@ -53,7 +53,7 @@ const DevDataSeeder = () => {
       location: 'Downtown Ottawa',
       address: '456 Arts Street, Ottawa, ON K1A 0A6',
       price: 35,
-      duration_hours: 1.5,
+      duration_hours: 2,
       max_guests: 6,
       image_urls: ['/placeholder-pottery.jpg'],
       what_included: [
@@ -79,7 +79,7 @@ const DevDataSeeder = () => {
       location: 'Westboro, Ottawa',
       address: '789 Culinary Lane, Ottawa, ON K1Z 8N8',
       price: 40,
-      duration_hours: 2.5,
+      duration_hours: 3,
       max_guests: 10,
       image_urls: ['/placeholder-cooking.jpg'],
       what_included: [
