@@ -1,8 +1,11 @@
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/hooks/useAuth";
-import { Input } from "@/components/ui/input";
-import { Search, MapPin, LogIn, LogOut } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
+import { RoleSwitcher } from '@/components/RoleSwitcher';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { Search, User, LogOut, Settings, Home, LogIn, MapPin } from 'lucide-react';
 
 const Header = () => {
   const { user, profile, signOut, currentRole, switchRole } = useAuth();

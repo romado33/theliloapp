@@ -8,6 +8,7 @@ import { HostExperienceForm } from "@/components/HostExperienceForm";
 import ExperienceCard from "@/components/ExperienceCard";
 import CategoryFilter from "@/components/CategoryFilter";
 import DevDataSeeder from "@/components/DevDataSeeder";
+import Header from "@/components/Header";
 import { Search, MapPin, TrendingUp, Heart, Database, Plus } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
@@ -138,6 +139,8 @@ const Index = () => {
   // Guest view - regular home page
   return (
     <div className="min-h-screen bg-background">
+      <Header />
+      
       {/* Hero Section */}
       <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
         <div 
