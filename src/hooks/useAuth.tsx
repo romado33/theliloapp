@@ -7,12 +7,15 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  profile: any;
+  currentRole: 'user' | 'host';
   signUp: (email: string, password: string, userData?: any) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: () => Promise<{ error: any }>;
   signInWithApple: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
-  devBypass: () => Promise<void>;
+  devBypass: (role: 'user' | 'host') => Promise<void>;
+  switchRole: (role: 'user' | 'host') => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,8 +23,28 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [currentRole, setCurrentRole] = useState<'user' | 'host'>('user');
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (!error && data) {
+        setProfile(data);
+        // Set initial role based on profile
+        setCurrentRole(data.is_host ? 'host' : 'user');
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -29,6 +52,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Fetch profile after user is set
+          setTimeout(() => {
+            fetchProfile(session.user.id);
+          }, 0);
+        } else {
+          setProfile(null);
+          setCurrentRole('user');
+        }
+        
         setLoading(false);
       }
     );
@@ -37,6 +71,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      }
+      
       setLoading(false);
     });
 
@@ -69,6 +108,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     return { error };
+  };
+
+  const switchRole = (role: 'user' | 'host') => {
+    if (!profile?.is_host && role === 'host') {
+      toast({
+        title: "Access Denied",
+        description: "You need to be registered as a host to access host features.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setCurrentRole(role);
+    toast({
+      title: "Role Switched",
+      description: `Switched to ${role === 'user' ? 'Guest' : 'Host'} view`
+    });
   };
 
   const signIn = async (email: string, password: string) => {
@@ -141,14 +197,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const devBypass = async () => {
-    // Create a mock user session for development
+  const devBypass = async (role: 'user' | 'host') => {
+    const isHost = role === 'host';
     const mockUser = {
-      id: 'dev-user-' + Date.now(),
-      email: 'dev@livelocal.app',
+      id: 'dev-' + role + '-' + Date.now(),
+      email: `dev-${role}@livelocal.app`,
       user_metadata: {
         first_name: 'Dev',
-        last_name: 'User'
+        last_name: isHost ? 'Host' : 'User'
       }
     };
 
@@ -170,14 +226,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // Sign in the dev user
-      await supabase.auth.signInWithPassword({
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: mockUser.email,
         password: 'devpassword123'
       });
 
+      if (signInError) throw signInError;
+
+      // Update profile to set host status and onboarded flag
+      if (signInData.user) {
+        await supabase
+          .from('profiles')
+          .update({ 
+            is_host: isHost,
+            onboarded: true
+          })
+          .eq('id', signInData.user.id);
+      }
+
       toast({
         title: "Dev bypass activated",
-        description: "Signed in as development user"
+        description: `Signed in as development ${role}`
       });
     } catch (error: any) {
       toast({
@@ -192,12 +261,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user,
     session,
     loading,
+    profile,
+    currentRole,
     signUp,
     signIn,
     signInWithGoogle,
     signInWithApple,
     signOut,
-    devBypass
+    devBypass,
+    switchRole
   };
 
   return (

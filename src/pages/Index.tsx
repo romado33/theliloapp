@@ -2,11 +2,14 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { WelcomeScreen } from "@/components/WelcomeScreen";
+import { HostExperienceForm } from "@/components/HostExperienceForm";
 import Header from "@/components/Header";
 import ExperienceCard from "@/components/ExperienceCard";
 import CategoryFilter from "@/components/CategoryFilter";
 import DevDataSeeder from "@/components/DevDataSeeder";
-import { Search, MapPin, TrendingUp, Heart, Database } from "lucide-react";
+import { Search, MapPin, TrendingUp, Heart, Database, Plus } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
 import farmersMarket from "@/assets/farmers-market.jpg";
@@ -58,7 +61,8 @@ const mockExperiences = [
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const { user } = useAuth();
+  const [showHostForm, setShowHostForm] = useState(false);
+  const { user, profile, loading, currentRole } = useAuth();
 
   const filteredExperiences = mockExperiences.filter(experience => {
     const matchesCategory = selectedCategory === "all" || 
@@ -69,6 +73,71 @@ const Index = () => {
     return matchesCategory && matchesSearch;
   });
 
+  // Show welcome screen for logged-in users who haven't onboarded
+  if (user && profile && !profile.onboarded) {
+    return <WelcomeScreen onComplete={() => window.location.reload()} />;
+  }
+
+  // Show loading screen while auth is loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-lilo-green/20 via-background to-lilo-blue/20 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-lilo-green"></div>
+      </div>
+    );
+  }
+
+  // Host view - show host dashboard and form
+  if (user && profile && currentRole === 'host') {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-lilo-navy mb-4">Host Dashboard</h1>
+            <p className="text-muted-foreground mb-6">Create and manage your local experiences</p>
+            
+            {showHostForm ? (
+              <div className="space-y-6">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowHostForm(false)}
+                  className="mb-4"
+                >
+                  ← Back to Dashboard
+                </Button>
+                <HostExperienceForm onSuccess={() => setShowHostForm(false)} />
+              </div>
+            ) : (
+              <Card className="max-w-md mx-auto">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Plus className="w-5 h-5" />
+                    <span>Get Started</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Ready to share your amazing local experience with families?
+                  </p>
+                  <Button 
+                    variant="brand" 
+                    className="w-full"
+                    onClick={() => setShowHostForm(true)}
+                  >
+                    Create Your First Experience
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+          {user && <DevDataSeeder />}
+        </main>
+      </div>
+    );
+  }
+
+  // Guest view - regular home page
   return (
     <div className="min-h-screen bg-background">
       <Header />

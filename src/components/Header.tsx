@@ -5,7 +5,7 @@ import { Search, MapPin, LogIn, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Header = () => {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut, currentRole, switchRole } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {

@@ -146,6 +146,38 @@ export type Database = {
         }
         Relationships: []
       }
+      experience_photos: {
+        Row: {
+          created_at: string | null
+          experience_id: string
+          id: string
+          image_url: string
+          is_primary: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          experience_id: string
+          id?: string
+          image_url: string
+          is_primary?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          experience_id?: string
+          id?: string
+          image_url?: string
+          is_primary?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experience_photos_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       experiences: {
         Row: {
           address: string | null
@@ -163,6 +195,7 @@ export type Database = {
           longitude: number | null
           max_guests: number
           price: number
+          status: Database["public"]["Enums"]["experience_status"] | null
           title: string
           updated_at: string | null
           what_included: string[] | null
@@ -184,6 +217,7 @@ export type Database = {
           longitude?: number | null
           max_guests?: number
           price: number
+          status?: Database["public"]["Enums"]["experience_status"] | null
           title: string
           updated_at?: string | null
           what_included?: string[] | null
@@ -205,6 +239,7 @@ export type Database = {
           longitude?: number | null
           max_guests?: number
           price?: number
+          status?: Database["public"]["Enums"]["experience_status"] | null
           title?: string
           updated_at?: string | null
           what_included?: string[] | null
@@ -291,6 +326,7 @@ export type Database = {
           is_host: boolean | null
           last_name: string | null
           location: string | null
+          onboarded: boolean | null
           phone: string | null
           updated_at: string | null
         }
@@ -305,6 +341,7 @@ export type Database = {
           is_host?: boolean | null
           last_name?: string | null
           location?: string | null
+          onboarded?: boolean | null
           phone?: string | null
           updated_at?: string | null
         }
@@ -319,6 +356,7 @@ export type Database = {
           is_host?: boolean | null
           last_name?: string | null
           location?: string | null
+          onboarded?: boolean | null
           phone?: string | null
           updated_at?: string | null
         }
@@ -384,7 +422,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      experience_status:
+        | "submitted"
+        | "under_review"
+        | "more_info_needed"
+        | "approved"
+        | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -511,6 +554,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      experience_status: [
+        "submitted",
+        "under_review",
+        "more_info_needed",
+        "approved",
+        "rejected",
+      ],
+    },
   },
 } as const

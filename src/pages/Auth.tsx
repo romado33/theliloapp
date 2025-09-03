@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { DevBypassModal } from '@/components/DevBypassModal';
 import { Eye, EyeOff, ArrowLeft, Code } from 'lucide-react';
 
 const Auth = () => {
@@ -17,6 +18,7 @@ const Auth = () => {
   const [lastName, setLastName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showDevModal, setShowDevModal] = useState(false);
   
   const { signUp, signIn, signInWithGoogle, signInWithApple, devBypass, user } = useAuth();
   const navigate = useNavigate();
@@ -46,10 +48,11 @@ const Auth = () => {
     setLoading(false);
   };
 
-  const handleDevBypass = async () => {
+  const handleDevBypass = (role: 'user' | 'host') => {
     setLoading(true);
-    await devBypass();
-    setLoading(false);
+    devBypass(role).finally(() => {
+      setLoading(false);
+    });
   };
 
   return (
@@ -254,7 +257,7 @@ const Auth = () => {
             <div className="pt-4 border-t">
               <Button
                 variant="secondary"
-                onClick={handleDevBypass}
+                onClick={() => setShowDevModal(true)}
                 disabled={loading}
                 className="w-full bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border-yellow-300"
               >
@@ -267,6 +270,12 @@ const Auth = () => {
             </div>
           </CardContent>
         </Card>
+        
+        <DevBypassModal
+          isOpen={showDevModal}
+          onClose={() => setShowDevModal(false)}
+          onSelectRole={handleDevBypass}
+        />
       </div>
     </div>
   );
