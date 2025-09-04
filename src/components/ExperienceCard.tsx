@@ -62,7 +62,7 @@ const ExperienceCard = ({
     <Card className="group overflow-hidden border-0 shadow-soft hover:shadow-medium transition-all duration-300 hover:-translate-y-1 bg-gradient-card cursor-pointer" onClick={handleCardClick}>
       <div className="relative">
         <img 
-          src={image} 
+          src={image}
           alt={title}
           className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
         />

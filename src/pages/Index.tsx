@@ -16,24 +16,23 @@ import potteryClass from "@/assets/pottery-class.jpg";
 import farmersMarket from "@/assets/farmers-market.jpg";
 import cookingClass from "@/assets/cooking-class.jpg";
 
-// Map placeholder URLs to actual assets
+// Map placeholder URLs to actual assets - simplified approach  
 const getImageFromUrl = (url: string | undefined): string => {
   if (!url) return potteryClass;
   
-  const imageMap: Record<string, string> = {
-    '/placeholder-cooking.jpg': cookingClass,
-    '/placeholder-pasta.jpg': cookingClass,
-    '/placeholder-pottery.jpg': potteryClass,
-    '/placeholder-workshop.jpg': potteryClass,
-    '/placeholder-yoga.jpg': potteryClass,
-    '/placeholder-hike.jpg': farmersMarket,
-    '/placeholder-wine.jpg': farmersMarket,
-    '/placeholder-market.jpg': farmersMarket,
-    '/placeholder-farm.jpg': farmersMarket, // Farm activities use farmers market image
-    '/placeholder-nature.jpg': farmersMarket, // Nature activities use farmers market image
-  };
+  // Direct mapping without complex logic
+  if (url === '/placeholder-cooking.jpg') return cookingClass;
+  if (url === '/placeholder-pasta.jpg') return cookingClass;
+  if (url === '/placeholder-pottery.jpg') return potteryClass;
+  if (url === '/placeholder-workshop.jpg') return potteryClass;
+  if (url === '/placeholder-yoga.jpg') return potteryClass;
+  if (url === '/placeholder-hike.jpg') return farmersMarket;
+  if (url === '/placeholder-wine.jpg') return farmersMarket;
+  if (url === '/placeholder-market.jpg') return farmersMarket;
+  if (url === '/placeholder-farm.jpg') return farmersMarket;
+  if (url === '/placeholder-nature.jpg') return farmersMarket;
   
-  return imageMap[url] || potteryClass;
+  return potteryClass; // fallback
 };
 
 // RESTORED NORMAL MOCK EXPERIENCES
