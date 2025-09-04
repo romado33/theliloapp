@@ -169,7 +169,7 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/60 to-background/80" />
         </div>
         
-        <div className="relative z-10 text-center max-w-4xl mx-auto px-4 py-20">
+        <div className="relative z-10 text-center mx-auto px-4 py-20">
           <div className="animate-fade-in">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
               Live <span className="bg-gradient-brand bg-clip-text text-transparent">Local</span>
