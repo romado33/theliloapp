@@ -16,9 +16,21 @@ import potteryClass from "@/assets/pottery-class.jpg";
 import farmersMarket from "@/assets/farmers-market.jpg";
 import cookingClass from "@/assets/cooking-class.jpg";
 
+// Debug: Check what these imports actually resolve to
+console.log("Image imports debug:", {
+  heroImage,
+  potteryClass,
+  farmersMarket,
+  cookingClass
+});
+
 // Map placeholder URLs to actual assets
 const getImageFromUrl = (url: string | undefined): string => {
-  if (!url) return potteryClass;
+  console.log("getImageFromUrl called with:", url);
+  if (!url) {
+    console.log("No URL provided, returning potteryClass:", potteryClass);
+    return potteryClass;
+  }
   
   const imageMap: Record<string, string> = {
     '/placeholder-cooking.jpg': cookingClass,
@@ -33,9 +45,12 @@ const getImageFromUrl = (url: string | undefined): string => {
     '/placeholder-nature.jpg': farmersMarket, // Nature activities use farmers market image
   };
   
-  return imageMap[url] || potteryClass;
+  const result = imageMap[url] || potteryClass;
+  console.log("Mapped", url, "to:", result);
+  return result;
 };
 
+// RESTORED NORMAL MOCK EXPERIENCES
 const mockExperiences = [
   {
     id: "550e8400-e29b-41d4-a716-446655440001",
@@ -231,18 +246,18 @@ const Index = () => {
                      <ExperienceCard 
                        id={experience.id}
                        title={experience.title}
-                       image={getImageFromUrl(experience.image_urls?.[0]) || experience.image || potteryClass}
+                       image={getImageFromUrl(experience.image_urls?.[0]) || potteryClass}
                        category={experience.category || "Experience"}
-                      price={experience.price}
-                      duration={experience.duration || `${experience.duration_hours || 2} hours`}
-                      rating={experience.rating || 4.5}
-                      reviewCount={experience.reviewCount || 0}
-                      location={experience.location}
-                      hostName={experience.hostName || "Local Host"}
-                      maxGuests={experience.maxGuests || experience.max_guests || 6}
-                      isNew={experience.isNew}
-                    />
-                  </div>
+                       price={experience.price}
+                       duration={experience.duration || `${experience.duration_hours || 2} hours`}
+                       rating={experience.rating || 4.5}
+                       reviewCount={experience.reviewCount || 0}
+                       location={experience.location}
+                       hostName={experience.hostName || "Local Host"}
+                       maxGuests={experience.maxGuests || experience.max_guests || 6}
+                       isNew={experience.isNew}
+                     />
+                   </div>
                 ))
               ) : (
                 mockExperiences
