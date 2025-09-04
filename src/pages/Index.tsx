@@ -183,7 +183,7 @@ const Index = () => {
               onResultsChange={handleSearchResults}
               showFilters={false}
               placeholder="What would you like to try?"
-              className="max-w-xl mx-auto"
+              className="w-full"
             />
             
             <div className="flex flex-wrap justify-center gap-4 text-sm text-lilo-navy/70">
