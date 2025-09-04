@@ -15,18 +15,19 @@ import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
 import farmersMarket from "@/assets/farmers-market.jpg";
 import cookingClass from "@/assets/cooking-class.jpg";
+
 // Map placeholder URLs to actual assets
 const getImageFromUrl = (url: string | undefined): string => {
   if (!url) return potteryClass;
   
   const imageMap: Record<string, string> = {
     '/placeholder-cooking.jpg': cookingClass,
-    '/placeholder-pasta.jpg': cookingClass, // Use cooking class for pasta too
+    '/placeholder-pasta.jpg': cookingClass,
     '/placeholder-pottery.jpg': potteryClass,
-    '/placeholder-workshop.jpg': potteryClass, // Use pottery class for workshop too
-    '/placeholder-yoga.jpg': potteryClass, // Fallback to pottery class
-    '/placeholder-hike.jpg': farmersMarket, // Use farmers market as nature fallback
-    '/placeholder-wine.jpg': farmersMarket, // Use farmers market as food/drink fallback
+    '/placeholder-workshop.jpg': potteryClass,
+    '/placeholder-yoga.jpg': potteryClass,
+    '/placeholder-hike.jpg': farmersMarket,
+    '/placeholder-wine.jpg': farmersMarket,
     '/placeholder-market.jpg': farmersMarket,
   };
   
@@ -218,18 +219,18 @@ const Index = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {searchResults.length > 0 ? (
+              {false ? ( // Temporarily force mock data
                 searchResults.map((experience, index) => (
                   <div 
                     key={experience.id}
                     className="animate-fade-in"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <ExperienceCard 
-                      id={experience.id}
-                      title={experience.title}
-                      image={getImageFromUrl(experience.image_urls?.[0]) || experience.image || potteryClass}
-                      category={experience.category || "Experience"}
+                     <ExperienceCard 
+                       id={experience.id}
+                       title={experience.title}
+                       image={getImageFromUrl(experience.image_urls?.[0]) || experience.image || potteryClass}
+                       category={experience.category || "Experience"}
                       price={experience.price}
                       duration={experience.duration || `${experience.duration_hours || 2} hours`}
                       rating={experience.rating || 4.5}
