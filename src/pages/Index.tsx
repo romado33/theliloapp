@@ -15,6 +15,29 @@ import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
 import farmersMarket from "@/assets/farmers-market.jpg";
 import cookingClass from "@/assets/cooking-class.jpg";
+import pastaMakingClass from "@/assets/pasta-making-class.jpg";
+import potteryWorkshop from "@/assets/pottery-workshop.jpg";
+import sunsetYoga from "@/assets/sunset-yoga.jpg";
+import waterfallHike from "@/assets/waterfall-hike.jpg";
+import wineTasting from "@/assets/wine-tasting.jpg";
+
+// Map placeholder URLs to actual assets
+const getImageFromUrl = (url: string | undefined): string => {
+  if (!url) return potteryClass;
+  
+  const imageMap: Record<string, string> = {
+    '/placeholder-cooking.jpg': cookingClass,
+    '/placeholder-pasta.jpg': pastaMakingClass,
+    '/placeholder-pottery.jpg': potteryClass,
+    '/placeholder-workshop.jpg': potteryWorkshop,
+    '/placeholder-yoga.jpg': sunsetYoga,
+    '/placeholder-hike.jpg': waterfallHike,
+    '/placeholder-wine.jpg': wineTasting,
+    '/placeholder-market.jpg': farmersMarket,
+  };
+  
+  return imageMap[url] || potteryClass;
+};
 
 const mockExperiences = [
   {
@@ -211,7 +234,7 @@ const Index = () => {
                     <ExperienceCard 
                       id={experience.id}
                       title={experience.title}
-                      image={experience.image_urls?.[0] || experience.image || potteryClass}
+                      image={getImageFromUrl(experience.image_urls?.[0]) || experience.image || potteryClass}
                       category={experience.category || "Experience"}
                       price={experience.price}
                       duration={experience.duration || `${experience.duration_hours || 2} hours`}
