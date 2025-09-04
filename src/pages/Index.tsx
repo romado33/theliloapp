@@ -15,24 +15,18 @@ import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
 import farmersMarket from "@/assets/farmers-market.jpg";
 import cookingClass from "@/assets/cooking-class.jpg";
-import pastaMakingClass from "@/assets/pasta-making-class.jpg";
-import potteryWorkshop from "@/assets/pottery-workshop.jpg";
-import sunsetYoga from "@/assets/sunset-yoga.jpg";
-import waterfallHike from "@/assets/waterfall-hike.jpg";
-import wineTasting from "@/assets/wine-tasting.jpg";
-
 // Map placeholder URLs to actual assets
 const getImageFromUrl = (url: string | undefined): string => {
   if (!url) return potteryClass;
   
   const imageMap: Record<string, string> = {
     '/placeholder-cooking.jpg': cookingClass,
-    '/placeholder-pasta.jpg': pastaMakingClass,
+    '/placeholder-pasta.jpg': cookingClass, // Use cooking class for pasta too
     '/placeholder-pottery.jpg': potteryClass,
-    '/placeholder-workshop.jpg': potteryWorkshop,
-    '/placeholder-yoga.jpg': sunsetYoga,
-    '/placeholder-hike.jpg': waterfallHike,
-    '/placeholder-wine.jpg': wineTasting,
+    '/placeholder-workshop.jpg': potteryClass, // Use pottery class for workshop too
+    '/placeholder-yoga.jpg': potteryClass, // Fallback to pottery class
+    '/placeholder-hike.jpg': farmersMarket, // Use farmers market as nature fallback
+    '/placeholder-wine.jpg': farmersMarket, // Use farmers market as food/drink fallback
     '/placeholder-market.jpg': farmersMarket,
   };
   
