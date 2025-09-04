@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import ExperienceSearch from "./pages/ExperienceSearch";
 import ExperienceDetails from "./pages/ExperienceDetails";
 import UserDashboard from "./pages/UserDashboard";
+import HostDashboard from "./pages/HostDashboard";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import Messages from "./pages/Messages";
 import Support from "./pages/Support";
@@ -47,11 +48,12 @@ const App = () => (
                   <Route path="/support" element={<Support />} />
                   
                   {/* Host Routes */}
-                  <Route path="/host" element={<Index />} />
-                  <Route path="/host/experiences" element={<UserDashboard />} />
-                  <Route path="/host/create" element={<Index />} />
-                  <Route path="/host/bookings" element={<UserDashboard />} />
-                  <Route path="/host/messages" element={<Messages />} />
+                  <Route path="/host-dashboard" element={<HostDashboard />} />
+                  <Route path="/host" element={<HostDashboard />} />
+                  <Route path="/host/experiences" element={<HostDashboard />} />
+                  <Route path="/host/create" element={<HostDashboard />} />
+                  <Route path="/host/bookings" element={<HostDashboard />} />
+                  <Route path="/host/messages" element={<HostDashboard />} />
                   
                   <Route path="/booking-confirmation/:bookingId" element={<BookingConfirmation />} />
                   <Route path="*" element={<NotFound />} />

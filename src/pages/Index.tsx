@@ -1,16 +1,13 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
-import { HostExperienceForm } from "@/components/HostExperienceForm";
 import ExperienceCard from "@/components/ExperienceCard";
 import SearchInterface from "@/components/SearchInterface";
 import CategoryFilter from "@/components/CategoryFilter";
 import Header from "@/components/Header";
 import DevDataSeeder from "@/components/DevDataSeeder";
-import { Search, MapPin, TrendingUp, Heart, Database, Plus } from "lucide-react";
+import { TrendingUp, Heart, Database } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
 import farmersMarket from "@/assets/farmers-market.jpg";
@@ -106,53 +103,11 @@ const Index = () => {
     );
   }
 
-  // Host view - show host dashboard and form
+  // Host view - redirect to host dashboard
   if (user && profile && currentRole === 'host') {
-    return (
-      <div className="min-h-screen bg-background">
-        <main className="container mx-auto px-4 py-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-lilo-navy mb-4">Host Dashboard</h1>
-            <p className="text-muted-foreground mb-6">Create and manage your local experiences</p>
-            
-            {showHostForm ? (
-              <div className="space-y-6">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowHostForm(false)}
-                  className="mb-4"
-                >
-                  ← Back to Dashboard
-                </Button>
-                <HostExperienceForm onSuccess={() => setShowHostForm(false)} />
-              </div>
-            ) : (
-              <Card className="max-w-md mx-auto">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Plus className="w-5 h-5" />
-                    <span>Get Started</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Ready to share your amazing local experience with families?
-                  </p>
-                  <Button 
-                    variant="brand" 
-                    className="w-full"
-                    onClick={() => setShowHostForm(true)}
-                  >
-                    Create Your First Experience
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-          {user && <DevDataSeeder />}
-        </main>
-      </div>
-    );
+    // Redirect to dedicated host dashboard
+    window.location.href = '/host-dashboard';
+    return null;
   }
 
   // Guest view - regular home page
