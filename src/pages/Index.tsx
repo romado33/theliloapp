@@ -201,10 +201,10 @@ const Index = () => {
       </section>
 
       {/* Main Content */}
-      <section className="container mx-auto px-4 py-12">
+      <section className="px-6 py-12">
         <div className="space-y-8">
           {/* Categories */}
-          <div className="animate-slide-up">
+          <div className="animate-slide-up container mx-auto">
             <h2 className="text-2xl font-bold mb-4">Browse by Category</h2>
             <CategoryFilter 
               selectedCategory={selectedCategory}
@@ -214,7 +214,7 @@ const Index = () => {
 
           {/* Featured Experiences */}
           <div className="animate-slide-up">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 container mx-auto px-4">
               <h2 className="text-2xl font-bold">
                 {selectedCategory === "all" ? "Featured Experiences" : `${selectedCategory} Experiences`}
               </h2>
@@ -223,7 +223,7 @@ const Index = () => {
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 px-4">
               {searchResults.length > 0 ? (
                 searchResults.map((experience, index) => (
                   <div 
