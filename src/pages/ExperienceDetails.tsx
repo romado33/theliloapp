@@ -67,11 +67,13 @@ const ExperienceDetails = () => {
   const { toast } = useToast();
   
   const [experience, setExperience] = useState<Experience | null>(null);
+  const [availability, setAvailability] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
   const [guestCount, setGuestCount] = useState(2);
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -588,33 +590,51 @@ const ExperienceDetails = () => {
               <div>
                 <label className="text-sm font-medium mb-2 block">Choose Date & Time</label>
                 <div className="space-y-2">
-                  {mockAvailability.map((slot, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedTimeSlot(`${slot.date}-${slot.time}`)}
-                      className={`w-full p-3 rounded-lg border text-left transition-colors ${
-                        selectedTimeSlot === `${slot.date}-${slot.time}`
-                          ? 'border-brand-soft-green bg-brand-soft-green/10'
-                          : 'border-border hover:border-brand-soft-green/50'
-                      }`}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="font-medium text-sm">
-                            {new Date(slot.date).toLocaleDateString('en-US', { 
-                              weekday: 'long', 
-                              month: 'short', 
-                              day: 'numeric' 
-                            })}
-                          </p>
-                          <p className="text-sm text-muted-foreground">{slot.time}</p>
-                        </div>
-                        <Badge variant="secondary" className="text-xs">
-                          {slot.spots} spots left
-                        </Badge>
-                      </div>
-                    </button>
-                  ))}
+                  {availability.length === 0 ? (
+                    <p className="text-sm text-muted-foreground p-3 text-center">
+                      No available slots found
+                    </p>
+                  ) : (
+                    availability.map((slot) => {
+                      const startDate = new Date(slot.start_time);
+                      const endDate = new Date(slot.end_time);
+                      return (
+                        <button
+                          key={slot.id}
+                          onClick={() => setSelectedTimeSlot(slot.id)}
+                          className={`w-full p-3 rounded-lg border text-left transition-colors ${
+                            selectedTimeSlot === slot.id
+                              ? 'border-primary bg-primary/10'
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-medium text-sm">
+                                {startDate.toLocaleDateString('en-US', { 
+                                  weekday: 'long', 
+                                  month: 'short', 
+                                  day: 'numeric' 
+                                })}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {startDate.toLocaleTimeString('en-US', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit' 
+                                })} - {endDate.toLocaleTimeString('en-US', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit' 
+                                })}
+                              </p>
+                            </div>
+                            <Badge variant="secondary" className="text-xs">
+                              {slot.available_spots} spots left
+                            </Badge>
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
@@ -662,9 +682,9 @@ const ExperienceDetails = () => {
                 variant="brand" 
                 className="w-full"
                 onClick={handleBooking}
-                disabled={!selectedTimeSlot}
+                disabled={!selectedTimeSlot || bookingLoading || availability.length === 0}
               >
-                {user ? 'Book Experience' : 'Sign in to Book'}
+                {bookingLoading ? 'Booking...' : user ? 'Book Experience' : 'Sign in to Book'}
               </Button>
 
               {!user && (

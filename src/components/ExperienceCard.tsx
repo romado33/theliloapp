@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Clock, Users, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import QuickBookModal from "@/components/QuickBookModal";
 
 interface ExperienceCardProps {
   id: string;
@@ -34,6 +37,8 @@ const ExperienceCard = ({
   isNew = false
 }: ExperienceCardProps) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [showQuickBook, setShowQuickBook] = useState(false);
 
   const handleCardClick = () => {
     navigate(`/experience/${id}`);
@@ -44,9 +49,13 @@ const ExperienceCard = ({
     // TODO: Implement save functionality
   };
 
-  const handleBookClick = (e: React.MouseEvent) => {
+  const handleQuickBook = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent navigation when clicking book button
-    navigate(`/experience/${id}`);
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    setShowQuickBook(true);
   };
 
   return (
@@ -111,12 +120,21 @@ const ExperienceCard = ({
           <Button 
             size="sm" 
             className="bg-primary hover:bg-primary-dark"
-            onClick={handleBookClick}
+            onClick={handleQuickBook}
           >
-            Book Now
+            Quick Book
           </Button>
         </div>
       </CardContent>
+      
+      <QuickBookModal
+        isOpen={showQuickBook}
+        onClose={() => setShowQuickBook(false)}
+        experienceId={id}
+        experienceTitle={title}
+        experiencePrice={price}
+        experienceLocation={location}
+      />
     </Card>
   );
 };

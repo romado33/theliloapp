@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import ExperienceSearch from "./pages/ExperienceSearch";
 import ExperienceDetails from "./pages/ExperienceDetails";
 import UserDashboard from "./pages/UserDashboard";
+import BookingConfirmation from "./pages/BookingConfirmation";
 import Messages from "./pages/Messages";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
@@ -52,7 +53,7 @@ const App = () => (
                   <Route path="/host/bookings" element={<UserDashboard />} />
                   <Route path="/host/messages" element={<Messages />} />
                   
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="/booking-confirmation/:bookingId" element={<BookingConfirmation />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
