@@ -34,6 +34,24 @@ import sunsetYoga from '@/assets/sunset-yoga.jpg';
 import waterfallHike from '@/assets/waterfall-hike.jpg';
 import wineTasting from '@/assets/wine-tasting.jpg';
 
+// Image mapping function for placeholder URLs
+const getImageFromUrl = (url: string) => {
+  console.log('getImageFromUrl called with:', url);
+  
+  const imageMap: Record<string, string> = {
+    '/placeholder-cooking.jpg': cookingClass,
+    '/placeholder-pottery.jpg': potteryClass,
+    '/placeholder-market.jpg': farmersMarket,
+    '/placeholder-farm.jpg': farmersMarket,
+    '/placeholder-nature.jpg': farmersMarket,
+    '/placeholder-experience.jpg': heroImage,
+  };
+
+  const mappedUrl = imageMap[url] || url;
+  console.log('Image mapping:', { originalUrl: url, mappedUrl });
+  return mappedUrl;
+};
+
 interface Experience {
   id: string;
   title: string;
@@ -347,9 +365,13 @@ const ExperienceDetails = () => {
     ? `${experience.profiles.first_name} ${experience.profiles.last_name}` 
     : 'Unknown Host';
 
-  const images = experience.image_urls && experience.image_urls.length > 0 
-    ? experience.image_urls 
-    : ['/placeholder-experience.jpg'];
+  // Debug logging to see what's in the experience data
+  console.log('Experience data:', experience);
+  console.log('Image URLs from experience:', experience.image_urls);
+  
+  // Map placeholder URLs to imported assets
+  const mappedImageUrls = experience.image_urls?.map(getImageFromUrl) || [];
+  const images = mappedImageUrls.length > 0 ? mappedImageUrls : [cookingClass];
 
   return (
     <div className="container mx-auto px-4 py-8">
