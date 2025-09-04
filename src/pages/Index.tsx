@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { HostExperienceForm } from "@/components/HostExperienceForm";
 import ExperienceCard from "@/components/ExperienceCard";
+import SearchInterface from "@/components/SearchInterface";
 import CategoryFilter from "@/components/CategoryFilter";
 import Header from "@/components/Header";
 import DevDataSeeder from "@/components/DevDataSeeder";
@@ -60,18 +61,13 @@ const mockExperiences = [
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showHostForm, setShowHostForm] = useState(false);
   const { user, profile, loading, currentRole } = useAuth();
 
-  const filteredExperiences = mockExperiences.filter(experience => {
-    const matchesCategory = selectedCategory === "all" || 
-      experience.category.toLowerCase().includes(selectedCategory);
-    const matchesSearch = experience.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      experience.category.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    return matchesCategory && matchesSearch;
-  });
+  const handleSearchResults = (results: any[]) => {
+    setSearchResults(results);
+  };
 
   // Show welcome screen for logged-in users who haven't onboarded
   if (user && profile && !profile.onboarded) {
@@ -160,21 +156,12 @@ const Index = () => {
             </p>
             
             {/* Hero Search */}
-            <div className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto mb-8">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lilo-green w-5 h-5" />
-                <Input 
-                  placeholder="What would you like to try?" 
-                  className="pl-12 h-12 text-lg bg-background/90 backdrop-blur-sm border-2 border-lilo-green/30 focus:border-lilo-green"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <Button size="lg" variant="brand" className="h-12 px-8 text-lg shadow-lg">
-                <MapPin className="w-5 h-5" />
-                Explore
-              </Button>
-            </div>
+            <SearchInterface 
+              onResultsChange={handleSearchResults}
+              showFilters={false}
+              placeholder="What would you like to try?"
+              className="max-w-xl mx-auto"
+            />
             
             <div className="flex flex-wrap justify-center gap-4 text-sm text-lilo-navy/70">
               <div className="flex items-center gap-1">
@@ -214,21 +201,52 @@ const Index = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredExperiences.map((experience, index) => (
-                <div 
-                  key={experience.id}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <ExperienceCard {...experience} />
-                </div>
-              ))}
+              {searchResults.length > 0 ? (
+                searchResults.map((experience, index) => (
+                  <div 
+                    key={experience.id}
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <ExperienceCard 
+                      id={experience.id}
+                      title={experience.title}
+                      image={experience.image_urls?.[0] || experience.image || potteryClass}
+                      category={experience.category || "Experience"}
+                      price={experience.price}
+                      duration={experience.duration || `${experience.duration_hours || 2} hours`}
+                      rating={experience.rating || 4.5}
+                      reviewCount={experience.reviewCount || 0}
+                      location={experience.location}
+                      hostName={experience.hostName || "Local Host"}
+                      maxGuests={experience.maxGuests || experience.max_guests || 6}
+                      isNew={experience.isNew}
+                    />
+                  </div>
+                ))
+              ) : (
+                mockExperiences
+                  .filter(experience => {
+                    const matchesCategory = selectedCategory === "all" || 
+                      experience.category.toLowerCase().includes(selectedCategory);
+                    return matchesCategory;
+                  })
+                  .map((experience, index) => (
+                    <div 
+                      key={experience.id}
+                      className="animate-fade-in"
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
+                      <ExperienceCard {...experience} />
+                    </div>
+                  ))
+              )}
             </div>
             
-            {filteredExperiences.length === 0 && (
+            {searchResults.length === 0 && selectedCategory !== "all" && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground text-lg">
-                  No experiences found for "{searchQuery || selectedCategory}". Try a different search or category.
+                  No experiences found for the selected category. Try a different search or category.
                 </p>
               </div>
             )}

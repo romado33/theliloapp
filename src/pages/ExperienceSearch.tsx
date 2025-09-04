@@ -1,203 +1,146 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import CategoryFilter from '@/components/CategoryFilter';
-import ExperienceCard from '@/components/ExperienceCard';
-import { Search, Filter, MapPin, Calendar, Users } from 'lucide-react';
+import { ArrowLeft, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import SearchInterface from '@/components/SearchInterface';
 
-// Mock data for search results
-const mockSearchResults = [
-  {
-    id: "1",
-    title: "Family Farm Visit & Animal Feeding",
-    image: "/placeholder-farm.jpg",
-    category: "Nature & Animals",
-    price: 25,
-    duration: "2 hours",
-    rating: 4.9,
-    reviewCount: 156,
-    location: "Kanata, Ottawa",
-    hostName: "Sarah Johnson",
-    maxGuests: 8,
-    isNew: false,
-  },
-  {
-    id: "2", 
-    title: "Pottery Making for Kids",
-    image: "/placeholder-pottery.jpg",
-    category: "Arts & Crafts",
-    price: 35,
-    duration: "1.5 hours", 
-    rating: 4.7,
-    reviewCount: 89,
-    location: "Downtown Ottawa",
-    hostName: "Michael Chen",
-    maxGuests: 6,
-    isNew: true,
-  },
-];
+interface SearchResult {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  duration_hours: number;
+  location: string;
+  image_urls?: string[];
+}
 
 const ExperienceSearch = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [showFilters, setShowFilters] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [generatingEmbeddings, setGeneratingEmbeddings] = useState(false);
 
-  const filteredResults = mockSearchResults.filter(experience => {
-    const matchesSearch = experience.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         experience.location.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || 
-                           experience.category.toLowerCase().includes(selectedCategory.toLowerCase());
-    
-    return matchesSearch && matchesCategory;
-  });
+  const handleGenerateEmbeddings = async () => {
+    setGeneratingEmbeddings(true);
+    try {
+      toast({
+        title: "Generating embeddings...",
+        description: "This may take a few minutes to process all experiences.",
+      });
+
+      const { data, error } = await supabase.functions.invoke('batch-generate-embeddings', {
+        body: {}
+      });
+
+      if (error) {
+        throw new Error('Failed to generate embeddings');
+      }
+
+      toast({
+        title: "Embeddings generated!",
+        description: `Successfully processed ${data.processed} experiences. Semantic search is now enhanced!`,
+      });
+
+    } catch (error) {
+      console.error('Error generating embeddings:', error);
+      toast({
+        title: "Error generating embeddings",
+        description: "There was an error processing the experiences. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingEmbeddings(false);
+    }
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-brand-navy mb-2">
-          Find Local Experiences
-        </h1>
-        <p className="text-muted-foreground">
-          Discover amazing activities perfect for families with young children in Ottawa
-        </p>
-      </div>
-
-      {/* Search Bar */}
-      <Card className="mb-8">
-        <CardContent className="p-6">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Search by activity, location, or keywords..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="gap-2"
-              >
-                <Filter className="w-4 h-4" />
-                Filters
-              </Button>
-              
-              <Button variant="brand" className="gap-2">
-                <Search className="w-4 h-4" />
-                Search
-              </Button>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate('/')}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">Search Experiences</h1>
+              <p className="text-muted-foreground mt-1">
+                Find the perfect local experience with our intelligent search
+              </p>
             </div>
           </div>
 
-          {/* Advanced Filters */}
-          {showFilters && (
-            <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Location</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input placeholder="Ottawa, ON" className="pl-10" />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Date</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input type="date" className="pl-10" />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Group Size</label>
-                  <div className="relative">
-                    <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input type="number" placeholder="4 people" className="pl-10" />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Category Filter */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Browse by Category</h2>
-        <CategoryFilter 
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-        />
-      </div>
-
-      {/* Results */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-semibold">
-            {selectedCategory === 'all' ? 'All Experiences' : `${selectedCategory} Experiences`}
-          </h2>
-          <p className="text-muted-foreground">
-            {filteredResults.length} experience{filteredResults.length !== 1 ? 's' : ''} found
-          </p>
-        </div>
-        
-        <Badge variant="secondary" className="gap-1">
-          <MapPin className="w-3 h-3" />
-          Ottawa Area
-        </Badge>
-      </div>
-
-      {/* Results Grid */}
-      {filteredResults.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredResults.map((experience) => (
-            <ExperienceCard key={experience.id} {...experience} />
-          ))}
-        </div>
-      ) : (
-        <Card className="p-12 text-center">
-          <CardContent>
-            <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">No experiences found</h3>
-            <p className="text-muted-foreground mb-4">
-              Try adjusting your search terms or filters to find more results.
-            </p>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('all');
-              }}
+          <div className="flex items-center gap-3">
+            <Badge variant="secondary" className="hidden md:flex">
+              {results.length} results
+            </Badge>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleGenerateEmbeddings}
+              disabled={generatingEmbeddings}
+              className="hidden md:flex"
             >
-              Clear all filters
+              <Zap className={`w-4 h-4 mr-2 ${generatingEmbeddings ? 'animate-spin' : ''}`} />
+              {generatingEmbeddings ? 'Enhancing...' : 'Enhance Search'}
             </Button>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </div>
 
-      {/* Quick Actions */}
-      <div className="mt-12 text-center">
-        <Card className="bg-gradient-brand text-white">
-          <CardHeader>
-            <CardTitle>Can't find what you're looking for?</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4">
-              Let us know what type of experience you'd like to see in Ottawa
-            </p>
-            <Button variant="secondary" className="bg-white text-brand-navy hover:bg-white/90">
-              Request an Experience
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Search Interface */}
+        <SearchInterface 
+          onResultsChange={setResults}
+          showFilters={true}
+          placeholder="Search for cooking classes, pottery workshops, hiking tours..."
+          className="w-full"
+        />
+
+        {/* Search Tips */}
+        <div className="mt-12 bg-muted/30 rounded-lg p-6">
+          <h3 className="text-lg font-semibold mb-4">🔍 Search Tips</h3>
+          <div className="grid md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+            <div>
+              <h4 className="font-medium text-foreground mb-2">Semantic Search</h4>
+              <ul className="space-y-1">
+                <li>• Try "learn cooking" instead of just "cooking class"</li>
+                <li>• Search "creative workshop" to find arts and crafts</li>
+                <li>• Use "outdoor adventure" for hiking and nature</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-foreground mb-2">Filters</h4>
+              <ul className="space-y-1">
+                <li>• Use price range to find experiences in your budget</li>
+                <li>• Filter by location to find nearby experiences</li>
+                <li>• Try different categories for varied results</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Generate Embeddings Call-to-Action (Mobile) */}
+        <div className="md:hidden mt-6 p-4 bg-primary/10 rounded-lg text-center">
+          <h3 className="font-semibold mb-2">Enhance Your Search Experience</h3>
+          <p className="text-sm text-muted-foreground mb-3">
+            Generate semantic embeddings for smarter, more intuitive search results
+          </p>
+          <Button
+            onClick={handleGenerateEmbeddings}
+            disabled={generatingEmbeddings}
+            size="sm"
+          >
+            <Zap className={`w-4 h-4 mr-2 ${generatingEmbeddings ? 'animate-spin' : ''}`} />
+            {generatingEmbeddings ? 'Enhancing Search...' : 'Enhance Search'}
+          </Button>
+        </div>
       </div>
     </div>
   );
