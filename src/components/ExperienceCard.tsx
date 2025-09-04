@@ -7,6 +7,36 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import QuickBookModal from "@/components/QuickBookModal";
 
+// Import assets for image mapping
+import cookingClass from '@/assets/cooking-class.jpg';
+import potteryClass from '@/assets/pottery-class.jpg';
+import farmersMarket from '@/assets/farmers-market.jpg';
+import pastaMakingClass from '@/assets/pasta-making-class.jpg';
+import potteryWorkshop from '@/assets/pottery-workshop.jpg';
+import sunsetYoga from '@/assets/sunset-yoga.jpg';
+import waterfallHike from '@/assets/waterfall-hike.jpg';
+import wineTasting from '@/assets/wine-tasting.jpg';
+import heroImage from '@/assets/hero-image.jpg';
+
+// Image mapping function for placeholder URLs
+const getImageFromUrl = (url: string) => {
+  const imageMap: Record<string, string> = {
+    '/placeholder-cooking.jpg': cookingClass,
+    '/placeholder-pasta.jpg': pastaMakingClass,
+    '/placeholder-pottery.jpg': potteryClass,
+    '/placeholder-workshop.jpg': potteryWorkshop,
+    '/placeholder-yoga.jpg': sunsetYoga,
+    '/placeholder-hike.jpg': waterfallHike,
+    '/placeholder-wine.jpg': wineTasting,
+    '/placeholder-market.jpg': farmersMarket,
+    '/placeholder-farm.jpg': farmersMarket,
+    '/placeholder-nature.jpg': farmersMarket,
+    '/placeholder-experience.jpg': heroImage,
+  };
+
+  return imageMap[url] || url;
+};
+
 interface ExperienceCardProps {
   id: string;
   title: string;
@@ -62,7 +92,7 @@ const ExperienceCard = ({
     <Card className="group overflow-hidden border-0 shadow-soft hover:shadow-medium transition-all duration-300 hover:-translate-y-1 bg-gradient-card cursor-pointer" onClick={handleCardClick}>
       <div className="relative">
         <img 
-          src={image}
+          src={getImageFromUrl(image)}
           alt={title}
           className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
         />

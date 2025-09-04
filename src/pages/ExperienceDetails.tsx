@@ -369,9 +369,23 @@ const ExperienceDetails = () => {
   console.log('Experience data:', experience);
   console.log('Image URLs from experience:', experience.image_urls);
   
-  // Map placeholder URLs to imported assets
+  // Create a gallery of images (3-10 photos per experience)
+  const galleryImages = [
+    cookingClass,
+    potteryClass, 
+    farmersMarket,
+    pastaMakingClass,
+    potteryWorkshop,
+    sunsetYoga,
+    waterfallHike,
+    wineTasting
+  ];
+  
+  // Map placeholder URLs to imported assets and add gallery images
   const mappedImageUrls = experience.image_urls?.map(getImageFromUrl) || [];
-  const images = mappedImageUrls.length > 0 ? mappedImageUrls : [cookingClass];
+  const images = mappedImageUrls.length > 0 ? 
+    [...mappedImageUrls, ...galleryImages.slice(0, 8 - mappedImageUrls.length)] : 
+    galleryImages.slice(0, 6);
 
   return (
     <div className="container mx-auto px-4 py-8">
