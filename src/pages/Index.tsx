@@ -38,7 +38,7 @@ const getImageFromUrl = (url: string | undefined): string => {
   return potteryClass; // fallback
 };
 
-// RESTORED NORMAL MOCK EXPERIENCES
+// Mock experiences using imported assets directly
 const mockExperiences = [
   {
     id: "550e8400-e29b-41d4-a716-446655440001",
