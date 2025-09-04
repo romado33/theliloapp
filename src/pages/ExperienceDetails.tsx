@@ -23,6 +23,17 @@ import {
   ArrowLeft
 } from 'lucide-react';
 
+// Import images for galleries
+import cookingClass from '@/assets/cooking-class.jpg';
+import farmersMarket from '@/assets/farmers-market.jpg';
+import heroImage from '@/assets/hero-image.jpg';
+import pastaMakingClass from '@/assets/pasta-making-class.jpg';
+import potteryClass from '@/assets/pottery-class.jpg';
+import potteryWorkshop from '@/assets/pottery-workshop.jpg';
+import sunsetYoga from '@/assets/sunset-yoga.jpg';
+import waterfallHike from '@/assets/waterfall-hike.jpg';
+import wineTasting from '@/assets/wine-tasting.jpg';
+
 interface Experience {
   id: string;
   title: string;
@@ -82,7 +93,7 @@ const ExperienceDetails = () => {
         price: 65,
         duration_hours: 2,
         max_guests: 8,
-        image_urls: ["/placeholder-pottery.jpg"],
+        image_urls: [potteryClass, potteryWorkshop, cookingClass, sunsetYoga, heroImage],
         what_included: [
           "All pottery materials and tools",
           "Professional instruction", 
@@ -111,7 +122,7 @@ const ExperienceDetails = () => {
         price: 45,
         duration_hours: 3,
         max_guests: 12,
-        image_urls: ["/placeholder-market.jpg"],
+        image_urls: [farmersMarket, heroImage, waterfallHike, sunsetYoga],
         what_included: [
           "Professional guide",
           "Sample tastings from 5+ vendors",
@@ -141,7 +152,7 @@ const ExperienceDetails = () => {
         price: 85,
         duration_hours: 4,
         max_guests: 6,
-        image_urls: ["/placeholder-cooking.jpg"],
+        image_urls: [cookingClass, pastaMakingClass, wineTasting, heroImage, farmersMarket, sunsetYoga],
         what_included: [
           "All ingredients and cooking supplies",
           "Professional chef instruction",
