@@ -65,6 +65,12 @@ const ExperienceDetails = () => {
   useEffect(() => {
     if (!id) return;
     
+    // Helper function to check if string is a valid UUID
+    const isValidUUID = (str: string) => {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(str);
+    };
+
     // Mock experience data for fallback
     const mockExperiences = {
       "550e8400-e29b-41d4-a716-446655440001": {
@@ -159,6 +165,14 @@ const ExperienceDetails = () => {
     };
     
     const fetchExperience = async () => {
+      // If ID is not a valid UUID, show error immediately
+      if (!isValidUUID(id)) {
+        console.log(`ID "${id}" is not a valid UUID format`);
+        setLoading(false);
+        setError('Invalid experience ID format. Please access experiences from the home page.');
+        return;
+      }
+
       try {
         setLoading(true);
         setError(null);
