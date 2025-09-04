@@ -18,11 +18,14 @@ import cookingClass from "@/assets/cooking-class.jpg";
 
 // Map placeholder URLs to actual assets - simplified approach  
 const getImageFromUrl = (url: string | undefined): string => {
+  console.log('getImageFromUrl called with:', url);
+  console.log('Available assets:', { potteryClass, farmersMarket, cookingClass });
+  
   if (!url) return potteryClass;
   
   // Direct mapping without complex logic
   if (url === '/placeholder-cooking.jpg') return cookingClass;
-  if (url === '/placeholder-pasta.jpg') return cookingClass;
+  if (url === '/placeholder-pasta.jpg') return cookingClass; 
   if (url === '/placeholder-pottery.jpg') return potteryClass;
   if (url === '/placeholder-workshop.jpg') return potteryClass;
   if (url === '/placeholder-yoga.jpg') return potteryClass;
@@ -231,7 +234,12 @@ const Index = () => {
                      <ExperienceCard 
                        id={experience.id}
                        title={experience.title}
-                       image={getImageFromUrl(experience.image_urls?.[0])}
+                       image={(() => {
+                         const originalUrl = experience.image_urls?.[0];
+                         const mappedUrl = getImageFromUrl(originalUrl);
+                         console.log('Image mapping:', { originalUrl, mappedUrl });
+                         return mappedUrl;
+                       })()}
                        category={experience.category || "Experience"}
                        price={experience.price}
                        duration={experience.duration || `${experience.duration_hours || 2} hours`}
