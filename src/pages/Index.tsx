@@ -29,6 +29,8 @@ const getImageFromUrl = (url: string | undefined): string => {
     '/placeholder-hike.jpg': farmersMarket,
     '/placeholder-wine.jpg': farmersMarket,
     '/placeholder-market.jpg': farmersMarket,
+    '/placeholder-farm.jpg': farmersMarket, // Farm activities use farmers market image
+    '/placeholder-nature.jpg': farmersMarket, // Nature activities use farmers market image
   };
   
   return imageMap[url] || potteryClass;
@@ -219,7 +221,7 @@ const Index = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {false ? ( // Temporarily force mock data
+              {searchResults.length > 0 ? (
                 searchResults.map((experience, index) => (
                   <div 
                     key={experience.id}
