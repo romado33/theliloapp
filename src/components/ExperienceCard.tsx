@@ -62,19 +62,9 @@ const ExperienceCard = ({
     <Card className="group overflow-hidden border-0 shadow-soft hover:shadow-medium transition-all duration-300 hover:-translate-y-1 bg-gradient-card cursor-pointer" onClick={handleCardClick}>
       <div className="relative">
         <img 
-          src={(() => {
-            console.log(`ExperienceCard ${title} - Image URL:`, image);
-            return image;
-          })()} 
+          src={image} 
           alt={title}
           className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => {
-            console.error(`Image failed to load for ${title}:`, image);
-            console.error('Error event:', e);
-          }}
-          onLoad={() => {
-            console.log(`Image loaded successfully for ${title}:`, image);
-          }}
         />
         {isNew && (
           <Badge className="absolute top-3 left-3 bg-accent hover:bg-accent">

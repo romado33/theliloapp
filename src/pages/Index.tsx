@@ -16,21 +16,9 @@ import potteryClass from "@/assets/pottery-class.jpg";
 import farmersMarket from "@/assets/farmers-market.jpg";
 import cookingClass from "@/assets/cooking-class.jpg";
 
-// Debug: Check what these imports actually resolve to
-console.log("Image imports debug:", {
-  heroImage,
-  potteryClass,
-  farmersMarket,
-  cookingClass
-});
-
 // Map placeholder URLs to actual assets
 const getImageFromUrl = (url: string | undefined): string => {
-  console.log("getImageFromUrl called with:", url);
-  if (!url) {
-    console.log("No URL provided, returning potteryClass:", potteryClass);
-    return potteryClass;
-  }
+  if (!url) return potteryClass;
   
   const imageMap: Record<string, string> = {
     '/placeholder-cooking.jpg': cookingClass,
@@ -45,9 +33,7 @@ const getImageFromUrl = (url: string | undefined): string => {
     '/placeholder-nature.jpg': farmersMarket, // Nature activities use farmers market image
   };
   
-  const result = imageMap[url] || potteryClass;
-  console.log("Mapped", url, "to:", result);
-  return result;
+  return imageMap[url] || potteryClass;
 };
 
 // RESTORED NORMAL MOCK EXPERIENCES
@@ -246,7 +232,7 @@ const Index = () => {
                      <ExperienceCard 
                        id={experience.id}
                        title={experience.title}
-                       image={getImageFromUrl(experience.image_urls?.[0]) || potteryClass}
+                       image={getImageFromUrl(experience.image_urls?.[0])}
                        category={experience.category || "Experience"}
                        price={experience.price}
                        duration={experience.duration || `${experience.duration_hours || 2} hours`}
