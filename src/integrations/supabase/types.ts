@@ -547,6 +547,14 @@ export type Database = {
         Args: { "": string } | { "": unknown }
         Returns: unknown
       }
+      get_public_host_profile: {
+        Args: { host_user_id: string }
+        Returns: {
+          first_name: string
+          id: string
+          is_host: boolean
+        }[]
+      }
       halfvec_avg: {
         Args: { "": number[] }
         Returns: unknown
