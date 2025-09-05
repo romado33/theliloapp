@@ -6,6 +6,40 @@ import { cn } from "@/lib/utils"
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const
 
+// Whitelist patterns for allowed keys and color values
+const KEY_PATTERN = /^[a-zA-Z0-9_-]+$/
+const COLOR_PATTERNS = [
+  /^#(?:[0-9a-fA-F]{3}){1,2}$/,
+  /^rgb\(\s*(?:\d{1,3}\s*,\s*){2}\d{1,3}\s*\)$/,
+  /^rgba\(\s*(?:\d{1,3}\s*,\s*){3}(?:0|0?\.\d+|1)\s*\)$/,
+  /^hsl\(var\(--[a-zA-Z0-9-]+\)\)$/,
+  /^var\(--[a-zA-Z0-9-]+\)$/,
+] as const
+
+const isValidColor = (color: string): boolean =>
+  COLOR_PATTERNS.some((re) => re.test(color))
+
+export const sanitizeChartConfig = (config: ChartConfig): ChartConfig =>
+  Object.fromEntries(
+    Object.entries(config).filter(([key, value]) => {
+      if (!KEY_PATTERN.test(key)) return false
+      if ("color" in value && value.color && !isValidColor(value.color)) {
+        return false
+      }
+      if ("theme" in value && value.theme) {
+        return Object.values(value.theme).every(isValidColor)
+      }
+      return true
+    })
+  )
+
+export const isSafeChartConfig = (
+  config: ChartConfig
+): config is ChartConfig => {
+  const sanitized = sanitizeChartConfig(config)
+  return Object.keys(sanitized).length === Object.keys(config).length
+}
+
 export type ChartConfig = {
   [k in string]: {
     label?: React.ReactNode
@@ -44,8 +78,10 @@ const ChartContainer = React.forwardRef<
   const uniqueId = React.useId()
   const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
 
+  const safeConfig = React.useMemo(() => sanitizeChartConfig(config), [config])
+
   return (
-    <ChartContext.Provider value={{ config }}>
+    <ChartContext.Provider value={{ config: safeConfig }}>
       <div
         data-chart={chartId}
         ref={ref}
@@ -55,7 +91,7 @@ const ChartContainer = React.forwardRef<
         )}
         {...props}
       >
-        <ChartStyle id={chartId} config={config} />
+        <ChartStyle id={chartId} config={safeConfig} />
         <RechartsPrimitive.ResponsiveContainer>
           {children}
         </RechartsPrimitive.ResponsiveContainer>
@@ -66,8 +102,9 @@ const ChartContainer = React.forwardRef<
 ChartContainer.displayName = "Chart"
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  const colorConfig = Object.entries(config).filter(
-    ([_, config]) => config.theme || config.color
+  const sanitized = React.useMemo(() => sanitizeChartConfig(config), [config])
+  const colorConfig = Object.entries(sanitized).filter(
+    ([_, value]) => value.theme || value.color
   )
 
   if (!colorConfig.length) {
