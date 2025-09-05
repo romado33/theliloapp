@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import ExperienceCard from './ExperienceCard';
 import { useToast } from '@/hooks/use-toast';
+import type { SearchResult } from '@/types';
 
 interface SearchFilters {
   category: string;
@@ -33,17 +34,6 @@ interface SearchFilters {
   priceMax: number;
   location: string;
   useSemanticSearch: boolean;
-}
-
-interface SearchResult {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  duration_hours: number;
-  location: string;
-  image_urls?: string[];
-  similarity?: number;
 }
 
 interface SearchInterfaceProps {
