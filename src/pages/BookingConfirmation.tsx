@@ -51,8 +51,12 @@ const BookingConfirmation = () => {
   const {
     data: booking,
     isLoading,
+    error,
   } = useQuery({
     queryKey: ['booking', bookingId, user?.id],
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+    retry: 1,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('bookings')
@@ -115,6 +119,22 @@ const BookingConfirmation = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="max-w-md w-full mx-4">
+          <CardContent className="text-center py-8">
+            <p className="text-muted-foreground mb-4">Error loading booking</p>
+            <Button onClick={() => navigate('/')} variant="outline">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Home
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
