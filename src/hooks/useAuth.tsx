@@ -212,65 +212,70 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const devBypass = async (role: 'user' | 'host') => {
-    const isHost = role === 'host';
-    const mockUser = {
-      id: 'dev-' + role + '-' + Date.now(),
-      email: `dev-${role}@livelocal.app`,
-      user_metadata: {
-        first_name: 'Dev',
-        last_name: isHost ? 'Host' : 'User'
-      }
-    };
-
-    try {
-      // Sign up the dev user
-      const { error } = await supabase.auth.signUp({
-        email: mockUser.email,
-        password: 'devpassword123',
-        options: {
-          data: {
-            first_name: mockUser.user_metadata.first_name,
-            last_name: mockUser.user_metadata.last_name
+  const devBypass = import.meta.env.DEV
+    ? async (role: 'user' | 'host') => {
+        const isHost = role === 'host';
+        const timestamp = Date.now();
+        const password =
+          import.meta.env.VITE_DEV_BYPASS_PASSWORD || crypto.randomUUID();
+        const mockUser = {
+          id: `dev-${role}-${timestamp}`,
+          email: `dev-${role}-${timestamp}@livelocal.app`,
+          user_metadata: {
+            first_name: 'Dev',
+            last_name: isHost ? 'Host' : 'User'
           }
+        };
+
+        try {
+          const { error } = await supabase.auth.signUp({
+            email: mockUser.email,
+            password,
+            options: {
+              data: {
+                first_name: mockUser.user_metadata.first_name,
+                last_name: mockUser.user_metadata.last_name
+              }
+            }
+          });
+
+          if (error && !error.message.includes('already registered')) {
+            throw error;
+          }
+
+          const { data: signInData, error: signInError } =
+            await supabase.auth.signInWithPassword({
+              email: mockUser.email,
+              password
+            });
+
+          if (signInError) throw signInError;
+
+          if (signInData.user) {
+            await supabase
+              .from('profiles')
+              .update({
+                is_host: isHost,
+                onboarded: true
+              })
+              .eq('id', signInData.user.id);
+          }
+
+          toast({
+            title: "Dev bypass activated",
+            description: `Signed in as development ${role}`
+          });
+        } catch (error: unknown) {
+          toast({
+            title: "Dev bypass failed",
+            description: error instanceof Error ? error.message : String(error),
+            variant: "destructive"
+          });
         }
-      });
-
-      if (error && !error.message.includes('already registered')) {
-        throw error;
       }
-
-      // Sign in the dev user
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: mockUser.email,
-        password: 'devpassword123'
-      });
-
-      if (signInError) throw signInError;
-
-      // Update profile to set host status and onboarded flag
-      if (signInData.user) {
-        await supabase
-          .from('profiles')
-          .update({ 
-            is_host: isHost,
-            onboarded: true
-          })
-          .eq('id', signInData.user.id);
-      }
-
-      toast({
-        title: "Dev bypass activated",
-        description: `Signed in as development ${role}`
-      });
-    } catch (error: unknown) {
-      toast({
-        title: "Dev bypass failed",
-        description: error instanceof Error ? error.message : String(error),
-        variant: "destructive"
-      });
-    }
-  };
+    : async () => {
+        throw new Error('Dev bypass is only available in development');
+      };
 
   const value = {
     user,

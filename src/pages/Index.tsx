@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
@@ -6,13 +6,16 @@ import ExperienceCard from "@/components/ExperienceCard";
 import SearchInterface from "@/components/SearchInterface";
 import CategoryFilter from "@/components/CategoryFilter";
 import Header from "@/components/Header";
-import DevDataSeeder from "@/components/DevDataSeeder";
 import { TrendingUp, Heart, Database } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
 import farmersMarket from "@/assets/farmers-market.jpg";
 import cookingClass from "@/assets/cooking-class.jpg";
 import type { SearchResult } from "@/types";
+
+const DevDataSeeder = import.meta.env.DEV
+  ? lazy(() => import("@/components/DevDataSeeder"))
+  : () => null;
 
 // Map placeholder URLs to actual assets - simplified approach  
 const getImageFromUrl = (url: string | undefined): string => {
@@ -233,13 +236,15 @@ const Index = () => {
           </div>
 
           {/* Developer Data Seeder - Only show when signed in */}
-          {user && (
+          {import.meta.env.DEV && user && (
             <div className="animate-fade-in">
               <div className="flex items-center gap-2 mb-6">
                 <Database className="w-5 h-5" />
                 <h2 className="text-2xl font-bold">Developer Tools</h2>
               </div>
-              <DevDataSeeder />
+              <Suspense fallback={null}>
+                <DevDataSeeder />
+              </Suspense>
             </div>
           )}
 
