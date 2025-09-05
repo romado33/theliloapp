@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -60,7 +61,6 @@ const SearchInterface = ({
 }: SearchInterfaceProps) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
   const [searchType, setSearchType] = useState<'semantic' | 'text'>('semantic');
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const { toast } = useToast();
@@ -83,17 +83,43 @@ const SearchInterface = ({
     { value: 'learning', label: 'Learning' },
   ];
 
-  const performSearch = async (searchQuery: string = query, searchFilters: SearchFilters = filters) => {
-    if (!searchQuery.trim() && searchFilters.category === 'all' && !searchFilters.location) {
-      // Load default experiences if no search criteria
-      loadDefaultExperiences();
-      return;
+  const {
+    data: defaultExperiences = [],
+    isLoading: defaultLoading,
+    error: defaultError,
+    refetch: refetchDefault,
+  } = useQuery({
+    queryKey: ['default-experiences'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('experiences')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .limit(12);
+      if (error) throw error;
+      return data as SearchResult[];
+    },
+  });
+
+  useEffect(() => {
+    setResults(defaultExperiences);
+    onResultsChange?.(defaultExperiences);
+    setSearchType('text');
+  }, [defaultExperiences, onResultsChange]);
+
+  useEffect(() => {
+    if (defaultError) {
+      toast({
+        title: 'Error loading experiences',
+        description: 'Could not load default experiences.',
+        variant: 'destructive',
+      });
     }
+  }, [defaultError, toast]);
 
-    setLoading(true);
-    try {
-      console.log('Performing search with:', { searchQuery, searchFilters });
-
+  const searchMutation = useMutation({
+    mutationFn: async ({ searchQuery, searchFilters }: { searchQuery: string; searchFilters: SearchFilters }) => {
       const { data, error } = await supabase.functions.invoke('semantic-search', {
         body: {
           query: searchQuery,
@@ -103,71 +129,47 @@ const SearchInterface = ({
           priceMax: searchFilters.priceMax,
           location: searchFilters.location || undefined,
           useSemanticSearch: searchFilters.useSemanticSearch,
-        }
+        },
       });
-
-      if (error) {
-        console.error('Search error:', error);
-        throw new Error('Search failed');
-      }
-
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data, variables) => {
       const searchResults = data?.results || [];
       setResults(searchResults);
       setSearchType(data?.searchType || 'text');
-      
       onResultsChange?.(searchResults);
-
-      if (searchResults.length === 0 && searchQuery.trim()) {
+      if (searchResults.length === 0 && variables.searchQuery.trim()) {
         toast({
-          title: "No results found",
-          description: `No experiences match "${searchQuery}". Try different keywords or remove filters.`,
-          variant: "default",
+          title: 'No results found',
+          description: `No experiences match "${variables.searchQuery}". Try different keywords or remove filters.`,
+          variant: 'default',
         });
       }
-
-      console.log(`Search completed: ${searchResults.length} results using ${data?.searchType} search`);
-
-    } catch (error) {
-      console.error('Search error:', error);
+    },
+    onError: () => {
       toast({
-        title: "Search failed",
-        description: "There was an error performing the search. Please try again.",
-        variant: "destructive",
+        title: 'Search failed',
+        description: 'There was an error performing the search. Please try again.',
+        variant: 'destructive',
       });
-      
-      // Fallback to default experiences
-      loadDefaultExperiences();
-    } finally {
-      setLoading(false);
-    }
-  };
+      refetchDefault();
+    },
+  });
 
-  const loadDefaultExperiences = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('experiences')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(12);
-
-      if (error) throw error;
-
-      setResults(data || []);
-      onResultsChange?.(data || []);
-      setSearchType('text');
-    } catch (error) {
-      console.error('Error loading default experiences:', error);
-    }
-  };
-
-  // Load default experiences on mount
-  useEffect(() => {
-    loadDefaultExperiences();
-  }, []);
+  const loading = searchMutation.isPending || defaultLoading;
 
   const handleSearch = () => {
-    performSearch();
+    if (!query.trim() && filters.category === 'all' && !filters.location) {
+      if (defaultExperiences.length === 0) {
+        refetchDefault();
+      } else {
+        setResults(defaultExperiences);
+        onResultsChange?.(defaultExperiences);
+      }
+      return;
+    }
+    searchMutation.mutate({ searchQuery: query, searchFilters: filters });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -178,9 +180,8 @@ const SearchInterface = ({
 
   const clearSearch = () => {
     setQuery('');
-    setResults([]);
-    loadDefaultExperiences();
-    onResultsChange?.([]);
+    setResults(defaultExperiences);
+    onResultsChange?.(defaultExperiences);
   };
 
   const updateFilter = <K extends keyof SearchFilters>(
@@ -192,7 +193,10 @@ const SearchInterface = ({
     
     // Auto-search when filters change
     if (query.trim() || newFilters.category !== 'all' || newFilters.location) {
-      performSearch(query, newFilters);
+      searchMutation.mutate({ searchQuery: query, searchFilters: newFilters });
+    } else {
+      setResults(defaultExperiences);
+      onResultsChange?.(defaultExperiences);
     }
   };
 
@@ -205,7 +209,12 @@ const SearchInterface = ({
       useSemanticSearch: true,
     };
     setFilters(defaultFilters);
-    performSearch(query, defaultFilters);
+    if (query.trim()) {
+      searchMutation.mutate({ searchQuery: query, searchFilters: defaultFilters });
+    } else {
+      setResults(defaultExperiences);
+      onResultsChange?.(defaultExperiences);
+    }
   };
 
   const hasActiveFilters = filters.category !== 'all' || 
