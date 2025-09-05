@@ -12,6 +12,7 @@ import ExperienceSearch from "./pages/ExperienceSearch";
 import ExperienceDetails from "./pages/ExperienceDetails";
 import UserDashboard from "./pages/UserDashboard";
 import HostDashboard from "./pages/HostDashboard";
+import Profile from "./pages/Profile";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import Messages from "./pages/Messages";
 import Support from "./pages/Support";
@@ -42,7 +43,7 @@ const App = () => (
                   <Route path="/search" element={<ExperienceSearch />} />
                   <Route path="/experience/:id" element={<ExperienceDetails />} />
                   <Route path="/bookings" element={<UserDashboard />} />
-                  <Route path="/profile" element={<UserDashboard />} />
+                  <Route path="/profile" element={<Profile />} />
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/settings" element={<UserDashboard />} />
                   <Route path="/support" element={<Support />} />

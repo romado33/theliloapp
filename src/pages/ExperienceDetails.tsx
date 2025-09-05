@@ -295,6 +295,7 @@ const ExperienceDetails = () => {
         .from('bookings')
         .insert({
           experience_id: experience.id,
+          availability_id: '00000000-0000-0000-0000-000000000000', // Temporary placeholder
           guest_id: user.id,
           guest_count: guestCount,
           total_price: experience.price * guestCount,
