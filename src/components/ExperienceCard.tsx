@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,36 +6,7 @@ import { Star, MapPin, Clock, Users, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import QuickBookModal from "@/components/QuickBookModal";
-
-// Import assets for image mapping
-import cookingClass from '@/assets/cooking-class.jpg';
-import potteryClass from '@/assets/pottery-class.jpg';
-import farmersMarket from '@/assets/farmers-market.jpg';
-import pastaMakingClass from '@/assets/pasta-making-class.jpg';
-import potteryWorkshop from '@/assets/pottery-workshop.jpg';
-import sunsetYoga from '@/assets/sunset-yoga.jpg';
-import waterfallHike from '@/assets/waterfall-hike.jpg';
-import wineTasting from '@/assets/wine-tasting.jpg';
-import heroImage from '@/assets/hero-image.jpg';
-
-// Image mapping function for placeholder URLs
-const getImageFromUrl = (url: string) => {
-  const imageMap: Record<string, string> = {
-    '/placeholder-cooking.jpg': cookingClass,
-    '/placeholder-pasta.jpg': pastaMakingClass,
-    '/placeholder-pottery.jpg': potteryClass,
-    '/placeholder-workshop.jpg': potteryWorkshop,
-    '/placeholder-yoga.jpg': sunsetYoga,
-    '/placeholder-hike.jpg': waterfallHike,
-    '/placeholder-wine.jpg': wineTasting,
-    '/placeholder-market.jpg': farmersMarket,
-    '/placeholder-farm.jpg': farmersMarket,
-    '/placeholder-nature.jpg': farmersMarket,
-    '/placeholder-experience.jpg': heroImage,
-  };
-
-  return imageMap[url] || url;
-};
+import { getImageFromUrl } from "@/lib/imageMap";
 
 interface ExperienceCardProps {
   id: string;
@@ -69,14 +40,39 @@ const ExperienceCard = ({
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showQuickBook, setShowQuickBook] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const saved = JSON.parse(localStorage.getItem('savedExperiences') || '[]') as string[];
+      setIsSaved(saved.includes(id));
+    } catch {
+      setIsSaved(false);
+    }
+  }, [id]);
 
   const handleCardClick = () => {
     navigate(`/experience/${id}`);
   };
 
   const handleSaveClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent navigation when clicking heart
-    // TODO: Implement save functionality
+    e.stopPropagation();
+    if (typeof window === 'undefined') return;
+    try {
+      const saved = JSON.parse(localStorage.getItem('savedExperiences') || '[]') as string[];
+      let updated: string[];
+      if (saved.includes(id)) {
+        updated = saved.filter((expId) => expId !== id);
+        setIsSaved(false);
+      } else {
+        updated = [...saved, id];
+        setIsSaved(true);
+      }
+      localStorage.setItem('savedExperiences', JSON.stringify(updated));
+    } catch {
+      /* ignore localStorage errors */
+    }
   };
 
   const handleQuickBook = (e: React.MouseEvent) => {
@@ -110,9 +106,10 @@ const ExperienceCard = ({
           variant="ghost"
           size="sm"
           onClick={handleSaveClick}
+          aria-pressed={isSaved}
           className="absolute top-3 left-3 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm hover:bg-background/90 border-0 shadow-sm"
         >
-          <Heart className="h-4 w-4" />
+          <Heart className={`h-4 w-4 ${isSaved ? 'text-primary fill-current' : ''}`} />
         </Button>
       </div>
       
