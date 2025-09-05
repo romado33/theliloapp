@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -40,22 +41,19 @@ const BookingConfirmation = () => {
   const { bookingId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [booking, setBooking] = useState<BookingDetails | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
       navigate('/auth');
-      return;
     }
-    
-    if (bookingId) {
-      fetchBooking();
-    }
-  }, [bookingId, user, navigate]);
+  }, [user, navigate]);
 
-  const fetchBooking = async () => {
-    try {
+  const {
+    data: booking,
+    isLoading,
+  } = useQuery({
+    queryKey: ['booking', bookingId, user?.id],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('bookings')
         .select(`
@@ -70,16 +68,14 @@ const BookingConfirmation = () => {
         .eq('id', bookingId)
         .eq('guest_id', user?.id)
         .single();
-
       if (error) throw error;
-      setBooking(data);
-    } catch (error) {
-      console.error('Error fetching booking:', error);
+      return data as BookingDetails;
+    },
+    enabled: !!bookingId && !!user,
+    onError: () => {
       navigate('/');
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -115,7 +111,7 @@ const BookingConfirmation = () => {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
