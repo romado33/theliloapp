@@ -9,11 +9,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  Star, 
-  MapPin, 
-  Clock, 
-  Users, 
+import {
+  Star,
+  MapPin,
+  Clock,
+  Users,
   Calendar,
   DollarSign,
   Heart,
@@ -33,24 +33,7 @@ import potteryWorkshop from '@/assets/pottery-workshop.jpg';
 import sunsetYoga from '@/assets/sunset-yoga.jpg';
 import waterfallHike from '@/assets/waterfall-hike.jpg';
 import wineTasting from '@/assets/wine-tasting.jpg';
-
-// Image mapping function for placeholder URLs
-const getImageFromUrl = (url: string) => {
-  console.log('getImageFromUrl called with:', url);
-  
-  const imageMap: Record<string, string> = {
-    '/placeholder-cooking.jpg': cookingClass,
-    '/placeholder-pottery.jpg': potteryClass,
-    '/placeholder-market.jpg': farmersMarket,
-    '/placeholder-farm.jpg': farmersMarket,
-    '/placeholder-nature.jpg': farmersMarket,
-    '/placeholder-experience.jpg': heroImage,
-  };
-
-  const mappedUrl = imageMap[url] || url;
-  console.log('Image mapping:', { originalUrl: url, mappedUrl });
-  return mappedUrl;
-};
+import { getImageFromUrl } from '@/lib/imageMap';
 
 interface Experience {
   id: string;
@@ -198,7 +181,6 @@ const ExperienceDetails = () => {
     const fetchExperience = async () => {
       // If ID is not a valid UUID, show error immediately
       if (!isValidUUID(id)) {
-        console.log(`ID "${id}" is not a valid UUID format`);
         setLoading(false);
         setError('Invalid experience ID format. Please access experiences from the home page.');
         return;
@@ -239,7 +221,7 @@ const ExperienceDetails = () => {
             return;
           }
         }
-      } catch (error: any) {
+      } catch (error) {
         console.error('Error fetching experience:', error);
         
         // Try fallback to mock data on database error too
@@ -247,10 +229,10 @@ const ExperienceDetails = () => {
         if (mockExperience) {
           setExperience(mockExperience);
         } else {
-          setError(error.message);
+          setError(error instanceof Error ? error.message : "Unknown error");
           toast({
             title: "Error loading experience",
-            description: error.message,
+            description: (error instanceof Error ? error.message : "Unknown error"),
             variant: "destructive"
           });
         }
@@ -305,11 +287,36 @@ const ExperienceDetails = () => {
       return;
     }
 
-    // TODO: Implement actual booking logic
-    toast({
-      title: "Booking initiated",
-      description: "This would redirect to the booking flow."
-    });
+    if (!experience) return;
+
+    try {
+      setBookingLoading(true);
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert({
+          experience_id: experience.id,
+          guest_id: user.id,
+          guest_count: guestCount,
+          total_price: experience.price * guestCount,
+          booking_date: selectedTimeSlot,
+          status: 'pending',
+          guest_contact_info: { email: user.email }
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      navigate(`/booking-confirmation/${data.id}`);
+    } catch (error) {
+      toast({
+        title: "Booking failed",
+        description: (error instanceof Error ? error.message : "Unknown error"),
+        variant: "destructive"
+      });
+    } finally {
+      setBookingLoading(false);
+    }
   };
 
   if (loading) {
@@ -365,10 +372,6 @@ const ExperienceDetails = () => {
     ? `${experience.profiles.first_name} ${experience.profiles.last_name}` 
     : 'Unknown Host';
 
-  // Debug logging to see what's in the experience data
-  console.log('Experience data:', experience);
-  console.log('Image URLs from experience:', experience.image_urls);
-  
   // Create a gallery of images (3-10 photos per experience)
   const galleryImages = [
     cookingClass,
