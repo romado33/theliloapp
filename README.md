@@ -71,3 +71,14 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Development bypass
+
+This project includes optional developer utilities to quickly access the app and seed sample data. These tools are only loaded when `import.meta.env.DEV` is `true` and are omitted from production builds.
+
+1. Create a `.env.local` (or development-only) file and set `VITE_DEV_BYPASS_PASSWORD` with a throwaway value.
+2. Run the dev server with `npm run dev`.
+3. On the auth screen, use the **Dev Bypass** button to sign in as a mock user or host.
+4. When signed in, a **Developer Tools** section on the home page lets you seed sample categories and experiences.
+
+Never define `VITE_DEV_BYPASS_PASSWORD` in production environments to avoid unintended exposure.

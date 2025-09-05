@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Database, Loader2, Trash2 } from 'lucide-react';
 
-const DevDataSeeder = () => {
+const DevDataSeeder: React.FC = import.meta.env.DEV ? () => {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -218,10 +218,10 @@ const DevDataSeeder = () => {
           variant: "destructive"
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error seeding data",
-        description: error.message,
+        description: error instanceof Error ? error.message : String(error),
         variant: "destructive"
       });
     } finally {
@@ -246,10 +246,10 @@ const DevDataSeeder = () => {
         title: "Data cleared",
         description: "Your test experiences have been removed"
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error clearing data",
-        description: error.message,
+        description: error instanceof Error ? error.message : String(error),
         variant: "destructive"
       });
     } finally {
@@ -320,6 +320,6 @@ const DevDataSeeder = () => {
       </CardContent>
     </Card>
   );
-};
+} : () => null;
 
 export default DevDataSeeder;

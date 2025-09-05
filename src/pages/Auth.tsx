@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -7,8 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { DevBypassModal } from '@/components/DevBypassModal';
 import { Eye, EyeOff, ArrowLeft, Code } from 'lucide-react';
+
+const DevBypassModal = import.meta.env.DEV
+  ? lazy(() => import('@/components/DevBypassModal'))
+  : () => null;
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -254,28 +257,34 @@ const Auth = () => {
             </Tabs>
 
             {/* Dev Bypass Button */}
-            <div className="pt-4 border-t">
-              <Button
-                variant="secondary"
-                onClick={() => setShowDevModal(true)}
-                disabled={loading}
-                className="w-full bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border-yellow-300"
-              >
-                <Code className="w-4 h-4 mr-2" />
-                Dev Bypass (Skip Login)
-              </Button>
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                For development purposes only
-              </p>
-            </div>
+            {import.meta.env.DEV && (
+              <div className="pt-4 border-t">
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowDevModal(true)}
+                  disabled={loading}
+                  className="w-full bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border-yellow-300"
+                >
+                  <Code className="w-4 h-4 mr-2" />
+                  Dev Bypass (Skip Login)
+                </Button>
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  For development purposes only
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
         
-        <DevBypassModal
-          isOpen={showDevModal}
-          onClose={() => setShowDevModal(false)}
-          onSelectRole={handleDevBypass}
-        />
+        {import.meta.env.DEV && (
+          <Suspense fallback={null}>
+            <DevBypassModal
+              isOpen={showDevModal}
+              onClose={() => setShowDevModal(false)}
+              onSelectRole={handleDevBypass}
+            />
+          </Suspense>
+        )}
       </div>
     </div>
   );
