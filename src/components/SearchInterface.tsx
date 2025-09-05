@@ -78,7 +78,7 @@ const SearchInterface = ({
     isLoading: defaultLoading,
     error: defaultError,
     refetch: refetchDefault,
-  } = useQuery({
+  } = useQuery<SearchResult[]>({
     queryKey: ['default-experiences'],
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,
@@ -91,7 +91,7 @@ const SearchInterface = ({
         .order('created_at', { ascending: false })
         .limit(12);
       if (error) throw error;
-      return data as SearchResult[];
+      return data ?? [];
     },
   });
 
@@ -111,10 +111,19 @@ const SearchInterface = ({
     }
   }, [defaultError, toast]);
 
-  const searchMutation = useMutation({
+  interface SearchResponse {
+    results: SearchResult[];
+    searchType: 'semantic' | 'text';
+  }
+
+  const searchMutation = useMutation<
+    SearchResponse,
+    Error,
+    { searchQuery: string; searchFilters: SearchFilters }
+  >({
     retry: 1,
-    mutationFn: async ({ searchQuery, searchFilters }: { searchQuery: string; searchFilters: SearchFilters }) => {
-      const { data, error } = await supabase.functions.invoke('semantic-search', {
+    mutationFn: async ({ searchQuery, searchFilters }) => {
+      const { data, error } = await supabase.functions.invoke<SearchResponse>('semantic-search', {
         body: {
           query: searchQuery,
           limit: 20,
@@ -129,9 +138,9 @@ const SearchInterface = ({
       return data;
     },
     onSuccess: (data, variables) => {
-      const searchResults = data?.results || [];
+      const searchResults = data.results;
       setResults(searchResults);
-      setSearchType(data?.searchType || 'text');
+      setSearchType(data.searchType);
       onResultsChange?.(searchResults);
       if (searchResults.length === 0 && variables.searchQuery.trim()) {
         toast({

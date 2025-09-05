@@ -35,7 +35,7 @@ const BookingConfirmation = () => {
     data: booking,
     isLoading,
     error,
-  } = useQuery({
+  } = useQuery<BookingDetails>({
     queryKey: ['booking', bookingId, user?.id],
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 30,
@@ -54,9 +54,9 @@ const BookingConfirmation = () => {
         `)
         .eq('id', bookingId)
         .eq('guest_id', user?.id)
-        .single();
+        .single<BookingDetails>();
       if (error) throw error;
-      return data as BookingDetails;
+      return data;
     },
     enabled: !!bookingId && !!user,
     onError: () => {

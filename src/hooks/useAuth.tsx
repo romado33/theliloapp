@@ -42,13 +42,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .single<Profile>();
 
       if (!error && data) {
-        const typedProfile = data as Profile;
-        setProfile(typedProfile);
+        setProfile(data);
         // Set initial role based on profile
-        setCurrentRole(typedProfile.is_host ? 'host' : 'user');
+        setCurrentRole(data.is_host ? 'host' : 'user');
       }
     } catch (error: unknown) {
       console.error('Error fetching profile:', error);

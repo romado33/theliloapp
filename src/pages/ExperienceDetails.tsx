@@ -34,33 +34,16 @@ import sunsetYoga from '@/assets/sunset-yoga.jpg';
 import waterfallHike from '@/assets/waterfall-hike.jpg';
 import wineTasting from '@/assets/wine-tasting.jpg';
 import { getImageFromUrl } from '@/lib/imageMap';
-import type { Availability } from '@/types';
+import type { Availability, Experience } from '@/types';
 
-interface Experience {
-  id: string;
-  title: string;
-  description: string;
-  location: string;
-  address: string;
-  price: number;
-  duration_hours: number;
-  max_guests: number;
-  image_urls: string[];
-  what_included: string[];
-  what_to_bring: string[];
-  cancellation_policy: string;
-  status: string;
-  is_active: boolean;
-  created_at: string;
-  categories: {
-    name: string;
-  };
+type ExperienceWithRelations = Experience & {
+  categories: { name: string };
   profiles: {
     first_name: string;
     last_name: string;
     avatar_url?: string;
   };
-}
+};
 
 const ExperienceDetails = () => {
   const { id } = useParams();
@@ -68,7 +51,7 @@ const ExperienceDetails = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  const [experience, setExperience] = useState<Experience | null>(null);
+  const [experience, setExperience] = useState<ExperienceWithRelations | null>(null);
   const [availability, setAvailability] = useState<Availability[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -87,7 +70,7 @@ const ExperienceDetails = () => {
     };
 
     // Mock experience data for fallback
-    const mockExperiences = {
+    const mockExperiences: Record<string, ExperienceWithRelations> = {
       "550e8400-e29b-41d4-a716-446655440001": {
         id: "550e8400-e29b-41d4-a716-446655440001",
         title: "Pottery Workshop for Beginners",
@@ -206,7 +189,7 @@ const ExperienceDetails = () => {
           `)
           .eq('id', id)
           .eq('is_active', true)
-          .maybeSingle();
+          .maybeSingle<ExperienceWithRelations>();
 
         if (error) throw error;
         
@@ -214,7 +197,7 @@ const ExperienceDetails = () => {
           setExperience(data);
         } else {
           // Fallback to mock data if experience not found in database
-          const mockExperience = mockExperiences[id as keyof typeof mockExperiences];
+          const mockExperience = mockExperiences[id as string];
           if (mockExperience) {
             setExperience(mockExperience);
           } else {
@@ -226,7 +209,7 @@ const ExperienceDetails = () => {
           console.error('Error fetching experience:', error);
         
         // Try fallback to mock data on database error too
-        const mockExperience = mockExperiences[id as keyof typeof mockExperiences];
+        const mockExperience = mockExperiences[id as string];
         if (mockExperience) {
           setExperience(mockExperience);
         } else {
