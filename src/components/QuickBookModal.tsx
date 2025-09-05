@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -42,7 +43,6 @@ const QuickBookModal = ({
 }: QuickBookModalProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string>('');
   const [guestCount, setGuestCount] = useState(1);
   const [contactInfo, setContactInfo] = useState({
@@ -52,22 +52,17 @@ const QuickBookModal = ({
     phone: '',
   });
   const [specialRequests, setSpecialRequests] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      fetchAvailability();
-      if (user?.email) {
-        setContactInfo(prev => ({
-          ...prev,
-          email: user.email || '',
-        }));
-      }
-    }
-  }, [isOpen, experienceId, user]);
-
-  const fetchAvailability = async () => {
-    try {
+  const {
+    data: timeSlots = [],
+    isLoading: slotsLoading,
+    error: slotsError,
+  } = useQuery({
+    queryKey: ['availability', experienceId],
+    enabled: isOpen,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+    retry: 1,
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('availability')
         .select('*')
@@ -77,18 +72,29 @@ const QuickBookModal = ({
         .gte('start_time', new Date().toISOString())
         .order('start_time', { ascending: true })
         .limit(5);
-
       if (error) throw error;
-      setTimeSlots(data || []);
-    } catch (error) {
-      console.error('Error fetching availability:', error);
+      return data as TimeSlot[];
+    },
+  });
+
+  useEffect(() => {
+    if (isOpen && user?.email) {
+      setContactInfo(prev => ({
+        ...prev,
+        email: user.email || '',
+      }));
+    }
+  }, [isOpen, user]);
+
+  useEffect(() => {
+    if (slotsError) {
       toast({
         title: "Error",
         description: "Unable to load available time slots.",
         variant: "destructive",
       });
     }
-  };
+  }, [slotsError, toast]);
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -105,7 +111,41 @@ const QuickBookModal = ({
     };
   };
 
-  const handleBooking = async () => {
+  const bookingMutation = useMutation({
+    retry: 1,
+    mutationFn: async ({ selectedTimeSlot }: { selectedTimeSlot: TimeSlot }) => {
+      const { error } = await supabase
+        .from('bookings')
+        .insert({
+          experience_id: experienceId,
+          availability_id: selectedSlot,
+          guest_id: user!.id,
+          guest_count: guestCount,
+          total_price: experiencePrice * guestCount,
+          booking_date: selectedTimeSlot.start_time,
+          guest_contact_info: contactInfo,
+          special_requests: specialRequests || null,
+          status: 'pending',
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Booking confirmed!",
+        description: `Your booking for ${experienceTitle} has been confirmed.`,
+      });
+      onClose();
+    },
+    onError: () => {
+      toast({
+        title: "Booking failed",
+        description: "There was an error processing your booking. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleBooking = () => {
     if (!user) {
       toast({
         title: "Sign in required",
@@ -133,43 +173,17 @@ const QuickBookModal = ({
       return;
     }
 
-    setLoading(true);
-    try {
-      const selectedTimeSlot = timeSlots.find(slot => slot.id === selectedSlot);
-      if (!selectedTimeSlot) throw new Error('Invalid time slot');
-
-      const { error } = await supabase
-        .from('bookings')
-        .insert({
-          experience_id: experienceId,
-          availability_id: selectedSlot,
-          guest_id: user.id,
-          guest_count: guestCount,
-          total_price: experiencePrice * guestCount,
-          booking_date: selectedTimeSlot.start_time,
-          guest_contact_info: contactInfo,
-          special_requests: specialRequests || null,
-          status: 'pending',
-        });
-
-      if (error) throw error;
-
+    const selectedTimeSlot = timeSlots.find(slot => slot.id === selectedSlot);
+    if (!selectedTimeSlot) {
       toast({
-        title: "Booking confirmed!",
-        description: `Your booking for ${experienceTitle} has been confirmed.`,
-      });
-
-      onClose();
-    } catch (error) {
-      console.error('Booking error:', error);
-      toast({
-        title: "Booking failed",
-        description: "There was an error processing your booking. Please try again.",
+        title: "Invalid time slot",
+        description: "Please select a valid time slot.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      return;
     }
+
+    bookingMutation.mutate({ selectedTimeSlot });
   };
 
   return (
@@ -193,13 +207,15 @@ const QuickBookModal = ({
           </div>
 
           {/* Time Slot Selection */}
-          <div>
-            <Label className="text-sm font-medium">Choose Time Slot</Label>
-            <div className="space-y-2 mt-2">
-              {timeSlots.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No available slots found</p>
-              ) : (
-                timeSlots.map((slot) => {
+            <div>
+              <Label className="text-sm font-medium">Choose Time Slot</Label>
+              <div className="space-y-2 mt-2">
+                {slotsLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading slots...</p>
+                ) : timeSlots.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No available slots found</p>
+                ) : (
+                  timeSlots.map((slot) => {
                   const { date, time } = formatDateTime(slot.start_time);
                   return (
                     <button
@@ -333,13 +349,13 @@ const QuickBookModal = ({
             <Button variant="outline" onClick={onClose} className="flex-1">
               Cancel
             </Button>
-            <Button 
-              onClick={handleBooking} 
-              disabled={loading || !selectedSlot || timeSlots.length === 0}
-              className="flex-1"
-            >
-              {loading ? 'Booking...' : 'Book Now'}
-            </Button>
+              <Button
+                onClick={handleBooking}
+                disabled={bookingMutation.isPending || !selectedSlot || timeSlots.length === 0}
+                className="flex-1"
+              >
+                {bookingMutation.isPending ? 'Booking...' : 'Book Now'}
+              </Button>
           </div>
         </div>
       </DialogContent>

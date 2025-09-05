@@ -90,6 +90,9 @@ const SearchInterface = ({
     refetch: refetchDefault,
   } = useQuery({
     queryKey: ['default-experiences'],
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+    retry: 1,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('experiences')
@@ -119,6 +122,7 @@ const SearchInterface = ({
   }, [defaultError, toast]);
 
   const searchMutation = useMutation({
+    retry: 1,
     mutationFn: async ({ searchQuery, searchFilters }: { searchQuery: string; searchFilters: SearchFilters }) => {
       const { data, error } = await supabase.functions.invoke('semantic-search', {
         body: {

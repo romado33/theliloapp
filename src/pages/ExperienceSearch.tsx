@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import SearchInterface from '@/components/SearchInterface';
+import { useMutation } from '@tanstack/react-query';
 
 interface SearchResult {
   id: string;
@@ -21,40 +22,30 @@ const ExperienceSearch = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [generatingEmbeddings, setGeneratingEmbeddings] = useState(false);
 
-  const handleGenerateEmbeddings = async () => {
-    setGeneratingEmbeddings(true);
-    try {
-      toast({
-        title: "Generating embeddings...",
-        description: "This may take a few minutes to process all experiences.",
-      });
-
+  const generateEmbeddings = useMutation({
+    retry: 1,
+    mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke('batch-generate-embeddings', {
         body: {}
       });
-
-      if (error) {
-        throw new Error('Failed to generate embeddings');
-      }
-
+      if (error) throw new Error('Failed to generate embeddings');
+      return data;
+    },
+    onSuccess: (data) => {
       toast({
         title: "Embeddings generated!",
         description: `Successfully processed ${data.processed} experiences. Semantic search is now enhanced!`,
       });
-
-    } catch (error) {
-      console.error('Error generating embeddings:', error);
+    },
+    onError: () => {
       toast({
         title: "Error generating embeddings",
         description: "There was an error processing the experiences. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setGeneratingEmbeddings(false);
     }
-  };
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -85,12 +76,12 @@ const ExperienceSearch = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={handleGenerateEmbeddings}
-              disabled={generatingEmbeddings}
+              onClick={() => generateEmbeddings.mutate()}
+              disabled={generateEmbeddings.isPending}
               className="hidden md:flex"
             >
-              <Zap className={`w-4 h-4 mr-2 ${generatingEmbeddings ? 'animate-spin' : ''}`} />
-              {generatingEmbeddings ? 'Enhancing...' : 'Enhance Search'}
+              <Zap className={`w-4 h-4 mr-2 ${generateEmbeddings.isPending ? 'animate-spin' : ''}`} />
+              {generateEmbeddings.isPending ? 'Enhancing...' : 'Enhance Search'}
             </Button>
           </div>
         </div>
@@ -132,14 +123,14 @@ const ExperienceSearch = () => {
           <p className="text-sm text-muted-foreground mb-3">
             Generate semantic embeddings for smarter, more intuitive search results
           </p>
-          <Button
-            onClick={handleGenerateEmbeddings}
-            disabled={generatingEmbeddings}
-            size="sm"
-          >
-            <Zap className={`w-4 h-4 mr-2 ${generatingEmbeddings ? 'animate-spin' : ''}`} />
-            {generatingEmbeddings ? 'Enhancing Search...' : 'Enhance Search'}
-          </Button>
+            <Button
+              onClick={() => generateEmbeddings.mutate()}
+              disabled={generateEmbeddings.isPending}
+              size="sm"
+            >
+              <Zap className={`w-4 h-4 mr-2 ${generateEmbeddings.isPending ? 'animate-spin' : ''}`} />
+              {generateEmbeddings.isPending ? 'Enhancing Search...' : 'Enhance Search'}
+            </Button>
         </div>
       </div>
     </div>
