@@ -13,6 +13,7 @@ import ExperienceDetails from "./pages/ExperienceDetails";
 import UserDashboard from "./pages/UserDashboard";
 import HostDashboard from "./pages/HostDashboard";
 import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import Messages from "./pages/Messages";
 import Support from "./pages/Support";
@@ -45,7 +46,7 @@ const App = () => (
                   <Route path="/bookings" element={<UserDashboard />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/messages" element={<Messages />} />
-                  <Route path="/settings" element={<UserDashboard />} />
+                  <Route path="/settings" element={<Settings />} />
                   <Route path="/support" element={<Support />} />
                   
                   {/* Host Routes */}
