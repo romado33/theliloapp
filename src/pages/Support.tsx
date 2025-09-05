@@ -1,10 +1,14 @@
 import { useState } from "react";
+import { useForm, type FieldErrors } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from "@/hooks/use-toast";
+import { sanitizeString } from "@/lib/sanitize";
 import { 
   HelpCircle, 
   MessageCircle, 
@@ -23,12 +27,20 @@ const Support = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
-  const [contactForm, setContactForm] = useState({
-    email: "",
-    subject: "",
-    message: ""
-  });
   const [loading, setLoading] = useState(false);
+
+  const contactSchema = z.object({
+    email: z.string().email('Valid email is required'),
+    subject: z.string().min(1, 'Subject is required'),
+    message: z.string().min(1, 'Message is required')
+  });
+
+  type ContactFormValues = z.infer<typeof contactSchema>;
+
+  const contactForm = useForm<ContactFormValues>({
+    resolver: zodResolver(contactSchema),
+    defaultValues: { email: "", subject: "", message: "" }
+  });
 
   const categories = [
     { icon: Book, title: "Bookings", count: 12 },
@@ -86,9 +98,15 @@ const Support = () => {
     faq.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleSubmitContact = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmitContact = async (values: ContactFormValues) => {
     setLoading(true);
+
+    const sanitized = {
+      email: sanitizeString(values.email),
+      subject: sanitizeString(values.subject),
+      message: sanitizeString(values.message)
+    };
+    void sanitized;
 
     // Simulate form submission
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -98,8 +116,16 @@ const Support = () => {
       description: "We'll get back to you within 24 hours."
     });
 
-    setContactForm({ email: "", subject: "", message: "" });
+    contactForm.reset();
     setLoading(false);
+  };
+
+  const handleContactError = (errors: FieldErrors<ContactFormValues>) => {
+    const message = Object.values(errors)
+      .map((err) => err?.message as string)
+      .filter(Boolean)
+      .join('\n');
+    toast({ title: 'Validation Error', description: message, variant: 'destructive' });
   };
 
   return (
@@ -202,39 +228,36 @@ const Support = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmitContact} className="space-y-4">
+              <form onSubmit={contactForm.handleSubmit(handleSubmitContact, handleContactError)} className="space-y-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">Your Email</label>
                   <Input
                     type="email"
                     placeholder="your@email.com"
-                    value={contactForm.email}
-                    onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
                     required
+                    {...contactForm.register('email')}
                   />
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium mb-2 block">Subject</label>
                   <Input
                     placeholder="How can we help you?"
-                    value={contactForm.subject}
-                    onChange={(e) => setContactForm(prev => ({ ...prev, subject: e.target.value }))}
                     required
+                    {...contactForm.register('subject')}
                   />
                 </div>
-                
+
                 <div>
                   <label className="text-sm font-medium mb-2 block">Message</label>
                   <Textarea
                     placeholder="Describe your question or issue..."
                     rows={4}
-                    value={contactForm.message}
-                    onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
                     required
+                    {...contactForm.register('message')}
                   />
                 </div>
-                
+
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Sending..." : "Send Message"}
                 </Button>
