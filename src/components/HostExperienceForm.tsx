@@ -1,101 +1,106 @@
 import { useState } from 'react';
+import { useForm, type FieldErrors } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Clock, Users, MapPin, DollarSign, Camera } from 'lucide-react';
+import { sanitizeString } from '@/lib/sanitize';
 
-interface FormData {
-  title: string;
-  description: string;
-  location: string;
-  address: string;
-  price: string;
-  duration_hours: string;
-  max_guests: string;
-  category_id: string;
-  what_included: string[];
-  what_to_bring: string[];
-  cancellation_policy: string;
-}
+const experienceSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().min(1, 'Description is required'),
+  location: z.string().min(1, 'Location is required'),
+  address: z.string().optional(),
+  price: z.preprocess((val) => Number(val), z.number().min(0, 'Price must be at least 0').max(10000, 'Price too high')),
+  duration_hours: z.preprocess((val) => Number(val), z.number().min(1, 'Duration must be at least 1 hour').max(24, 'Duration too long')),
+  max_guests: z.preprocess((val) => Number(val), z.number().min(1, 'At least 1 guest').max(100, 'Too many guests')),
+  category_id: z.string().optional(),
+  cancellation_policy: z.string().optional()
+});
+
+type ExperienceFormValues = z.infer<typeof experienceSchema>;
 
 export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
-    title: '',
-    description: '',
-    location: '',
-    address: '',
-    price: '',
-    duration_hours: '',
-    max_guests: '',
-    category_id: '',
-    what_included: [],
-    what_to_bring: [],
-    cancellation_policy: ''
+
+  const form = useForm<ExperienceFormValues>({
+    resolver: zodResolver(experienceSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      location: '',
+      address: '',
+      price: 0,
+      duration_hours: 1,
+      max_guests: 1,
+      category_id: '',
+      cancellation_policy: ''
+    }
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (values: ExperienceFormValues) => {
     if (!user) return;
-
     setLoading(true);
     try {
+      const sanitized = {
+        title: sanitizeString(values.title),
+        description: sanitizeString(values.description),
+        location: sanitizeString(values.location),
+        address: sanitizeString(values.address || ''),
+        price: values.price,
+        duration_hours: values.duration_hours,
+        max_guests: values.max_guests,
+        category_id: values.category_id || null,
+        what_included: [],
+        what_to_bring: [],
+        cancellation_policy: sanitizeString(values.cancellation_policy || '')
+      };
+
       const { error } = await supabase
         .from('experiences')
         .insert({
           host_id: user.id,
-          title: formData.title,
-          description: formData.description,
-          location: formData.location,
-          address: formData.address,
-          price: parseFloat(formData.price),
-          duration_hours: parseInt(formData.duration_hours),
-          max_guests: parseInt(formData.max_guests),
-          category_id: formData.category_id || null,
-          what_included: formData.what_included,
-          what_to_bring: formData.what_to_bring,
-          cancellation_policy: formData.cancellation_policy,
+          ...sanitized,
           status: 'submitted',
-          is_active: false // Inactive until approved
+          is_active: false
         });
 
       if (error) throw error;
 
       toast({
-        title: "Experience Submitted!",
+        title: 'Experience Submitted!',
         description: "Your experience has been submitted for review. You'll be notified once it's approved."
       });
 
-      // Reset form
-      setFormData({
-        title: '', description: '', location: '', address: '', price: '',
-        duration_hours: '', max_guests: '', category_id: '', 
-        what_included: [], what_to_bring: [], cancellation_policy: ''
-      });
-
+      form.reset();
       onSuccess?.();
     } catch (error: any) {
       toast({
-        title: "Error",
+        title: 'Error',
         description: error.message,
-        variant: "destructive"
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const updateField = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const onError = (errors: FieldErrors<ExperienceFormValues>) => {
+    const message = Object.values(errors)
+      .map((err) => err?.message as string)
+      .filter(Boolean)
+      .join('\n');
+    toast({ title: 'Validation Error', description: message, variant: 'destructive' });
   };
 
   return (
@@ -110,16 +115,15 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
       </CardHeader>
       
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-6">
           <div className="space-y-4">
             <div>
               <Label htmlFor="title">Experience Title *</Label>
               <Input
                 id="title"
-                value={formData.title}
-                onChange={(e) => updateField('title', e.target.value)}
                 placeholder="Farm Visit & Animal Feeding"
                 required
+                {...form.register('title')}
               />
             </div>
 
@@ -127,11 +131,10 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
               <Label htmlFor="description">Description *</Label>
               <Textarea
                 id="description"
-                value={formData.description}
-                onChange={(e) => updateField('description', e.target.value)}
                 placeholder="Describe your experience, what makes it special, and what families can expect..."
                 rows={4}
                 required
+                {...form.register('description')}
               />
             </div>
 
@@ -143,10 +146,9 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
                 </Label>
                 <Input
                   id="location"
-                  value={formData.location}
-                  onChange={(e) => updateField('location', e.target.value)}
                   placeholder="Ottawa, ON"
                   required
+                  {...form.register('location')}
                 />
               </div>
 
@@ -154,9 +156,8 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
                 <Label htmlFor="address">Full Address</Label>
                 <Input
                   id="address"
-                  value={formData.address}
-                  onChange={(e) => updateField('address', e.target.value)}
                   placeholder="123 Farm Road, Ottawa, ON"
+                  {...form.register('address')}
                 />
               </div>
             </div>
@@ -171,10 +172,9 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
                   id="price"
                   type="number"
                   step="0.01"
-                  value={formData.price}
-                  onChange={(e) => updateField('price', e.target.value)}
                   placeholder="25.00"
                   required
+                  {...form.register('price', { valueAsNumber: true })}
                 />
               </div>
 
@@ -186,10 +186,9 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
                 <Input
                   id="duration"
                   type="number"
-                  value={formData.duration_hours}
-                  onChange={(e) => updateField('duration_hours', e.target.value)}
                   placeholder="2"
                   required
+                  {...form.register('duration_hours', { valueAsNumber: true })}
                 />
               </div>
 
@@ -201,10 +200,9 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
                 <Input
                   id="max_guests"
                   type="number"
-                  value={formData.max_guests}
-                  onChange={(e) => updateField('max_guests', e.target.value)}
                   placeholder="8"
                   required
+                  {...form.register('max_guests', { valueAsNumber: true })}
                 />
               </div>
             </div>
@@ -213,10 +211,9 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
               <Label htmlFor="cancellation_policy">Cancellation Policy</Label>
               <Textarea
                 id="cancellation_policy"
-                value={formData.cancellation_policy}
-                onChange={(e) => updateField('cancellation_policy', e.target.value)}
                 placeholder="Free cancellation 24 hours before the experience..."
                 rows={2}
+                {...form.register('cancellation_policy')}
               />
             </div>
           </div>
