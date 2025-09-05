@@ -34,6 +34,7 @@ import sunsetYoga from '@/assets/sunset-yoga.jpg';
 import waterfallHike from '@/assets/waterfall-hike.jpg';
 import wineTasting from '@/assets/wine-tasting.jpg';
 import { getImageFromUrl } from '@/lib/imageMap';
+import type { Availability } from '@/types';
 
 interface Experience {
   id: string;
@@ -68,7 +69,7 @@ const ExperienceDetails = () => {
   const { toast } = useToast();
   
   const [experience, setExperience] = useState<Experience | null>(null);
-  const [availability, setAvailability] = useState<any[]>([]);
+  const [availability, setAvailability] = useState<Availability[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
@@ -221,8 +222,8 @@ const ExperienceDetails = () => {
             return;
           }
         }
-      } catch (error) {
-        console.error('Error fetching experience:', error);
+        } catch (error: unknown) {
+          console.error('Error fetching experience:', error);
         
         // Try fallback to mock data on database error too
         const mockExperience = mockExperiences[id as keyof typeof mockExperiences];
@@ -232,7 +233,7 @@ const ExperienceDetails = () => {
           setError(error instanceof Error ? error.message : "Unknown error");
           toast({
             title: "Error loading experience",
-            description: (error instanceof Error ? error.message : "Unknown error"),
+            description: error instanceof Error ? error.message : "Unknown error",
             variant: "destructive"
           });
         }
@@ -309,10 +310,10 @@ const ExperienceDetails = () => {
       if (error) throw error;
 
       navigate(`/booking-confirmation/${data.id}`);
-    } catch (error) {
+    } catch (error: unknown) {
       toast({
         title: "Booking failed",
-        description: (error instanceof Error ? error.message : "Unknown error"),
+        description: error instanceof Error ? error.message : "Unknown error",
         variant: "destructive"
       });
     } finally {

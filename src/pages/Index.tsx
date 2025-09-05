@@ -12,6 +12,7 @@ import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
 import farmersMarket from "@/assets/farmers-market.jpg";
 import cookingClass from "@/assets/cooking-class.jpg";
+import type { SearchResult } from "@/types";
 
 // Map placeholder URLs to actual assets - simplified approach  
 const getImageFromUrl = (url: string | undefined): string => {
@@ -78,11 +79,11 @@ const mockExperiences = [
 
 const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showHostForm, setShowHostForm] = useState(false);
   const { user, profile, loading, currentRole } = useAuth();
 
-  const handleSearchResults = (results: any[]) => {
+  const handleSearchResults = (results: SearchResult[]) => {
     setSearchResults(results);
   };
 

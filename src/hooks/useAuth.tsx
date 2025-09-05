@@ -1,18 +1,26 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import type { Profile } from '@/types';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  profile: any;
+  profile: Profile | null;
   currentRole: 'user' | 'host';
-  signUp: (email: string, password: string, userData?: any) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signInWithGoogle: () => Promise<{ error: any }>;
-  signInWithApple: () => Promise<{ error: any }>;
+  signUp: (
+    email: string,
+    password: string,
+    userData?: Partial<Profile>
+  ) => Promise<{ error: AuthError | null }>;
+  signIn: (
+    email: string,
+    password: string
+  ) => Promise<{ error: AuthError | null }>;
+  signInWithGoogle: () => Promise<{ error: AuthError | null }>;
+  signInWithApple: () => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
   devBypass: (role: 'user' | 'host') => Promise<void>;
   switchRole: (role: 'user' | 'host') => void;
@@ -23,7 +31,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [currentRole, setCurrentRole] = useState<'user' | 'host'>('user');
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
@@ -35,13 +43,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .select('*')
         .eq('id', userId)
         .single();
-      
+
       if (!error && data) {
-        setProfile(data);
+        const typedProfile = data as Profile;
+        setProfile(typedProfile);
         // Set initial role based on profile
-        setCurrentRole(data.is_host ? 'host' : 'user');
+        setCurrentRole(typedProfile.is_host ? 'host' : 'user');
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error fetching profile:', error);
     }
   };
@@ -82,28 +91,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, userData?: any) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    userData?: Partial<Profile>
+  ): Promise<{ error: AuthError | null }> => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: userData
-      }
+        data: userData,
+      },
     });
 
     if (error) {
       toast({
         title: "Sign up failed",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     } else {
       toast({
         title: "Check your email",
-        description: "We sent you a confirmation link"
+        description: "We sent you a confirmation link",
       });
     }
 
@@ -127,55 +140,58 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (
+    email: string,
+    password: string
+  ): Promise<{ error: AuthError | null }> => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
-      password
+      password,
     });
 
     if (error) {
       toast({
         title: "Sign in failed",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
 
     return { error };
   };
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = async (): Promise<{ error: AuthError | null }> => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`
-      }
+        redirectTo: `${window.location.origin}/`,
+      },
     });
 
     if (error) {
       toast({
         title: "Google sign in failed",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
 
     return { error };
   };
 
-  const signInWithApple = async () => {
+  const signInWithApple = async (): Promise<{ error: AuthError | null }> => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'apple',
       options: {
-        redirectTo: `${window.location.origin}/`
-      }
+        redirectTo: `${window.location.origin}/`,
+      },
     });
 
     if (error) {
       toast({
         title: "Apple sign in failed",
         description: error.message,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
 
@@ -248,10 +264,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         title: "Dev bypass activated",
         description: `Signed in as development ${role}`
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Dev bypass failed",
-        description: error.message,
+        description: error instanceof Error ? error.message : String(error),
         variant: "destructive"
       });
     }

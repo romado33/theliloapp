@@ -7,35 +7,18 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  CheckCircle, 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Users, 
-  Mail, 
+import {
+  CheckCircle,
+  Calendar,
+  Clock,
+  MapPin,
+  Users,
+  Mail,
   Phone,
   ArrowLeft,
   Download
 } from 'lucide-react';
-
-interface BookingDetails {
-  id: string;
-  experience_id: string;
-  guest_count: number;
-  total_price: number;
-  booking_date: string;
-  status: string;
-  guest_contact_info: any;
-  special_requests: string;
-  created_at: string;
-  experience: {
-    title: string;
-    location: string;
-    address: string;
-    duration_hours: number;
-  };
-}
+import type { BookingDetails } from '@/types';
 
 const BookingConfirmation = () => {
   const { bookingId } = useParams();
@@ -227,14 +210,14 @@ const BookingConfirmation = () => {
               <div className="space-y-2">
                 <div className="flex items-center gap-3">
                   <Mail className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm">{booking.guest_contact_info.email}</span>
+                    <span className="text-sm">{booking.guest_contact_info?.email}</span>
                 </div>
-                {booking.guest_contact_info.phone && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm">{booking.guest_contact_info.phone}</span>
-                  </div>
-                )}
+                  {booking.guest_contact_info?.phone && (
+                    <div className="flex items-center gap-3">
+                      <Phone className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm">{booking.guest_contact_info?.phone}</span>
+                    </div>
+                  )}
               </div>
             </div>
 
