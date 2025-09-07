@@ -547,12 +547,35 @@ export type Database = {
         Args: { "": string } | { "": unknown }
         Returns: unknown
       }
+      get_host_booking_info: {
+        Args: { booking_id: string }
+        Returns: {
+          booking_date: string
+          experience_id: string
+          guest_count: number
+          guest_name: string
+          id: string
+          special_requests: string
+          status: string
+          total_price: number
+        }[]
+      }
       get_public_host_profile: {
         Args: { host_user_id: string }
         Returns: {
           first_name: string
           id: string
           is_host: boolean
+        }[]
+      }
+      get_safe_host_profile: {
+        Args: { host_user_id: string }
+        Returns: {
+          bio: string
+          first_name: string
+          id: string
+          is_host: boolean
+          location: string
         }[]
       }
       halfvec_avg: {
