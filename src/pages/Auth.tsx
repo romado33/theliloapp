@@ -10,8 +10,8 @@ import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, ArrowLeft, Code } from 'lucide-react';
 
 const DevBypassModal = import.meta.env.DEV
-  ? lazy(() => import('@/components/DevBypassModal'))
-  : () => null;
+  ? lazy(() => import('@/components/DevBypassModal').then(module => ({ default: module.DevBypassModal })))
+  : (): null => null;
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);

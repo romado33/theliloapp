@@ -59,9 +59,6 @@ const BookingConfirmation = () => {
       return data;
     },
     enabled: !!bookingId && !!user,
-    onError: () => {
-      navigate('/');
-    },
   });
 
   const formatDateTime = (dateString: string) => {

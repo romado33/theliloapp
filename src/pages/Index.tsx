@@ -15,7 +15,7 @@ import type { SearchResult } from "@/types";
 
 const DevDataSeeder = import.meta.env.DEV
   ? lazy(() => import("@/components/DevDataSeeder"))
-  : () => null;
+  : (): null => null;
 
 // Map placeholder URLs to actual assets - simplified approach  
 const getImageFromUrl = (url: string | undefined): string => {
@@ -195,15 +195,15 @@ const Index = () => {
                          const mappedUrl = getImageFromUrl(originalUrl);
                          return mappedUrl;
                        })()}
-                       category={experience.category || "Experience"}
-                       price={experience.price}
-                       duration={experience.duration || `${experience.duration_hours || 2} hours`}
-                       rating={experience.rating || 4.5}
-                       reviewCount={experience.reviewCount || 0}
-                       location={experience.location}
-                       hostName={experience.hostName || "Local Host"}
-                       maxGuests={experience.maxGuests || experience.max_guests || 6}
-                       isNew={experience.isNew}
+                        category="Experience"
+                        price={experience.price}
+                        duration={`${experience.duration_hours || 2} hours`}
+                        rating={4.5}
+                        reviewCount={0}
+                        location={experience.location}
+                        hostName="Local Host"
+                        maxGuests={experience.max_guests || 6}
+                        isNew={false}
                      />
                    </div>
                 ))

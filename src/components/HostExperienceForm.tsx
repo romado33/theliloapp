@@ -61,8 +61,8 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
         duration_hours: values.duration_hours,
         max_guests: values.max_guests,
         category_id: values.category_id || null,
-        what_included: [],
-        what_to_bring: [],
+        what_included: [] as string[],
+        what_to_bring: [] as string[],
         cancellation_policy: sanitizeString(values.cancellation_policy || '')
       };
 

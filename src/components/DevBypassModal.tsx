@@ -10,7 +10,7 @@ interface DevBypassModalProps {
 }
 
 export const DevBypassModal = import.meta.env.DEV
-  ? ({ isOpen, onClose, onSelectRole }: DevBypassModalProps) => {
+  ? ({ isOpen, onClose, onSelectRole }: DevBypassModalProps): JSX.Element => {
       const handleRoleSelect = (role: 'user' | 'host') => {
         onSelectRole(role);
         onClose();
@@ -58,4 +58,4 @@ export const DevBypassModal = import.meta.env.DEV
         </Dialog>
       );
     }
-  : () => null;
+  : (): null => null;

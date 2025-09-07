@@ -18,6 +18,10 @@ export type BookingDetails = Omit<BookingRow, 'guest_contact_info'> & {
 
 export type Experience = Database['public']['Tables']['experiences']['Row'];
 
+export type ExperienceWithRelations = Experience & {
+  profiles?: Profile;
+};
+
 export type SearchResult = Experience & {
   similarity?: number;
 };
