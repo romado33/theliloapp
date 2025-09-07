@@ -465,6 +465,30 @@ export type Database = {
         }
         Relationships: []
       }
+      request_logs: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          ip_address: unknown | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          ip_address?: unknown | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          ip_address?: unknown | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           booking_id: string
