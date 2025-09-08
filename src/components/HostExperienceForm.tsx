@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { PhotoUpload } from '@/components/PhotoUpload';
 import { Clock, Users, MapPin, DollarSign, Camera } from 'lucide-react';
 import { sanitizeString } from '@/lib/sanitize';
 
@@ -32,6 +33,8 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [showPhotoSection, setShowPhotoSection] = useState(false);
 
   const form = useForm<ExperienceFormValues>({
     resolver: zodResolver(experienceSchema),
@@ -63,7 +66,8 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
         category_id: values.category_id || null,
         what_included: [] as string[],
         what_to_bring: [] as string[],
-        cancellation_policy: sanitizeString(values.cancellation_policy || '')
+        cancellation_policy: sanitizeString(values.cancellation_policy || ''),
+        image_urls: photos
       };
 
       const { error } = await supabase
@@ -223,11 +227,24 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
               {loading ? "Submitting..." : "Submit for Review"}
             </Button>
             
-            <Button type="button" variant="outline" className="flex-1">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => setShowPhotoSection(!showPhotoSection)}
+            >
               <Camera className="w-4 h-4 mr-2" />
-              Add Photos Later
+              {showPhotoSection ? 'Hide Photos' : 'Add Photos'}
             </Button>
           </div>
+
+          {/* Photo Upload Section */}
+          {showPhotoSection && (
+            <PhotoUpload
+              onPhotosChange={setPhotos}
+              maxPhotos={5}
+            />
+          )}
 
           <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
             <strong>What happens next?</strong>

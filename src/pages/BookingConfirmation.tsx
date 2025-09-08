@@ -25,6 +25,26 @@ const BookingConfirmation = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  // Send confirmation email when booking loads
+  useEffect(() => {
+    const sendConfirmationEmail = async () => {
+      if (bookingId) {
+        try {
+          await supabase.functions.invoke('send-booking-email', {
+            body: {
+              bookingId,
+              type: 'confirmation'
+            }
+          });
+        } catch (error) {
+          console.error('Failed to send confirmation email:', error);
+        }
+      }
+    };
+
+    sendConfirmationEmail();
+  }, [bookingId]);
+
   useEffect(() => {
     if (!user) {
       navigate('/auth');

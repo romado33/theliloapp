@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ReviewsSection } from '@/components/ReviewsSection';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -583,42 +584,7 @@ const ExperienceDetails = () => {
           </Card>
 
           {/* Reviews */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-yellow-400" />
-                Reviews (156)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {mockReviews.map(review => (
-                <div key={review.id} className="border-b border-border last:border-0 pb-4 last:pb-0">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Avatar className="w-8 h-8">
-                        <AvatarFallback>{review.author[0]}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium text-sm">{review.author}</p>
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={`w-3 h-3 ${
-                                i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                              }`} 
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-xs text-muted-foreground">{review.date}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{review.comment}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <ReviewsSection experienceId={experience.id} />
         </div>
 
         {/* Booking Sidebar */}
