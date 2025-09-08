@@ -40,43 +40,43 @@ const getImageFromUrl = (url: string | undefined): string => {
 const mockExperiences = [
   {
     id: "550e8400-e29b-41d4-a716-446655440001",
-    title: "Pottery Workshop for Beginners",
+    title: "Feed Animals & Learn About Farm Life",
     image: potteryClass,
-    category: "Arts & Crafts",
-    price: 65,
+    category: "Farm & Animals",
+    price: 35,
     duration: "2 hours",
-    rating: 4.8,
-    reviewCount: 127,
-    location: "Downtown",
-    hostName: "Sarah Chen",
-    maxGuests: 8,
+    rating: 4.9,
+    reviewCount: 47,
+    location: "Manotick",
+    hostName: "Sarah & Family Farm",
+    maxGuests: 6,
     isNew: true,
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440002",
-    title: "Farmers Market Food Tour",
+    title: "Backyard Beekeeping Experience",
     image: farmersMarket,
-    category: "Food & Drink",
-    price: 45,
-    duration: "3 hours",
+    category: "Nature & Learning",
+    price: 25,
+    duration: "1.5 hours",
     rating: 4.9,
-    reviewCount: 203,
-    location: "Market District",
-    hostName: "Miguel Rodriguez",
-    maxGuests: 12,
+    reviewCount: 38,
+    location: "Kanata",
+    hostName: "The Johnson Family",
+    maxGuests: 4,
   },
   {
     id: "550e8400-e29b-41d4-a716-446655440003",
-    title: "Italian Cooking Masterclass",
+    title: "Kids Pottery & Clay Making",
     image: cookingClass,
-    category: "Food & Drink",
-    price: 85,
-    duration: "4 hours",
-    rating: 4.7,
-    reviewCount: 89,
-    location: "Little Italy",
-    hostName: "Chef Marco",
-    maxGuests: 6,
+    category: "Arts & Crafts",
+    price: 40,
+    duration: "2 hours",
+    rating: 4.8,
+    reviewCount: 62,
+    location: "Westboro",
+    hostName: "Maya's Art Studio",
+    maxGuests: 8,
   },
 ];
 
@@ -131,7 +131,7 @@ const Index = () => {
               Live <span className="bg-gradient-brand bg-clip-text text-transparent">Local</span>
             </h1>
             <p className="text-xl md:text-2xl text-lilo-navy/80 mb-8 max-w-2xl mx-auto">
-              Discover unique experiences in your neighborhood. Connect with local businesses and create unforgettable memories.
+              Connect with Ottawa neighbors who share authentic, family-friendly experiences. From local farms to artisan workshops.
             </p>
             
             {/* Hero Search */}
@@ -145,11 +145,15 @@ const Index = () => {
             <div className="flex flex-wrap justify-center gap-4 text-sm text-lilo-navy/70">
               <div className="flex items-center gap-1">
                 <TrendingUp className="w-4 h-4 text-lilo-green" />
-                <span>500+ local experiences</span>
+                <span>Local Ottawa experiences</span>
               </div>
               <div className="flex items-center gap-1">
                 <Heart className="w-4 h-4 text-lilo-yellow" />
-                <span>Trusted by locals</span>
+                <span>Family-friendly & safe</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Database className="w-4 h-4 text-lilo-blue" />
+                <span>Verified community hosts</span>
               </div>
             </div>
           </div>
@@ -250,12 +254,12 @@ const Index = () => {
 
           {/* CTA Section */}
           <div className="bg-gradient-brand rounded-2xl p-8 md:p-12 text-center text-white animate-fade-in shadow-strong">
-            <h3 className="text-3xl font-bold mb-4">Share Your Passion</h3>
+            <h3 className="text-3xl font-bold mb-4">Share Your Skills with Ottawa Families</h3>
             <p className="text-xl mb-6 opacity-95">
-              Turn your skills into income by hosting experiences in your community
+              Are you a local farmer, artisan, or maker? Share your passion with neighboring families and earn extra income.
             </p>
             <Button size="lg" variant="secondary" className="bg-white text-lilo-navy hover:bg-white/90 shadow-medium">
-              Become a Host
+              Become a Community Host
             </Button>
           </div>
         </div>
@@ -275,9 +279,9 @@ const Index = () => {
                 />
               </div>
             </div>
-            <p className="font-medium">Connecting communities through local experiences</p>
+            <p className="font-medium">Supporting Ottawa families through authentic local connections</p>
             <div className="mt-2 text-sm">
-              <span className="bg-gradient-brand bg-clip-text text-transparent font-semibold">Live Local, Love Local</span>
+              <span className="bg-gradient-brand bg-clip-text text-transparent font-semibold">Neighbors helping neighbors discover more</span>
             </div>
           </div>
         </div>

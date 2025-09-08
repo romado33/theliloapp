@@ -111,11 +111,14 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
-          <span>Create Your Experience</span>
+          <span>Share Your Local Experience</span>
           <Badge variant="outline" className="text-xs">
-            Under Review
+            Community Host
           </Badge>
         </CardTitle>
+        <p className="text-sm text-muted-foreground mt-2">
+          Connect with Ottawa families by sharing your skills, farm, workshop, or local knowledge
+        </p>
       </CardHeader>
       
       <CardContent>
@@ -125,7 +128,7 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
               <Label htmlFor="title">Experience Title *</Label>
               <Input
                 id="title"
-                placeholder="Farm Visit & Animal Feeding"
+                placeholder="e.g., Feed Animals & Learn About Farm Life"
                 required
                 {...form.register('title')}
               />
@@ -135,7 +138,7 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
               <Label htmlFor="description">Description *</Label>
               <Textarea
                 id="description"
-                placeholder="Describe your experience, what makes it special, and what families can expect..."
+                placeholder="Describe your experience: What will families do? What makes it special? What can kids expect to learn or discover?"
                 rows={4}
                 required
                 {...form.register('description')}
@@ -249,10 +252,11 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
           <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
             <strong>What happens next?</strong>
             <ol className="list-decimal list-inside mt-2 space-y-1">
-              <li>Your experience will be reviewed by our team</li>
-              <li>We may contact you for additional information</li>
-              <li>Once approved, you can add photos and set availability</li>
-              <li>Your experience will go live for bookings</li>
+              <li>We'll review your experience to ensure it's family-friendly and safe</li>
+              <li>Our team may contact you to discuss safety protocols and logistics</li>
+              <li>Once approved, you can add photos and set your availability</li>
+              <li>Local Ottawa families will discover and book your experience</li>
+              <li>Build lasting connections with your community while earning income</li>
             </ol>
           </div>
         </form>
