@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Camera, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { validateImageFile } from '@/lib/validation';
 
 interface PhotoUploadProps {
   experienceId?: string;
@@ -46,27 +47,37 @@ export const PhotoUpload = ({
       const newPhotos: string[] = [];
 
       for (const file of files) {
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
+        // Enhanced file validation
+        const validation = validateImageFile(file);
+        if (!validation.valid) {
           toast({
-            title: "Invalid file type",
-            description: "Please upload only image files",
+            title: "Invalid file",
+            description: validation.error,
             variant: "destructive"
           });
           continue;
         }
 
-        // Validate file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
+        // Additional security: Check file header (magic bytes)
+        const arrayBuffer = await file.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        
+        // Check for valid image magic bytes
+        const isValidImage = 
+          (uint8Array[0] === 0xFF && uint8Array[1] === 0xD8) || // JPEG
+          (uint8Array[0] === 0x89 && uint8Array[1] === 0x50) || // PNG
+          (uint8Array[0] === 0x52 && uint8Array[1] === 0x49); // WebP
+
+        if (!isValidImage) {
           toast({
-            title: "File too large",
-            description: "Please upload images smaller than 5MB",
+            title: "Invalid image file",
+            description: "File appears to be corrupted or not a valid image",
             variant: "destructive"
           });
           continue;
         }
 
-        // Convert to base64 for now (in a real app, you'd upload to storage)
+        // Convert to base64 for now (TODO: Replace with Supabase Storage)
         const base64 = await fileToBase64(file);
         newPhotos.push(base64);
       }

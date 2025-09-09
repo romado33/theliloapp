@@ -13,19 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { PhotoUpload } from '@/components/PhotoUpload';
 import { Clock, Users, MapPin, DollarSign, Camera } from 'lucide-react';
+import { experienceSchema } from '@/lib/validation';
 import { sanitizeString } from '@/lib/sanitize';
-
-const experienceSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  description: z.string().min(1, 'Description is required'),
-  location: z.string().min(1, 'Location is required'),
-  address: z.string().optional(),
-  price: z.preprocess((val) => Number(val), z.number().min(0, 'Price must be at least 0').max(10000, 'Price too high')),
-  duration_hours: z.preprocess((val) => Number(val), z.number().min(1, 'Duration must be at least 1 hour').max(24, 'Duration too long')),
-  max_guests: z.preprocess((val) => Number(val), z.number().min(1, 'At least 1 guest').max(100, 'Too many guests')),
-  category_id: z.string().optional(),
-  cancellation_policy: z.string().optional()
-});
 
 type ExperienceFormValues = z.infer<typeof experienceSchema>;
 
@@ -46,7 +35,6 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
       price: 0,
       duration_hours: 1,
       max_guests: 1,
-      category_id: '',
       cancellation_policy: ''
     }
   });
@@ -63,7 +51,7 @@ export const HostExperienceForm = ({ onSuccess }: { onSuccess?: () => void }) =>
         price: values.price,
         duration_hours: values.duration_hours,
         max_guests: values.max_guests,
-        category_id: values.category_id || null,
+        category_id: null as string | null,
         what_included: [] as string[],
         what_to_bring: [] as string[],
         cancellation_policy: sanitizeString(values.cancellation_policy || ''),

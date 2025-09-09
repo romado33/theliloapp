@@ -12,6 +12,29 @@ interface BookingEmailRequest {
   type: 'confirmation' | 'cancellation';
 }
 
+// Input validation schema
+const validateBookingEmailRequest = (data: any): { valid: boolean; error?: string } => {
+  if (!data || typeof data !== 'object') {
+    return { valid: false, error: 'Invalid request body' };
+  }
+
+  if (!data.bookingId || typeof data.bookingId !== 'string') {
+    return { valid: false, error: 'Valid bookingId is required' };
+  }
+
+  if (!data.type || !['confirmation', 'cancellation'].includes(data.type)) {
+    return { valid: false, error: 'Valid type (confirmation or cancellation) is required' };
+  }
+
+  // Basic UUID validation
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(data.bookingId)) {
+    return { valid: false, error: 'Invalid bookingId format' };
+  }
+
+  return { valid: true };
+};
+
 const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
@@ -25,7 +48,22 @@ serve(async (req) => {
   }
 
   try {
-    const { bookingId, type }: BookingEmailRequest = await req.json();
+    const rawData = await req.json();
+    
+    // Validate input
+    const validation = validateBookingEmailRequest(rawData);
+    if (!validation.valid) {
+      console.error('Validation error:', validation.error);
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { 
+          status: 400, 
+          headers: { "Content-Type": "application/json", ...corsHeaders } 
+        }
+      );
+    }
+    
+    const { bookingId, type }: BookingEmailRequest = rawData;
 
     console.log(`Processing ${type} email for booking ${bookingId}`);
 

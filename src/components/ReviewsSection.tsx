@@ -8,6 +8,8 @@ import { Star, MessageSquare, Calendar, User, ThumbsUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { reviewSchema } from '@/lib/validation';
+import { SecureDisplayText } from '@/components/SecureDisplayText';
 
 interface Review {
   id: string;
@@ -129,7 +131,7 @@ export const ReviewsSection = ({
         guest_id: user.id,
         experience_id: experienceId,
         rating: newReview.rating,
-        comment: newReview.comment
+        comment: reviewSchema.parse({ rating: newReview.rating, comment: newReview.comment }).comment
       };
 
       // Mock successful submission
@@ -321,9 +323,12 @@ export const ReviewsSection = ({
                       </Badge>
                     </div>
                     
-                    <p className="text-muted-foreground leading-relaxed">
-                      {review.comment}
-                    </p>
+                    <SecureDisplayText 
+                      text={review.comment}
+                      className="text-muted-foreground leading-relaxed"
+                      maxLength={500}
+                      allowLineBreaks={true}
+                    />
                     
                     <div className="flex items-center gap-4 pt-2">
                       <Button variant="ghost" size="sm" className="text-muted-foreground">
