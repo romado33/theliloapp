@@ -34,10 +34,7 @@ const Header = () => {
               />
             </div>
             <div className="hidden sm:block">
-              <div className="text-2xl font-bold bg-gradient-brand bg-clip-text text-transparent">
-                LiLo
-              </div>
-              <div className="text-xs text-lilo-navy/70 font-medium tracking-wide">
+              <div className="text-sm text-lilo-navy/70 font-medium tracking-wide -mt-1">
                 Live Local
               </div>
             </div>
