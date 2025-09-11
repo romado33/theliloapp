@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Camera, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { validateImageFile } from '@/lib/validation';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PhotoUploadProps {
   experienceId?: string;
@@ -46,6 +47,17 @@ export const PhotoUpload = ({
     try {
       const newPhotos: string[] = [];
 
+      // Get current user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        toast({
+          title: "Authentication required",
+          description: "You must be logged in to upload photos",
+          variant: "destructive"
+        });
+        return;
+      }
+
       for (const file of files) {
         // Enhanced file validation
         const validation = validateImageFile(file);
@@ -77,9 +89,33 @@ export const PhotoUpload = ({
           continue;
         }
 
-        // Convert to base64 for now (TODO: Replace with Supabase Storage)
-        const base64 = await fileToBase64(file);
-        newPhotos.push(base64);
+        // Upload to Supabase Storage
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('experience-photos')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          toast({
+            title: "Upload failed",
+            description: `Failed to upload ${file.name}. Please try again.`,
+            variant: "destructive"
+          });
+          continue;
+        }
+
+        // Get the public URL
+        const { data: urlData } = supabase.storage
+          .from('experience-photos')
+          .getPublicUrl(uploadData.path);
+
+        newPhotos.push(urlData.publicUrl);
       }
 
       const updatedPhotos = [...photos, ...newPhotos];
@@ -102,16 +138,36 @@ export const PhotoUpload = ({
     }
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
+  const extractStoragePathFromUrl = (url: string): string | null => {
+    try {
+      // Extract the file path from the storage URL
+      const urlParts = url.split('/storage/v1/object/public/experience-photos/');
+      return urlParts[1] || null;
+    } catch {
+      return null;
+    }
   };
 
-  const removePhoto = (index: number) => {
+  const removePhoto = async (index: number) => {
+    const photoUrl = photos[index];
+    const storageUrl = extractStoragePathFromUrl(photoUrl);
+    
+    // Delete from Supabase Storage if it's a storage URL
+    if (storageUrl) {
+      const { error: deleteError } = await supabase.storage
+        .from('experience-photos')
+        .remove([storageUrl]);
+        
+      if (deleteError) {
+        console.error('Error deleting from storage:', deleteError);
+        toast({
+          title: "Deletion failed",
+          description: "Failed to delete photo from storage, but removed from list",
+          variant: "destructive"
+        });
+      }
+    }
+    
     const updatedPhotos = photos.filter((_, i) => i !== index);
     setPhotos(updatedPhotos);
     onPhotosChange?.(updatedPhotos);
@@ -180,7 +236,7 @@ export const PhotoUpload = ({
                 </div>
                 
                 <p className="text-xs text-muted-foreground">
-                  JPG, PNG up to 5MB each
+                  JPG, PNG, WebP up to 10MB each
                 </p>
               </div>
             </div>
