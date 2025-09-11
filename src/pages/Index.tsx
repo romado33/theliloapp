@@ -128,7 +128,9 @@ const Index = () => {
         <div className="relative z-10 text-center mx-auto px-4 py-20">
           <div className="animate-fade-in">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-              <span className="bg-gradient-brand bg-clip-text text-transparent" style={{ textShadow: "0 0 20px rgba(0,0,0,0.3)" }}>Live</span> <span className="bg-gradient-brand bg-clip-text text-transparent font-black" style={{ textShadow: "0 0 20px rgba(0,0,0,0.5)" }}>Local</span>
+              <span className="hero-title-contrast">
+                <span className="bg-gradient-brand bg-clip-text text-transparent">Live</span> <span className="bg-gradient-brand bg-clip-text text-transparent font-black">Local</span>
+              </span>
             </h1>
             <p className="text-xl md:text-2xl text-lilo-navy/80 mb-8 max-w-2xl mx-auto">
               Connect with Ottawa neighbors who share authentic, family-friendly experiences. From local farms to artisan workshops.
