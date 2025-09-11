@@ -24,7 +24,7 @@ const Header = () => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo - Much more prominent */}
-          <div className="flex items-center gap-4 cursor-pointer group" onClick={() => navigate('/')}>
+          <div className="flex items-center gap-4 cursor-pointer group md:hidden" onClick={() => navigate('/')}>
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-brand rounded-full opacity-10 group-hover:opacity-20 transition-opacity blur-xl"></div>
               <img 
