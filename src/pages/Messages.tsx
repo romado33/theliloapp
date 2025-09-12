@@ -1,27 +1,69 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageCircle } from 'lucide-react';
+import React from 'react';
+import { useChat } from '@/hooks/useChat';
+import { useSecureAuth } from '@/hooks/useSecureAuth';
+import ConversationList from '@/components/ConversationList';
+import ChatInterface from '@/components/ChatInterface';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 const Messages = () => {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-brand-navy mb-2">Messages</h1>
-        <p className="text-muted-foreground">
-          Communicate with hosts and guests
-        </p>
-      </div>
+  const auth = useSecureAuth();
+  const {
+    conversations,
+    messages,
+    loading,
+    activeConversationId,
+    setActiveConversationId,
+    sendMessage,
+  } = useChat();
 
-      <Card className="p-12 text-center">
-        <MessageCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-        <CardHeader>
-          <CardTitle>No messages yet</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Messages from hosts and guests will appear here
-          </p>
-        </CardContent>
-      </Card>
+  const activeConversation = conversations.find(
+    (conv) => conv.id === activeConversationId
+  );
+
+  const handleSendMessage = async (content: string) => {
+    if (activeConversationId) {
+      await sendMessage(activeConversationId, content);
+    }
+  };
+
+  const handleBackToList = () => {
+    setActiveConversationId(null);
+  };
+
+  if (!auth.user) {
+    return null;
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      {!activeConversationId ? (
+        <>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">Messages</h1>
+            <p className="text-muted-foreground">
+              Communicate with hosts and guests
+            </p>
+          </div>
+
+          <ConversationList
+            conversations={conversations}
+            onSelectConversation={setActiveConversationId}
+            loading={loading}
+          />
+        </>
+      ) : (
+        <div className="h-[calc(100vh-12rem)]">
+          {activeConversation && (
+            <ChatInterface
+              conversation={activeConversation}
+              messages={messages}
+              onSendMessage={handleSendMessage}
+              onBack={handleBackToList}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };
