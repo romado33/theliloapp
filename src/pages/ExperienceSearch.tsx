@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Zap } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, Zap, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import SearchInterface from '@/components/SearchInterface';
+import AdvancedSearchInterface from '@/components/AdvancedSearchInterface';
 import { useMutation } from '@tanstack/react-query';
 
 interface SearchResult {
@@ -22,6 +25,7 @@ const ExperienceSearch = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [useAdvancedSearch, setUseAdvancedSearch] = useState(false);
 
   const generateEmbeddings = useMutation({
     retry: 1,
@@ -70,6 +74,18 @@ const ExperienceSearch = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="advanced-search" className="text-sm">Basic</Label>
+              <Switch
+                id="advanced-search"
+                checked={useAdvancedSearch}
+                onCheckedChange={setUseAdvancedSearch}
+              />
+              <Label htmlFor="advanced-search" className="flex items-center gap-1 text-sm">
+                <Settings className="w-4 h-4" />
+                Advanced
+              </Label>
+            </div>
             <Badge variant="secondary" className="hidden md:flex">
               {results.length} results
             </Badge>
@@ -87,17 +103,24 @@ const ExperienceSearch = () => {
         </div>
 
         {/* Search Interface */}
-        <SearchInterface 
-          onResultsChange={setResults}
-          showFilters={true}
-          placeholder="Search for cooking classes, pottery workshops, hiking tours..."
-          className="w-full"
-        />
+        {useAdvancedSearch ? (
+          <AdvancedSearchInterface 
+            onResultsChange={setResults}
+            className="w-full"
+          />
+        ) : (
+          <SearchInterface 
+            onResultsChange={setResults}
+            showFilters={true}
+            placeholder="Search for cooking classes, pottery workshops, hiking tours..."
+            className="w-full"
+          />
+        )}
 
         {/* Search Tips */}
         <div className="mt-12 bg-muted/30 rounded-lg p-6">
           <h3 className="text-lg font-semibold mb-4">🔍 Search Tips</h3>
-          <div className="grid md:grid-cols-2 gap-4 text-sm text-muted-foreground">
+          <div className="grid md:grid-cols-3 gap-4 text-sm text-muted-foreground">
             <div>
               <h4 className="font-medium text-foreground mb-2">Semantic Search</h4>
               <ul className="space-y-1">
@@ -107,11 +130,19 @@ const ExperienceSearch = () => {
               </ul>
             </div>
             <div>
-              <h4 className="font-medium text-foreground mb-2">Filters</h4>
+              <h4 className="font-medium text-foreground mb-2">Location & Map</h4>
               <ul className="space-y-1">
+                <li>• Click on the map to set your location</li>
+                <li>• Adjust radius to find experiences nearby</li>
+                <li>• Use the search bar in the map for specific places</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-foreground mb-2">Date & Availability</h4>
+              <ul className="space-y-1">
+                <li>• Select date range to see available experiences</li>
+                <li>• Choose guest count for capacity filtering</li>
                 <li>• Use price range to find experiences in your budget</li>
-                <li>• Filter by location to find nearby experiences</li>
-                <li>• Try different categories for varied results</li>
               </ul>
             </div>
           </div>
