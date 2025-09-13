@@ -6,7 +6,8 @@ import { Star, MapPin, Clock, Users, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import QuickBookModal from "@/components/QuickBookModal";
-import { getImageFromUrl } from "@/lib/imageMap";
+import SaveExperienceButton from './SaveExperienceButton';
+import { getImageFromUrl } from '@/lib/imageMap';
 
 interface ExperienceCardProps {
   id: string;
@@ -102,15 +103,14 @@ const ExperienceCard = ({
           <span className="font-medium">{rating}</span>
           <span className="text-muted-foreground">({reviewCount})</span>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleSaveClick}
-          aria-pressed={isSaved}
-          className="absolute top-3 left-3 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm hover:bg-background/90 border-0 shadow-sm"
-        >
-          <Heart className={`h-4 w-4 ${isSaved ? 'text-primary fill-current' : ''}`} />
-        </Button>
+        <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity">
+          <SaveExperienceButton 
+            experienceId={id}
+            variant="outline"
+            size="icon"
+            className="bg-white/90 hover:bg-white"
+          />
+        </div>
       </div>
       
       <CardContent className="p-4 space-y-3">

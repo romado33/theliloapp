@@ -16,6 +16,7 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import Messages from "./pages/Messages";
+import SavedExperiences from "./pages/SavedExperiences";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
 
@@ -58,7 +59,8 @@ const App = () => (
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/settings" element={<Settings />} />
-                  <Route path="/support" element={<Support />} />
+            <Route path="/saved" element={<SavedExperiences />} />
+            <Route path="/support" element={<Support />} />
                   
                   {/* Host Routes */}
                   <Route path="/host-dashboard" element={<HostDashboard />} />

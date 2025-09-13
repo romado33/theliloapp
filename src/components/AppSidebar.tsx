@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { 
   Home, 
-  Search, 
+  Heart, 
   FileText, 
   Calendar, 
   MessageCircle, 
@@ -21,12 +21,14 @@ import {
   Settings,
   HelpCircle,
   Plus,
-  BarChart3
+  BarChart3,
+  Search
 } from "lucide-react";
 
 const guestItems = [
   { title: "Home", url: "/", icon: Home },
   { title: "Search Experiences", url: "/search", icon: Search },
+  { title: "Saved", url: "/saved", icon: Heart },
   { title: "My Bookings", url: "/bookings", icon: Calendar },
   { title: "Messages", url: "/messages", icon: MessageCircle },
   { title: "Profile", url: "/profile", icon: User },

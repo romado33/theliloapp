@@ -36,6 +36,7 @@ import waterfallHike from '@/assets/waterfall-hike.jpg';
 import wineTasting from '@/assets/wine-tasting.jpg';
 import { getImageFromUrl } from '@/lib/imageMap';
 import type { Availability, Experience } from '@/types';
+import SaveExperienceButton from '@/components/SaveExperienceButton';
 
 type ExperienceWithRelations = Experience & {
   categories: { name: string };
@@ -439,9 +440,11 @@ const ExperienceDetails = () => {
               </div>
               
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  <Heart className="w-4 h-4" />
-                </Button>
+                <SaveExperienceButton 
+                  experienceId={experience.id} 
+                  showLabel={true}
+                  variant="outline"
+                />
                 <Button variant="outline" size="sm">
                   <Share2 className="w-4 h-4" />
                 </Button>
@@ -519,7 +522,7 @@ const ExperienceDetails = () => {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {experience.what_included.map((item, index) => (
+                      {experience.what_included?.map((item: string, index: number) => (
                         <li key={index} className="flex items-start gap-2 text-sm">
                           <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                           <span>{item}</span>
@@ -540,7 +543,7 @@ const ExperienceDetails = () => {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {experience.what_to_bring.map((item, index) => (
+                      {experience.what_to_bring?.map((item: string, index: number) => (
                         <li key={index} className="flex items-start gap-2 text-sm">
                           <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
                           <span>{item}</span>
