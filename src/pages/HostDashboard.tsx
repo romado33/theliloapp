@@ -5,6 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { HostExperienceForm } from "@/components/HostExperienceForm";
+import { BookingManagement } from "@/components/host/BookingManagement";
+import { AvailabilityCalendar } from "@/components/host/AvailabilityCalendar";
+import { RevenueAnalytics } from "@/components/host/RevenueAnalytics";
+import { EditExperienceModal } from "@/components/host/EditExperienceModal";
 import { 
   Plus, 
   Eye, 
@@ -15,7 +19,9 @@ import {
   Star, 
   TrendingUp,
   Edit,
-  Trash2
+  Trash2,
+  BarChart3,
+  Settings
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +62,7 @@ const HostDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [editingExperience, setEditingExperience] = useState<Experience | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -78,15 +85,32 @@ const HostDashboard = () => {
 
       setExperiences(experiencesData || []);
 
-      // Calculate basic stats
+      // Fetch real booking statistics
+      const { data: bookingsData, error: bookingsError } = await supabase
+        .from('bookings')
+        .select(`
+          total_price,
+          status,
+          experience:experiences!inner(host_id)
+        `)
+        .eq('experience.host_id', user?.id)
+        .in('status', ['confirmed', 'completed']);
+
+      if (bookingsError) {
+        console.warn('Error fetching bookings:', bookingsError);
+      }
+
+      // Calculate real stats
       const totalExperiences = experiencesData?.length || 0;
       const activeExperiences = experiencesData?.filter(exp => exp.is_active).length || 0;
+      const totalBookings = bookingsData?.length || 0;
+      const monthlyEarnings = bookingsData?.reduce((sum, booking) => sum + Number(booking.total_price), 0) || 0;
       
       setStats({
         totalExperiences,
         activeExperiences,
-        totalBookings: 0, // Will implement with bookings table
-        monthlyEarnings: 0, // Will calculate from bookings
+        totalBookings,
+        monthlyEarnings,
         averageRating: 4.5 // Placeholder until reviews are implemented
       });
 
@@ -239,10 +263,12 @@ const HostDashboard = () => {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="experiences">Experiences</TabsTrigger>
             <TabsTrigger value="bookings">Bookings</TabsTrigger>
+            <TabsTrigger value="availability">Availability</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
           </TabsList>
 
@@ -361,8 +387,15 @@ const HostDashboard = () => {
                         <div className="flex gap-2 mt-4">
                           <Button 
                             variant="outline" 
+                            size="sm"
+                            onClick={() => setEditingExperience(experience)}
+                          >
+                            <Edit className="w-4 h-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button 
+                            variant="outline" 
                             size="sm" 
-                            className="flex-1"
                             onClick={() => toggleExperienceStatus(experience.id, experience.is_active)}
                           >
                             {experience.is_active ? "Deactivate" : "Activate"}
@@ -384,15 +417,15 @@ const HostDashboard = () => {
           </TabsContent>
 
           <TabsContent value="bookings" className="mt-6">
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Users className="w-16 h-16 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Bookings Coming Soon</h3>
-                <p className="text-muted-foreground text-center">
-                  Booking management functionality will be available soon
-                </p>
-              </CardContent>
-            </Card>
+            <BookingManagement />
+          </TabsContent>
+
+          <TabsContent value="availability" className="mt-6">
+            <AvailabilityCalendar />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="mt-6">
+            <RevenueAnalytics />
           </TabsContent>
 
           <TabsContent value="messages" className="mt-6">
@@ -432,6 +465,17 @@ const HostDashboard = () => {
             </div>
           </div>
         )}
+
+        {/* Edit Experience Modal */}
+        <EditExperienceModal
+          experience={editingExperience}
+          isOpen={!!editingExperience}
+          onClose={() => setEditingExperience(null)}
+          onSuccess={() => {
+            fetchHostData();
+            setEditingExperience(null);
+          }}
+        />
       </div>
     </div>
   );
