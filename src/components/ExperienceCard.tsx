@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Clock, Users, Heart } from "lucide-react";
+import { Star, MapPin, Clock, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import QuickBookModal from "@/components/QuickBookModal";
 import SaveExperienceButton from './SaveExperienceButton';
 import { getImageFromUrl } from '@/lib/imageMap';
+import { useExperienceRatings } from '@/hooks/useReviews';
 
 interface ExperienceCardProps {
   id: string;
@@ -42,6 +43,14 @@ const ExperienceCard = ({
   const { user } = useAuth();
   const [showQuickBook, setShowQuickBook] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  
+  // Get real ratings data
+  const { ratings, loading: ratingsLoading } = useExperienceRatings([id]);
+  const experienceRating = ratings[id];
+  
+  // Use real data if available, otherwise fallback to props
+  const displayRating = experienceRating?.rating || rating;
+  const displayReviewCount = experienceRating?.count || reviewCount;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -98,11 +107,13 @@ const ExperienceCard = ({
             New
           </Badge>
         )}
-        <div className="absolute top-3 right-3 flex items-center gap-1 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-full text-sm">
-          <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-          <span className="font-medium">{rating}</span>
-          <span className="text-muted-foreground">({reviewCount})</span>
-        </div>
+        {displayReviewCount > 0 && (
+          <div className="absolute top-3 right-3 flex items-center gap-1 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-full text-sm">
+            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+            <span className="font-medium">{displayRating}</span>
+            <span className="text-muted-foreground">({displayReviewCount})</span>
+          </div>
+        )}
         <div className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity">
           <SaveExperienceButton 
             experienceId={id}

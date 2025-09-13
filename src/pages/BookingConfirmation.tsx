@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { WriteReviewModal } from '@/components/WriteReviewModal';
 import {
   CheckCircle,
   Calendar,
@@ -19,7 +20,8 @@ import {
   Phone,
   ArrowLeft,
   Download,
-  Loader2
+  Loader2,
+  Star
 } from 'lucide-react';
 import type { BookingDetails } from '@/types';
 
@@ -31,6 +33,7 @@ const BookingConfirmation = () => {
   const { toast } = useToast();
   const [paymentVerified, setPaymentVerified] = useState(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   // Get booking ID from URL params or query params
   const bookingId = urlBookingId || searchParams.get('booking_id');
@@ -136,6 +139,18 @@ const BookingConfirmation = () => {
     },
     enabled: !!bookingId && !!user,
   });
+
+  // Check if user can write a review (booking is completed)
+  const canWriteReview = booking && 
+    booking.status === 'confirmed' && 
+    new Date(booking.booking_date) < new Date();
+
+  const handleReviewSubmitted = () => {
+    toast({
+      title: 'Review submitted!',
+      description: 'Thank you for sharing your experience',
+    });
+  };
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -373,12 +388,22 @@ const BookingConfirmation = () => {
             <Download className="w-4 h-4 mr-2" />
             Download Receipt
           </Button>
-          <Button 
-            onClick={() => navigate('/dashboard')} 
-            className="flex-1"
-          >
-            View My Bookings
-          </Button>
+          {canWriteReview ? (
+            <Button 
+              onClick={() => setShowReviewModal(true)}
+              className="flex-1"
+            >
+              <Star className="w-4 h-4 mr-2" />
+              Write Review
+            </Button>
+          ) : (
+            <Button 
+              onClick={() => navigate('/dashboard')} 
+              className="flex-1"
+            >
+              View My Bookings
+            </Button>
+          )}
         </div>
 
         {/* What's Next */}
@@ -387,26 +412,53 @@ const BookingConfirmation = () => {
             <CardTitle className="text-lg">What's Next?</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-              <p className="text-sm text-muted-foreground">
-                You'll receive a confirmation email with all the details
-              </p>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-              <p className="text-sm text-muted-foreground">
-                The host will contact you 24 hours before your experience
-              </p>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-              <p className="text-sm text-muted-foreground">
-                Arrive 10 minutes early at the specified location
-              </p>
-            </div>
+            {!canWriteReview ? (
+              <>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                  <p className="text-sm text-muted-foreground">
+                    You'll receive a confirmation email with all the details
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                  <p className="text-sm text-muted-foreground">
+                    The host will contact you 24 hours before your experience
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+                  <p className="text-sm text-muted-foreground">
+                    Arrive 10 minutes early at the specified location
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <div className="bg-green-50 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-green-700 mb-2">
+                    ✓ Experience completed successfully!
+                  </p>
+                  <p className="text-xs text-green-600">
+                    Help other guests by sharing your review
+                  </p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
+
+        {/* Review Modal */}
+        {booking && (
+          <WriteReviewModal
+            isOpen={showReviewModal}
+            onClose={() => setShowReviewModal(false)}
+            bookingId={booking.id}
+            experienceId={booking.experience_id}
+            experienceTitle={booking.experience.title}
+            onReviewSubmitted={handleReviewSubmitted}
+          />
+        )}
       </div>
     </div>
   );

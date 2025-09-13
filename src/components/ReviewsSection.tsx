@@ -1,25 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
-import { Star, MessageSquare, Calendar, User, ThumbsUp } from 'lucide-react';
+import { Star, MessageSquare, User, ThumbsUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useReviews } from '@/hooks/useReviews';
 import { reviewSchema } from '@/lib/validation';
 import { SecureDisplayText } from '@/components/SecureDisplayText';
-
-interface Review {
-  id: string;
-  rating: number;
-  comment: string;
-  created_at: string;
-  guest_name: string;
-  guest_avatar?: string;
-  booking_id: string;
-}
 
 interface ReviewsSectionProps {
   experienceId?: string;
@@ -33,122 +22,43 @@ export const ReviewsSection = ({
   bookingId 
 }: ReviewsSectionProps) => {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { reviews, stats, loading, error, submitReview } = useReviews(experienceId);
   const [submitting, setSubmitting] = useState(false);
   const [newReview, setNewReview] = useState({
     rating: 0,
     comment: ''
   });
 
-  useEffect(() => {
-    if (experienceId) {
-      fetchReviews();
-    }
-  }, [experienceId]);
-
-  const fetchReviews = async () => {
-    if (!experienceId) return;
-    
-    try {
-      setLoading(true);
-      
-      // In a real app, you'd fetch from the reviews table
-      // For now, using mock data
-      const mockReviews: Review[] = [
-        {
-          id: '1',
-          rating: 5,
-          comment: "Absolutely amazing experience! The kids loved every moment, especially feeding the animals. Sarah was such a wonderful host and really made sure everyone felt included. Can't wait to come back!",
-          created_at: '2024-01-15T10:00:00Z',
-          guest_name: 'Emily Chen',
-          guest_avatar: '',
-          booking_id: 'booking-1'
-        },
-        {
-          id: '2',
-          rating: 4,
-          comment: "Great family activity! The farm tour was educational and fun. Only minor issue was that it ran a bit longer than expected, but the kids didn't mind at all. Highly recommend for families with young children.",
-          created_at: '2024-01-10T14:30:00Z',
-          guest_name: 'Michael Rodriguez',
-          guest_avatar: '',
-          booking_id: 'booking-2'
-        },
-        {
-          id: '3',
-          rating: 5,
-          comment: "Perfect way to spend a weekend afternoon! The pottery class was relaxing and the instructor was very patient with beginners. Loved taking home our creations.",
-          created_at: '2024-01-08T16:15:00Z',
-          guest_name: 'Jessica Smith',
-          guest_avatar: '',
-          booking_id: 'booking-3'
-        }
-      ];
-
-      setReviews(mockReviews);
-    } catch (error) {
-      console.error('Error fetching reviews:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const calculateAverageRating = () => {
-    if (reviews.length === 0) return 0;
-    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
-    return (sum / reviews.length).toFixed(1);
-  };
-
-  const getRatingDistribution = () => {
-    const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-    reviews.forEach(review => {
-      const rating = review.rating as 1 | 2 | 3 | 4 | 5;
-      distribution[rating]++;
-    });
-    return distribution;
-  };
+  // ... keep existing code (removed fetchReviews, calculateAverageRating, getRatingDistribution as they're now in the hook)
 
   const handleStarClick = (rating: number) => {
     setNewReview(prev => ({ ...prev, rating }));
   };
 
-  const submitReview = async () => {
-    if (!user || !bookingId || newReview.rating === 0) {
-      toast({
-        title: 'Invalid review',
-        description: 'Please provide a rating and ensure you have permission to review',
-        variant: 'destructive'
-      });
+  const handleSubmitReview = async () => {
+    if (!experienceId || !bookingId || newReview.rating === 0) {
       return;
     }
 
     setSubmitting(true);
     try {
-      // In a real app, you'd submit to the reviews table
-      const reviewData = {
-        booking_id: bookingId,
-        guest_id: user.id,
-        experience_id: experienceId,
+      const validatedData = reviewSchema.parse({ 
+        rating: newReview.rating, 
+        comment: newReview.comment 
+      });
+
+      const success = await submitReview({
         rating: newReview.rating,
-        comment: reviewSchema.parse({ rating: newReview.rating, comment: newReview.comment }).comment
-      };
-
-      // Mock successful submission
-      toast({
-        title: 'Review submitted!',
-        description: 'Thank you for your feedback'
+        comment: validatedData.comment || '',
+        experienceId,
+        bookingId
       });
 
-      setNewReview({ rating: 0, comment: '' });
-      await fetchReviews(); // Refresh reviews
-
+      if (success) {
+        setNewReview({ rating: 0, comment: '' });
+      }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to submit review. Please try again.',
-        variant: 'destructive'
-      });
+      console.error('Review validation error:', error);
     } finally {
       setSubmitting(false);
     }
@@ -186,8 +96,18 @@ export const ReviewsSection = ({
     );
   }
 
-  const averageRating = calculateAverageRating();
-  const distribution = getRatingDistribution();
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8 text-center">
+          <div>
+            <p className="text-muted-foreground mb-2">Failed to load reviews</p>
+            <p className="text-sm text-destructive">{error}</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -204,13 +124,13 @@ export const ReviewsSection = ({
             {/* Overall Rating */}
             <div className="text-center">
               <div className="text-4xl font-bold text-primary mb-2">
-                {averageRating}
+                {stats.averageRating}
               </div>
               <div className="flex justify-center mb-2">
-                {renderStars(Math.round(parseFloat(averageRating.toString())))}
+                {renderStars(Math.round(stats.averageRating))}
               </div>
               <p className="text-muted-foreground">
-                Based on {reviews.length} reviews
+                Based on {stats.totalReviews} reviews
               </p>
             </div>
 
@@ -224,12 +144,12 @@ export const ReviewsSection = ({
                     <div 
                       className="bg-yellow-400 h-2 rounded-full transition-all"
                       style={{ 
-                        width: `${reviews.length > 0 ? (distribution[rating as 1 | 2 | 3 | 4 | 5] / reviews.length) * 100 : 0}%` 
+                        width: `${stats.totalReviews > 0 ? (stats.distribution[rating as 1 | 2 | 3 | 4 | 5] / stats.totalReviews) * 100 : 0}%` 
                       }}
                     />
                   </div>
                   <span className="text-sm text-muted-foreground w-8">
-                    {distribution[rating as 1 | 2 | 3 | 4 | 5]}
+                    {stats.distribution[rating as 1 | 2 | 3 | 4 | 5]}
                   </span>
                 </div>
               ))}
@@ -270,7 +190,7 @@ export const ReviewsSection = ({
             </div>
 
             <Button 
-              onClick={submitReview}
+              onClick={handleSubmitReview}
               disabled={submitting || newReview.rating === 0}
               className="w-full"
             >
@@ -293,54 +213,62 @@ export const ReviewsSection = ({
             </CardContent>
           </Card>
         ) : (
-          reviews.map((review) => (
-            <Card key={review.id}>
-              <CardContent className="pt-6">
-                <div className="flex items-start gap-4">
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage src={review.guest_avatar} />
-                    <AvatarFallback>
-                      <User className="w-5 h-5" />
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">{review.guest_name}</h4>
-                        <div className="flex items-center gap-2">
-                          <div className="flex">
-                            {renderStars(review.rating)}
+          reviews.map((review) => {
+            const guestName = review.profiles 
+              ? `${review.profiles.first_name || ''} ${review.profiles.last_name || ''}`.trim()
+              : 'Anonymous Guest';
+
+            return (
+              <Card key={review.id}>
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-4">
+                    <Avatar className="w-10 h-10">
+                      <AvatarImage src={review.profiles?.avatar_url || ''} />
+                      <AvatarFallback>
+                        <User className="w-5 h-5" />
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">{guestName}</h4>
+                          <div className="flex items-center gap-2">
+                            <div className="flex">
+                              {renderStars(review.rating)}
+                            </div>
+                            <span className="text-sm text-muted-foreground">
+                              {formatDate(review.created_at)}
+                            </span>
                           </div>
-                          <span className="text-sm text-muted-foreground">
-                            {formatDate(review.created_at)}
-                          </span>
                         </div>
+                        
+                        <Badge variant="outline" className="text-xs">
+                          Verified
+                        </Badge>
                       </div>
                       
-                      <Badge variant="outline" className="text-xs">
-                        Verified
-                      </Badge>
-                    </div>
-                    
-                    <SecureDisplayText 
-                      text={review.comment}
-                      className="text-muted-foreground leading-relaxed"
-                      maxLength={500}
-                      allowLineBreaks={true}
-                    />
-                    
-                    <div className="flex items-center gap-4 pt-2">
-                      <Button variant="ghost" size="sm" className="text-muted-foreground">
-                        <ThumbsUp className="w-3 h-3 mr-1" />
-                        Helpful
-                      </Button>
+                      {review.comment && (
+                        <SecureDisplayText 
+                          text={review.comment}
+                          className="text-muted-foreground leading-relaxed"
+                          maxLength={500}
+                          allowLineBreaks={true}
+                        />
+                      )}
+                      
+                      <div className="flex items-center gap-4 pt-2">
+                        <Button variant="ghost" size="sm" className="text-muted-foreground">
+                          <ThumbsUp className="w-3 h-3 mr-1" />
+                          Helpful
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                </CardContent>
+              </Card>
+            );
+          })
         )}
       </div>
     </div>
