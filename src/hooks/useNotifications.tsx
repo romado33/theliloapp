@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useSecureAuth } from '@/hooks/useSecureAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface Notification {
   id: string;
@@ -19,11 +19,11 @@ export const useNotifications = () => {
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
   const { toast } = useToast();
-  const auth = useSecureAuth();
+  const { user } = useAuth();
 
   // Fetch initial notifications
   const fetchNotifications = async () => {
-    if (!auth.user) return;
+    if (!user) return;
 
     try {
       const { data, error } = await supabase
@@ -50,14 +50,14 @@ export const useNotifications = () => {
 
   // Mark notification as read
   const markAsRead = async (notificationId: string) => {
-    if (!auth.user) return;
+    if (!user) return;
 
     try {
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
         .eq('id', notificationId)
-        .eq('user_id', auth.user.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -72,13 +72,13 @@ export const useNotifications = () => {
 
   // Mark all as read
   const markAllAsRead = async () => {
-    if (!auth.user) return;
+    if (!user) return;
 
     try {
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
-        .eq('user_id', auth.user.id)
+        .eq('user_id', user.id)
         .eq('read', false);
 
       if (error) throw error;
@@ -92,14 +92,14 @@ export const useNotifications = () => {
 
   // Delete notification
   const deleteNotification = async (notificationId: string) => {
-    if (!auth.user) return;
+    if (!user) return;
 
     try {
       const { error } = await supabase
         .from('notifications')
         .delete()
         .eq('id', notificationId)
-        .eq('user_id', auth.user.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -120,7 +120,7 @@ export const useNotifications = () => {
 
   // Set up real-time subscription
   useEffect(() => {
-    if (!auth.user) return;
+    if (!user) return;
 
     fetchNotifications();
 
@@ -133,7 +133,7 @@ export const useNotifications = () => {
           event: 'INSERT',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${auth.user.id}`
+          filter: `user_id=eq.${user.id}`
         },
         (payload) => {
           console.log('New notification received:', payload);
@@ -163,7 +163,7 @@ export const useNotifications = () => {
           event: 'UPDATE',
           schema: 'public',
           table: 'notifications',
-          filter: `user_id=eq.${auth.user.id}`
+          filter: `user_id=eq.${user.id}`
         },
         (payload) => {
           const updatedNotification = payload.new as Notification;
@@ -177,7 +177,7 @@ export const useNotifications = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [auth.user, toast]);
+  }, [user, toast]);
 
   return {
     notifications,

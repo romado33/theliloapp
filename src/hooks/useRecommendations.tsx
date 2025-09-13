@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useSecureAuth } from '@/hooks/useSecureAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface Experience {
   id: string;
@@ -30,10 +30,10 @@ export interface RecommendedExperience extends Experience {
 export const useRecommendations = () => {
   const [recommendations, setRecommendations] = useState<RecommendedExperience[]>([]);
   const [loading, setLoading] = useState(true);
-  const auth = useSecureAuth();
+  const { user } = useAuth();
 
   const generateRecommendations = async () => {
-    if (!auth.user) return;
+    if (!user) return;
 
     try {
       setLoading(true);
@@ -42,7 +42,7 @@ export const useRecommendations = () => {
       const { data: profile } = await supabase
         .from('profiles')
         .select('location')
-        .eq('id', auth.user.id)
+        .eq('id', user.id)
         .single();
 
       // Get user's booking history
@@ -58,7 +58,7 @@ export const useRecommendations = () => {
             longitude
           )
         `)
-        .eq('guest_id', auth.user.id);
+        .eq('guest_id', user.id);
 
       // Get user's saved experiences
       const { data: savedExperiences } = await supabase
@@ -71,7 +71,7 @@ export const useRecommendations = () => {
             location
           )
         `)
-        .eq('user_id', auth.user.id);
+        .eq('user_id', user.id);
 
       // Get all active experiences
       const { data: allExperiences } = await supabase
@@ -301,10 +301,10 @@ export const useRecommendations = () => {
   };
 
   useEffect(() => {
-    if (auth.user) {
+    if (user) {
       generateRecommendations();
     }
-  }, [auth.user]);
+  }, [user]);
 
   return {
     recommendations,
