@@ -149,6 +149,54 @@ export type Database = {
           },
         ]
       }
+      campaign_recipients: {
+        Row: {
+          campaign_id: string
+          clicked_at: string | null
+          created_at: string
+          email: string
+          id: string
+          opened_at: string | null
+          sent_at: string | null
+          user_id: string
+        }
+        Insert: {
+          campaign_id: string
+          clicked_at?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          opened_at?: string | null
+          sent_at?: string | null
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string
+          clicked_at?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          opened_at?: string | null
+          sent_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "email_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_recipients_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string | null
@@ -239,6 +287,68 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "chat_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_campaigns: {
+        Row: {
+          clicks_count: number | null
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          opens_count: number | null
+          recipients_count: number | null
+          scheduled_at: string | null
+          sent_at: string | null
+          status: string | null
+          subject: string
+          target_audience: Json | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          clicks_count?: number | null
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          opens_count?: number | null
+          recipients_count?: number | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject: string
+          target_audience?: Json | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          clicks_count?: number | null
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          opens_count?: number | null
+          recipients_count?: number | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+          target_audience?: Json | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_campaigns_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -460,8 +570,110 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_analytics: {
+        Row: {
+          average_booking_value: number | null
+          conversion_rate: number | null
+          created_at: string
+          daily_revenue: number | null
+          date: string
+          id: string
+          new_bookings: number | null
+          new_experiences: number | null
+          new_hosts: number | null
+          new_users: number | null
+          total_bookings: number | null
+          total_experiences: number | null
+          total_hosts: number | null
+          total_revenue: number | null
+          total_users: number | null
+          updated_at: string
+        }
+        Insert: {
+          average_booking_value?: number | null
+          conversion_rate?: number | null
+          created_at?: string
+          daily_revenue?: number | null
+          date: string
+          id?: string
+          new_bookings?: number | null
+          new_experiences?: number | null
+          new_hosts?: number | null
+          new_users?: number | null
+          total_bookings?: number | null
+          total_experiences?: number | null
+          total_hosts?: number | null
+          total_revenue?: number | null
+          total_users?: number | null
+          updated_at?: string
+        }
+        Update: {
+          average_booking_value?: number | null
+          conversion_rate?: number | null
+          created_at?: string
+          daily_revenue?: number | null
+          date?: string
+          id?: string
+          new_bookings?: number | null
+          new_experiences?: number | null
+          new_hosts?: number | null
+          new_users?: number | null
+          total_bookings?: number | null
+          total_experiences?: number | null
+          total_hosts?: number | null
+          total_revenue?: number | null
+          total_users?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pricing_suggestions: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          current_price: number
+          experience_id: string
+          expires_at: string
+          factors: Json | null
+          id: string
+          reasoning: string | null
+          suggested_price: number
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          current_price: number
+          experience_id: string
+          expires_at?: string
+          factors?: Json | null
+          id?: string
+          reasoning?: string | null
+          suggested_price: number
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          current_price?: number
+          experience_id?: string
+          expires_at?: string
+          factors?: Json | null
+          id?: string
+          reasoning?: string | null
+          suggested_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_suggestions_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "experiences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          admin_role: Database["public"]["Enums"]["admin_role"] | null
           avatar_url: string | null
           bio: string | null
           created_at: string | null
@@ -477,6 +689,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          admin_role?: Database["public"]["Enums"]["admin_role"] | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
@@ -492,6 +705,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          admin_role?: Database["public"]["Enums"]["admin_role"] | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
@@ -632,6 +846,10 @@ export type Database = {
         }
         Returns: string
       }
+      generate_pricing_suggestion: {
+        Args: { p_experience_id: string }
+        Returns: string
+      }
       get_host_booking_info: {
         Args: { booking_id: string }
         Returns: {
@@ -753,6 +971,7 @@ export type Database = {
       }
     }
     Enums: {
+      admin_role: "super_admin" | "platform_admin" | "moderator"
       experience_status:
         | "submitted"
         | "under_review"
@@ -886,6 +1105,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admin_role: ["super_admin", "platform_admin", "moderator"],
       experience_status: [
         "submitted",
         "under_review",
