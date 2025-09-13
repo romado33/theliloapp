@@ -37,6 +37,7 @@ import wineTasting from '@/assets/wine-tasting.jpg';
 import { getImageFromUrl } from '@/lib/imageMap';
 import type { Availability, Experience } from '@/types';
 import SaveExperienceButton from '@/components/SaveExperienceButton';
+import ContactHostButton from '@/components/ContactHostButton';
 
 type ExperienceWithRelations = Experience & {
   categories: { name: string };
@@ -700,6 +701,14 @@ const ExperienceDetails = () => {
               >
                 {bookingLoading ? 'Booking...' : user ? 'Book Experience' : 'Sign in to Book'}
               </Button>
+
+              {/* Contact Host Button */}
+              <ContactHostButton
+                hostId={experience.host_id}
+                experienceId={experience.id}
+                experienceTitle={experience.title}
+                className="w-full"
+              />
 
               {!user && (
                 <p className="text-xs text-muted-foreground text-center">
