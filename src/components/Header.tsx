@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Search, User, LogOut, Settings, Home, LogIn, MapPin } from 'lucide-react';
+import { NotificationCenter } from '@/components/NotificationCenter';
 
 const Header = () => {
   const { user, profile, signOut, currentRole, switchRole } = useAuth();
@@ -63,6 +64,7 @@ const Header = () => {
             
             {user ? (
               <div className="flex items-center gap-3">
+                <NotificationCenter />
                 <span className="text-sm text-lilo-navy/80 hidden sm:inline font-medium">
                   Hi, {user.user_metadata?.first_name || user.email?.split('@')[0]}
                 </span>

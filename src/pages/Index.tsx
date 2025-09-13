@@ -6,6 +6,9 @@ import ExperienceCard from "@/components/ExperienceCard";
 import SearchInterface from "@/components/SearchInterface";
 import CategoryFilter from "@/components/CategoryFilter";
 import Header from "@/components/Header";
+import { RecommendationCard } from "@/components/RecommendationCard";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { useRecommendations } from "@/hooks/useRecommendations";
 import { TrendingUp, Heart, Database } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
@@ -85,6 +88,7 @@ const Index = () => {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showHostForm, setShowHostForm] = useState(false);
   const { user, profile, loading, currentRole } = useAuth();
+  const { recommendations, loading: recommendationsLoading } = useRecommendations();
 
   const handleSearchResults = (results: SearchResult[]) => {
     setSearchResults(results);
@@ -165,6 +169,30 @@ const Index = () => {
       {/* Main Content */}
       <section className="px-6 py-12">
         <div className="space-y-8">
+          {/* Recommendations Section */}
+          {user && recommendations.length > 0 && (
+            <div className="animate-slide-up container mx-auto">
+              <h2 className="text-2xl font-bold mb-4">Recommended for You</h2>
+              <p className="text-muted-foreground mb-6">
+                Personalized experiences based on your preferences
+              </p>
+              
+              {recommendationsLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="animate-pulse bg-muted rounded-lg h-64"></div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {recommendations.slice(0, 3).map((experience) => (
+                    <RecommendationCard key={experience.id} experience={experience} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Categories */}
           <div className="animate-slide-up container mx-auto">
             <h2 className="text-2xl font-bold mb-4">Browse by Category</h2>
@@ -266,6 +294,8 @@ const Index = () => {
           </div>
         </div>
       </section>
+      
+      <PWAInstallPrompt />
       
       {/* Footer */}
       <footer className="bg-gradient-to-r from-lilo-green/5 via-lilo-blue/5 to-lilo-yellow/5 border-t border-lilo-green/20 mt-20">
