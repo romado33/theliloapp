@@ -48,7 +48,7 @@ export const useSavedExperiences = () => {
             price,
             duration_hours,
             image_urls,
-            profiles (
+            profiles!fk_experiences_host_id (
               first_name,
               last_name
             )
