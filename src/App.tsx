@@ -71,6 +71,7 @@ const App = () => (
                   <Route path="/host/messages" element={<HostDashboard />} />
                   
                   <Route path="/booking-confirmation/:bookingId" element={<BookingConfirmation />} />
+                  <Route path="/booking-confirmation" element={<BookingConfirmation />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>

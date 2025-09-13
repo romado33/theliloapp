@@ -1,12 +1,14 @@
-import { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   CheckCircle,
   Calendar,
@@ -16,19 +18,73 @@ import {
   Mail,
   Phone,
   ArrowLeft,
-  Download
+  Download,
+  Loader2
 } from 'lucide-react';
 import type { BookingDetails } from '@/types';
 
 const BookingConfirmation = () => {
-  const { bookingId } = useParams();
+  const { bookingId: urlBookingId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
+  const [paymentVerified, setPaymentVerified] = useState(false);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
 
-  // Send confirmation email when booking loads
+  // Get booking ID from URL params or query params
+  const bookingId = urlBookingId || searchParams.get('booking_id');
+  const sessionId = searchParams.get('session_id');
+
+  // Verify payment if session_id is present (coming from Stripe)
+  useEffect(() => {
+    const verifyPayment = async () => {
+      if (!bookingId || !sessionId) return;
+      
+      try {
+        console.log('Verifying payment with session ID:', sessionId);
+        
+        const { data, error } = await supabase.functions.invoke('verify-payment', {
+          body: {
+            bookingId,
+            sessionId
+          }
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        if (data.success) {
+          setPaymentVerified(true);
+          console.log('Payment verified successfully');
+          
+          toast({
+            title: 'Payment Confirmed!',
+            description: 'Your booking has been confirmed and a confirmation email has been sent.',
+          });
+        } else {
+          throw new Error('Payment verification failed');
+        }
+      } catch (error: any) {
+        console.error('Payment verification error:', error);
+        setVerificationError(error.message || 'Failed to verify payment');
+        
+        toast({
+          title: 'Payment Verification Error',
+          description: 'There was an issue verifying your payment. Please contact support.',
+          variant: 'destructive',
+        });
+      }
+    };
+
+    verifyPayment();
+  }, [bookingId, sessionId, toast]);
+
+  // Send confirmation email when booking loads (for URL bookings)
   useEffect(() => {
     const sendConfirmationEmail = async () => {
-      if (bookingId) {
+      if (bookingId && !sessionId && !paymentVerified) {
         try {
           await supabase.functions.invoke('send-booking-email', {
             body: {
@@ -43,7 +99,7 @@ const BookingConfirmation = () => {
     };
 
     sendConfirmationEmail();
-  }, [bookingId]);
+  }, [bookingId, sessionId, paymentVerified]);
 
   useEffect(() => {
     if (!user) {
@@ -118,21 +174,40 @@ const BookingConfirmation = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <Card className="max-w-md w-full mx-4">
+          <CardContent className="flex flex-col items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+            <p className="text-lg font-semibold mb-2">
+              {sessionId ? 'Confirming Your Booking...' : 'Loading Booking Details...'}
+            </p>
+            <p className="text-muted-foreground text-center text-sm">
+              {sessionId 
+                ? 'Please wait while we verify your payment and confirm your experience booking.'
+                : 'Retrieving your booking information.'
+              }
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  if (error) {
+  if (error || verificationError) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="max-w-md w-full mx-4">
-          <CardContent className="text-center py-8">
-            <p className="text-muted-foreground mb-4">Error loading booking</p>
-            <Button onClick={() => navigate('/')} variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Home
-            </Button>
+          <CardContent className="py-8">
+            <Alert variant="destructive" className="mb-6">
+              <AlertDescription>
+                {verificationError || 'Error loading booking details'}
+              </AlertDescription>
+            </Alert>
+            <div className="text-center">
+              <Button onClick={() => navigate('/')} variant="outline">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Home
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -168,11 +243,21 @@ const BookingConfirmation = () => {
             <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Booking Confirmed!
+            {paymentVerified || sessionId ? 'Payment Confirmed!' : 'Booking Confirmed!'}
           </h1>
           <p className="text-muted-foreground">
-            Your experience has been successfully booked
+            {paymentVerified || sessionId 
+              ? 'Your payment has been processed and your experience is confirmed'
+              : 'Your experience has been successfully booked'
+            }
           </p>
+          {sessionId && (
+            <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+              <p className="text-sm text-green-700">
+                ✓ Payment processed successfully • Confirmation email sent
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Booking Details Card */}

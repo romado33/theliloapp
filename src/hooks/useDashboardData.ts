@@ -90,7 +90,7 @@ export const useDashboardData = () => {
             location,
             image_urls,
             host_id,
-            profiles (
+            profiles!experiences_host_id_fkey (
               first_name,
               last_name
             )
@@ -147,7 +147,7 @@ export const useDashboardData = () => {
             price,
             image_urls,
             host_id,
-            profiles (
+            profiles!experiences_host_id_fkey (
               first_name,
               last_name
             )
