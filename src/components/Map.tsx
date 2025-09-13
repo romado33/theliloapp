@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MapProps {
   onLocationSelect?: (location: { lat: number; lng: number; address: string }) => void;
@@ -39,16 +40,22 @@ const Map: React.FC<MapProps> = ({
   const { toast } = useToast();
 
   useEffect(() => {
-    // Get Mapbox token from environment or show input
+    // Get Mapbox token from Supabase secrets
     const getMapboxToken = async () => {
       try {
-        // In a real implementation, this would come from your Supabase secrets
-        // For now, we'll use a placeholder that users need to replace
-        const token = process.env.MAPBOX_PUBLIC_TOKEN || 'pk.your_mapbox_token_here';
-        setMapboxToken(token);
+        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        if (error) throw error;
+        
+        const token = data?.token;
+        if (token && token !== 'pk.your_mapbox_token_here') {
+          setMapboxToken(token);
+        } else {
+          setMapboxToken('pk.your_mapbox_token_here');
+        }
         setIsLoading(false);
       } catch (error) {
         console.error('Error getting Mapbox token:', error);
+        setMapboxToken('pk.your_mapbox_token_here');
         setIsLoading(false);
       }
     };
