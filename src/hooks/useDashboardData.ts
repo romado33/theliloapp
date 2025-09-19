@@ -78,46 +78,59 @@ export const useDashboardData = () => {
     try {
       setLoading(true);
 
-      // Fetch bookings with experience details
-      const { data: bookingsData, error: bookingsError } = await supabase
-        .from('bookings')
-        .select(`
-          *,
-          experiences (
-            id,
-            title,
-            description,
-            location,
-            image_urls,
-            host_id,
-            profiles!experiences_host_id_fkey (
-              first_name,
-              last_name
+        // Fetch bookings with experience details
+        const { data: bookingsData, error: bookingsError } = await supabase
+          .from('bookings')
+          .select(`
+            *,
+            experiences (
+              id,
+              title,
+              description,
+              location,
+              image_urls,
+              host_id
             )
-          )
-        `)
-        .eq('guest_id', user.id)
-        .order('booking_date', { ascending: false });
+          `)
+          .eq('guest_id', user.id)
+          .order('booking_date', { ascending: false });
 
-      if (bookingsError) {
-        console.error('Error fetching bookings:', bookingsError);
-      }
-
-      // Transform bookings data to flatten the nested structure
-      const transformedBookings: BookingWithDetails[] = (bookingsData || []).map(booking => ({
-        ...booking,
-        experience: {
-          title: booking.experiences?.title || 'Unknown Experience',
-          description: booking.experiences?.description || '',
-          location: booking.experiences?.location || 'Unknown Location',
-          image_urls: booking.experiences?.image_urls || [],
-          host_id: booking.experiences?.host_id || '',
-        },
-        host_profile: {
-          first_name: booking.experiences?.profiles?.first_name || 'Unknown',
-          last_name: booking.experiences?.profiles?.last_name || 'Host'
+        if (bookingsError) {
+          console.error('Error fetching bookings:', bookingsError);
         }
-      }));
+
+        // Get safe host profiles for bookings
+        const hostProfiles = new Map();
+        if (bookingsData) {
+          const hostIds = [...new Set(bookingsData.map(b => b.experiences?.host_id).filter(Boolean))];
+          for (const hostId of hostIds) {
+            const { data: hostProfile } = await supabase.rpc('get_safe_host_profile', { 
+              host_user_id: hostId 
+            });
+            if (hostProfile && hostProfile.length > 0) {
+              hostProfiles.set(hostId, hostProfile[0]);
+            }
+          }
+        }
+
+        // Transform bookings data to flatten the nested structure
+        const transformedBookings: BookingWithDetails[] = (bookingsData || []).map(booking => {
+          const hostProfile = hostProfiles.get(booking.experiences?.host_id);
+          return {
+            ...booking,
+            experience: {
+              title: booking.experiences?.title || 'Unknown Experience',
+              description: booking.experiences?.description || '',
+              location: booking.experiences?.location || 'Unknown Location',
+              image_urls: booking.experiences?.image_urls || [],
+              host_id: booking.experiences?.host_id || '',
+            },
+            host_profile: {
+              first_name: hostProfile?.first_name || 'Unknown',
+              last_name: hostProfile?.first_name ? '' : 'Host' // Only show last name if we have first name
+            }
+          };
+        });
 
       setBookings(transformedBookings);
 
@@ -146,17 +159,28 @@ export const useDashboardData = () => {
             location,
             price,
             image_urls,
-            host_id,
-            profiles!experiences_host_id_fkey (
-              first_name,
-              last_name
-            )
+            host_id
           `)
           .in('id', experienceIds);
+
+        // Get safe host profiles for saved experiences
+        const hostProfiles = new Map();
+        if (experiencesData) {
+          const hostIds = [...new Set(experiencesData.map(exp => exp.host_id).filter(Boolean))];
+          for (const hostId of hostIds) {
+            const { data: hostProfile } = await supabase.rpc('get_safe_host_profile', { 
+              host_user_id: hostId 
+            });
+            if (hostProfile && hostProfile.length > 0) {
+              hostProfiles.set(hostId, hostProfile[0]);
+            }
+          }
+        }
 
         // Transform saved experiences data
         transformedSaved = savedData.map(saved => {
           const experience = experiencesData?.find(exp => exp.id === saved.experience_id);
+          const hostProfile = hostProfiles.get(experience?.host_id);
           return {
             ...saved,
             experience: {
@@ -169,8 +193,8 @@ export const useDashboardData = () => {
               host_id: experience?.host_id || '',
             },
             host_profile: {
-              first_name: experience?.profiles?.first_name || 'Unknown',
-              last_name: experience?.profiles?.last_name || 'Host'
+              first_name: hostProfile?.first_name || 'Unknown',
+              last_name: hostProfile?.first_name ? '' : 'Host'
             }
           };
         });

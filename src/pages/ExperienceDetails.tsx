@@ -204,11 +204,6 @@ const ExperienceDetails = () => {
             *,
             categories (
               name
-            ),
-            profiles (
-              first_name,
-              last_name,
-              avatar_url
             )
           `)
           .eq('id', id)
@@ -218,6 +213,19 @@ const ExperienceDetails = () => {
         if (error) throw error;
         
         if (data) {
+          // Get safe host profile
+          if (data.host_id) {
+            const { data: hostProfile } = await supabase.rpc('get_safe_host_profile', { 
+              host_user_id: data.host_id 
+            });
+            if (hostProfile && hostProfile.length > 0) {
+              data.profiles = {
+                first_name: hostProfile[0].first_name,
+                last_name: '', // Only show first name for privacy
+                avatar_url: null
+              };
+            }
+          }
           setExperience(data);
         } else {
           // Fallback to mock data if experience not found in database

@@ -48,10 +48,7 @@ export const useSavedExperiences = () => {
             price,
             duration_hours,
             image_urls,
-            profiles!fk_experiences_host_id (
-              first_name,
-              last_name
-            )
+            host_id
           )
         `)
         .eq('user_id', user.id)
@@ -59,27 +56,44 @@ export const useSavedExperiences = () => {
 
       if (error) throw error;
 
+      // Get safe host profiles
+      const hostProfiles = new Map();
+      if (data) {
+        const hostIds = [...new Set(data.map(item => item.experiences.host_id).filter(Boolean))];
+        for (const hostId of hostIds) {
+          const { data: hostProfile } = await supabase.rpc('get_safe_host_profile', { 
+            host_user_id: hostId 
+          });
+          if (hostProfile && hostProfile.length > 0) {
+            hostProfiles.set(hostId, hostProfile[0]);
+          }
+        }
+      }
+
       // Transform the data to include host name and mock ratings
-      const transformedData: SavedExperience[] = data.map((item: any) => ({
-        id: item.id,
-        experience_id: item.experience_id,
-        user_id: item.user_id,
-        created_at: item.created_at,
-        experience: item.experiences ? {
-          id: item.experiences.id,
-          title: item.experiences.title,
-          description: item.experiences.description,
-          location: item.experiences.location,
-          price: item.experiences.price,
-          duration_hours: item.experiences.duration_hours,
-          image_urls: item.experiences.image_urls || [],
-          host_name: item.experiences.profiles 
-            ? `${item.experiences.profiles.first_name} ${item.experiences.profiles.last_name}`.trim()
-            : 'Unknown Host',
-          average_rating: 4.8, // Mock rating - would come from reviews aggregation
-          review_count: Math.floor(Math.random() * 50) + 10, // Mock count
-        } : undefined,
-      }));
+      const transformedData: SavedExperience[] = data.map((item: any) => {
+        const hostProfile = hostProfiles.get(item.experiences.host_id);
+        return {
+          id: item.id,
+          experience_id: item.experience_id,
+          user_id: item.user_id,
+          created_at: item.created_at,
+          experience: item.experiences ? {
+            id: item.experiences.id,
+            title: item.experiences.title,
+            description: item.experiences.description,
+            location: item.experiences.location,
+            price: item.experiences.price,
+            duration_hours: item.experiences.duration_hours,
+            image_urls: item.experiences.image_urls || [],
+            host_name: hostProfile 
+              ? `${hostProfile.first_name}`.trim()
+              : 'Unknown Host',
+            average_rating: 4.8, // Mock rating - would come from reviews aggregation
+            review_count: Math.floor(Math.random() * 50) + 10, // Mock count
+          } : undefined,
+        };
+      });
 
       setSavedExperiences(transformedData);
     } catch (error) {
