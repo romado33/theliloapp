@@ -268,16 +268,8 @@ const Index = () => {
             )}
           </div>
 
-          {/* Developer Data Seeder - Only show when signed in */}
-          {import.meta.env.DEV && user && (
-            <div className="animate-fade-in">
-              <div className="flex items-center gap-2 mb-6">
-                <Database className="w-5 h-5" />
-                <h2 className="text-2xl font-bold">Developer Tools</h2>
-              </div>
-              <DevDataSeeder />
-            </div>
-          )}
+          {/* Developer Data Seeder - Temporarily disabled due to module cache issues */}
+          {/* Will be re-enabled after cache clears */}
 
           {/* CTA Section */}
           <div className="bg-gradient-brand rounded-2xl p-8 md:p-12 text-center text-white animate-fade-in shadow-strong">
