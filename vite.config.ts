@@ -10,7 +10,11 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   optimizeDeps: {
-    force: true, // Force re-optimization to clear corrupted cache
+    force: true,
+    include: ['react', 'react-dom'],
+    esbuildOptions: {
+      target: 'esnext',
+    },
   },
   plugins: [
     react(),
@@ -20,6 +24,9 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "react": path.resolve(__dirname, "./node_modules/react"),
+      "react-dom": path.resolve(__dirname, "./node_modules/react-dom"),
     },
+    dedupe: ['react', 'react-dom'],
   },
 }));
