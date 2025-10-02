@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
@@ -14,9 +14,8 @@ import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
 import farmersMarket from "@/assets/farmers-market.jpg";
 import cookingClass from "@/assets/cooking-class.jpg";
+import DevDataSeeder from "@/components/DevDataSeeder";
 import type { SearchResult } from "@/types";
-
-const DevDataSeeder = lazy(() => import("@/components/DevDataSeeder"));
 
 // Map placeholder URLs to actual assets - simplified approach  
 const getImageFromUrl = (url: string | undefined): string => {
@@ -274,9 +273,7 @@ const Index = () => {
                 <Database className="w-5 h-5" />
                 <h2 className="text-2xl font-bold">Developer Tools</h2>
               </div>
-              <Suspense fallback={null}>
-                <DevDataSeeder />
-              </Suspense>
+              <DevDataSeeder />
             </div>
           )}
 
