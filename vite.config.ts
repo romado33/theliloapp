@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  optimizeDeps: {
+    force: true, // Force re-optimization to clear corrupted cache
+  },
   plugins: [
     react(),
     mode === 'development' &&
