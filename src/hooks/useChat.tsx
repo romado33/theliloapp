@@ -53,7 +53,7 @@ export const useChat = () => {
 
       if (error) throw error;
 
-      const formattedConversations: ChatConversation[] = (data || []).map((conv: any) => ({
+      const formattedConversations: ChatConversation[] = data.map((conv: any) => ({
         id: conv.id,
         experience_id: conv.experience_id,
         guest_id: conv.guest_id,
@@ -66,16 +66,13 @@ export const useChat = () => {
       }));
 
       setConversations(formattedConversations);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching conversations:', error);
-      // Don't show toast for "no rows" errors - this is expected when no conversations exist
-      if (error?.code !== 'PGRST116') {
-        toast({
-          title: 'Error',
-          description: 'Failed to load conversations',
-          variant: 'destructive',
-        });
-      }
+      toast({
+        title: 'Error',
+        description: 'Failed to load conversations',
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }

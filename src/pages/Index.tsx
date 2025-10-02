@@ -15,6 +15,7 @@ import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
 import farmersMarket from "@/assets/farmers-market.jpg";
 import cookingClass from "@/assets/cooking-class.jpg";
+import DevDataSeeder from "@/components/DevDataSeeder";
 import type { SearchResult } from "@/types";
 
 // Map placeholder URLs to actual assets - simplified approach  

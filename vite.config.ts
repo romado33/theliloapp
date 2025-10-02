@@ -11,19 +11,15 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     force: true, // Force re-optimization to clear corrupted cache
-    include: ['react', 'react-dom'],
-  },
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-      'react': path.resolve(__dirname, './node_modules/react'),
-      'react-dom': path.resolve(__dirname, './node_modules/react-dom'),
-    },
-    dedupe: ['react', 'react-dom'],
   },
   plugins: [
     react(),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
 }));
