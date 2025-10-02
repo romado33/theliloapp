@@ -16,9 +16,7 @@ import farmersMarket from "@/assets/farmers-market.jpg";
 import cookingClass from "@/assets/cooking-class.jpg";
 import type { SearchResult } from "@/types";
 
-const DevDataSeeder = import.meta.env.DEV
-  ? lazy(() => import("@/components/DevDataSeeder"))
-  : (): null => null;
+const DevDataSeeder = lazy(() => import("@/components/DevDataSeeder"));
 
 // Map placeholder URLs to actual assets - simplified approach  
 const getImageFromUrl = (url: string | undefined): string => {
