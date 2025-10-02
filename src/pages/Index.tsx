@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -93,6 +93,13 @@ const Index = () => {
     setSearchResults(results);
   };
 
+  // Handle redirects in useEffect to avoid early hook calls
+  useEffect(() => {
+    if (user && profile && currentRole === 'host') {
+      navigate('/host');
+    }
+  }, [user, profile, currentRole, navigate]);
+
   // Show welcome screen for logged-in users who haven't onboarded
   if (user && profile && !profile.onboarded) {
     return <WelcomeScreen onComplete={() => navigate(0)} />;
@@ -105,12 +112,6 @@ const Index = () => {
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-lilo-green"></div>
       </div>
     );
-  }
-
-  // Host view - redirect to host dashboard
-  if (user && profile && currentRole === 'host') {
-    navigate('/host');
-    return null;
   }
 
   // Guest view - regular home page
