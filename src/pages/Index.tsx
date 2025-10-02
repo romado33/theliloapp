@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
@@ -81,6 +82,7 @@ const mockExperiences = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showHostForm, setShowHostForm] = useState(false);
@@ -93,7 +95,7 @@ const Index = () => {
 
   // Show welcome screen for logged-in users who haven't onboarded
   if (user && profile && !profile.onboarded) {
-    return <WelcomeScreen onComplete={() => window.location.reload()} />;
+    return <WelcomeScreen onComplete={() => navigate(0)} />;
   }
 
   // Show loading screen while auth is loading
@@ -107,8 +109,7 @@ const Index = () => {
 
   // Host view - redirect to host dashboard
   if (user && profile && currentRole === 'host') {
-    // Redirect to dedicated host dashboard
-    window.location.href = '/host-dashboard';
+    navigate('/host');
     return null;
   }
 
