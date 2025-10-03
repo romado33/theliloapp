@@ -4,9 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-// Force cache clear
 export default defineConfig(({ mode }) => ({
-  cacheDir: '.vite-cache',
   server: {
     host: "::",
     port: 8080,
