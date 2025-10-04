@@ -58,6 +58,10 @@ const Auth = () => {
     });
   };
 
+  // Debug: Log environment mode
+  console.log('Auth page - DEV mode:', import.meta.env.DEV);
+  console.log('Auth page - MODE:', import.meta.env.MODE);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
