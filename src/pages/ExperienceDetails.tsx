@@ -260,13 +260,32 @@ const ExperienceDetails = () => {
     fetchExperience();
   }, [id, toast]);
 
-  // Mock availability data - this would come from a real availability table
-  const mockAvailability = [
-    { date: "2025-01-15", time: "10:00 AM", spots: 6 },
-    { date: "2025-01-15", time: "2:00 PM", spots: 3 },
-    { date: "2025-01-16", time: "10:00 AM", spots: 8 },
-    { date: "2025-01-17", time: "10:00 AM", spots: 5 },
-  ];
+  // Fetch real availability data from database
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchAvailability = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('availability')
+          .select('*')
+          .eq('experience_id', id)
+          .eq('is_available', true)
+          .gte('start_time', new Date().toISOString())
+          .order('start_time', { ascending: true });
+
+        if (error) throw error;
+        
+        if (data) {
+          setAvailability(data);
+        }
+      } catch (error) {
+        console.error('Error fetching availability:', error);
+      }
+    };
+
+    fetchAvailability();
+  }, [id]);
 
   // Mock reviews - this would come from a real reviews table
   const mockReviews = [
