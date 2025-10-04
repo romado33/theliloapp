@@ -44,16 +44,31 @@ export const useChat = () => {
         .from('chat_conversations')
         .select(`
           *,
-          guest:profiles!chat_conversations_guest_id_fkey(first_name, last_name),
-          host:profiles!chat_conversations_host_id_fkey(first_name, last_name),
-          experience:experiences(title)
+          experiences(title)
         `)
         .or(`guest_id.eq.${user.id},host_id.eq.${user.id}`)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
+      
+      // Fetch guest and host profiles separately
+      const conversationsWithProfiles = await Promise.all(
+        (data || []).map(async (conv: any) => {
+          const [guestProfile, hostProfile] = await Promise.all([
+            supabase.from('profiles').select('first_name, last_name').eq('id', conv.guest_id).single(),
+            supabase.from('profiles').select('first_name, last_name').eq('id', conv.host_id).single()
+          ]);
+          
+          return {
+            ...conv,
+            guest: guestProfile.data,
+            host: hostProfile.data,
+            experience: conv.experiences
+          };
+        })
+      );
 
-      const formattedConversations: ChatConversation[] = (data || []).map((conv: any) => ({
+      const formattedConversations: ChatConversation[] = conversationsWithProfiles.map((conv: any) => ({
         id: conv.id,
         experience_id: conv.experience_id,
         guest_id: conv.guest_id,
@@ -86,16 +101,29 @@ export const useChat = () => {
     try {
       const { data, error } = await supabase
         .from('chat_messages')
-        .select(`
-          *,
-          sender:profiles!chat_messages_sender_id_fkey(first_name, last_name)
-        `)
+        .select('*')
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
+      
+      // Fetch sender profiles separately
+      const messagesWithSenders = await Promise.all(
+        (data || []).map(async (msg: any) => {
+          const { data: senderProfile } = await supabase
+            .from('profiles')
+            .select('first_name, last_name')
+            .eq('id', msg.sender_id)
+            .single();
+          
+          return {
+            ...msg,
+            sender: senderProfile
+          };
+        })
+      );
 
-      const formattedMessages: ChatMessage[] = data.map((msg: any) => ({
+      const formattedMessages: ChatMessage[] = messagesWithSenders.map((msg: any) => ({
         id: msg.id,
         conversation_id: msg.conversation_id,
         sender_id: msg.sender_id,

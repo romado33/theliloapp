@@ -266,13 +266,19 @@ const ExperienceDetails = () => {
 
     const fetchAvailability = async () => {
       try {
+        // For demo purposes, show availability from 7 days ago to future
+        // This ensures mock data is visible even if dates are slightly off
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        
         const { data, error } = await supabase
           .from('availability')
           .select('*')
           .eq('experience_id', id)
           .eq('is_available', true)
-          .gte('start_time', new Date().toISOString())
-          .order('start_time', { ascending: true });
+          .gte('start_time', weekAgo.toISOString())
+          .order('start_time', { ascending: true })
+          .limit(20);
 
         if (error) throw error;
         
