@@ -10,7 +10,16 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react/jsx-runtime', '@radix-ui/react-tooltip'],
+    include: [
+      'react', 
+      'react-dom', 
+      'react/jsx-runtime',
+      '@radix-ui/react-tooltip',
+      '@radix-ui/react-toast',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-slot'
+    ],
     exclude: [],
   },
   build: {
