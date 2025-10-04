@@ -284,14 +284,31 @@ const ExperienceDetails = () => {
           .limit(20);
 
         if (error) {
-          console.error('Error fetching availability:', error);
+          console.error('❌ Error fetching availability:', error);
+          toast({
+            title: "Debug: Availability fetch error",
+            description: JSON.stringify(error),
+            variant: "destructive"
+          });
           throw error;
         }
         
-        console.log('Availability data received:', data?.length || 0, 'slots');
+        console.log('✅ Availability data received:', data?.length || 0, 'slots');
+        console.log('📅 Availability slots:', data);
         
-        if (data) {
+        if (data && data.length > 0) {
           setAvailability(data);
+          toast({
+            title: "Debug: Availability loaded",
+            description: `Found ${data.length} time slots`,
+          });
+        } else {
+          console.warn('⚠️ No availability data found');
+          toast({
+            title: "Debug: No availability",
+            description: "Query returned 0 slots",
+            variant: "destructive"
+          });
         }
       } catch (error) {
         console.error('Error fetching availability:', error);
