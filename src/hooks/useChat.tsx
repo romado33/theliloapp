@@ -37,60 +37,100 @@ export const useChat = () => {
 
   // Fetch conversations
   const fetchConversations = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user, skipping conversation fetch');
+      setLoading(false);
+      return;
+    }
+
+    console.log('Fetching conversations for user:', user.id);
 
     try {
-      const { data, error } = await supabase
+      // First get conversations without joins
+      const { data: conversations, error } = await supabase
         .from('chat_conversations')
-        .select(`
-          *,
-          experiences(title)
-        `)
+        .select('*')
         .or(`guest_id.eq.${user.id},host_id.eq.${user.id}`)
         .order('updated_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error in initial conversation query:', error);
+        throw error;
+      }
       
-      // Fetch guest and host profiles separately
-      const conversationsWithProfiles = await Promise.all(
-        (data || []).map(async (conv: any) => {
-          const [guestProfile, hostProfile] = await Promise.all([
-            supabase.from('profiles').select('first_name, last_name').eq('id', conv.guest_id).single(),
-            supabase.from('profiles').select('first_name, last_name').eq('id', conv.host_id).single()
-          ]);
-          
-          return {
-            ...conv,
-            guest: guestProfile.data,
-            host: hostProfile.data,
-            experience: conv.experiences
-          };
+      console.log('Conversations found:', conversations?.length || 0);
+      
+      // If no conversations, just return empty
+      if (!conversations || conversations.length === 0) {
+        setConversations([]);
+        setLoading(false);
+        return;
+      }
+      
+      // Fetch related data separately for each conversation
+      const conversationsWithData = await Promise.all(
+        conversations.map(async (conv: any) => {
+          try {
+            // Fetch profiles
+            const { data: guestProfile } = await supabase
+              .from('profiles')
+              .select('first_name, last_name')
+              .eq('id', conv.guest_id)
+              .maybeSingle();
+            
+            const { data: hostProfile } = await supabase
+              .from('profiles')
+              .select('first_name, last_name')
+              .eq('id', conv.host_id)
+              .maybeSingle();
+            
+            // Fetch experience if exists
+            let experienceTitle = undefined;
+            if (conv.experience_id) {
+              const { data: experience } = await supabase
+                .from('experiences')
+                .select('title')
+                .eq('id', conv.experience_id)
+                .maybeSingle();
+              experienceTitle = experience?.title;
+            }
+            
+            return {
+              id: conv.id,
+              experience_id: conv.experience_id,
+              guest_id: conv.guest_id,
+              host_id: conv.host_id,
+              created_at: conv.created_at,
+              updated_at: conv.updated_at,
+              guest_name: guestProfile 
+                ? `${guestProfile.first_name || ''} ${guestProfile.last_name || ''}`.trim() 
+                : 'Guest',
+              host_name: hostProfile 
+                ? `${hostProfile.first_name || ''} ${hostProfile.last_name || ''}`.trim() 
+                : 'Host',
+              experience_title: experienceTitle,
+            };
+          } catch (err) {
+            console.error('Error fetching conversation data:', err);
+            return null;
+          }
         })
       );
 
-      const formattedConversations: ChatConversation[] = conversationsWithProfiles.map((conv: any) => ({
-        id: conv.id,
-        experience_id: conv.experience_id,
-        guest_id: conv.guest_id,
-        host_id: conv.host_id,
-        created_at: conv.created_at,
-        updated_at: conv.updated_at,
-        guest_name: conv.guest ? `${conv.guest.first_name} ${conv.guest.last_name}`.trim() : 'Guest',
-        host_name: conv.host ? `${conv.host.first_name} ${conv.host.last_name}`.trim() : 'Host',
-        experience_title: conv.experience?.title,
-      }));
-
-      setConversations(formattedConversations);
+      // Filter out any failed fetches
+      const validConversations = conversationsWithData.filter(c => c !== null) as ChatConversation[];
+      setConversations(validConversations);
     } catch (error: any) {
       console.error('Error fetching conversations:', error);
-      // Don't show toast for "no rows" errors - this is expected when no conversations exist
-      if (error?.code !== 'PGRST116') {
+      // Don't show toast for "no rows" or relationship errors
+      if (error?.code !== 'PGRST116' && error?.code !== 'PGRST200') {
         toast({
           title: 'Error',
           description: 'Failed to load conversations',
           variant: 'destructive',
         });
       }
+      setConversations([]);
     } finally {
       setLoading(false);
     }
@@ -99,7 +139,7 @@ export const useChat = () => {
   // Fetch messages for a conversation
   const fetchMessages = async (conversationId: string) => {
     try {
-      const { data, error } = await supabase
+      const { data: messages, error } = await supabase
         .from('chat_messages')
         .select('*')
         .eq('conversation_id', conversationId)
@@ -107,33 +147,41 @@ export const useChat = () => {
 
       if (error) throw error;
       
+      if (!messages || messages.length === 0) {
+        setMessages([]);
+        return;
+      }
+      
       // Fetch sender profiles separately
       const messagesWithSenders = await Promise.all(
-        (data || []).map(async (msg: any) => {
-          const { data: senderProfile } = await supabase
-            .from('profiles')
-            .select('first_name, last_name')
-            .eq('id', msg.sender_id)
-            .single();
-          
-          return {
-            ...msg,
-            sender: senderProfile
-          };
+        messages.map(async (msg: any) => {
+          try {
+            const { data: senderProfile } = await supabase
+              .from('profiles')
+              .select('first_name, last_name')
+              .eq('id', msg.sender_id)
+              .maybeSingle();
+            
+            return {
+              id: msg.id,
+              conversation_id: msg.conversation_id,
+              sender_id: msg.sender_id,
+              content: msg.content,
+              created_at: msg.created_at,
+              read_at: msg.read_at,
+              sender_name: senderProfile 
+                ? `${senderProfile.first_name || ''} ${senderProfile.last_name || ''}`.trim() 
+                : 'User',
+            };
+          } catch (err) {
+            console.error('Error fetching sender profile:', err);
+            return null;
+          }
         })
       );
 
-      const formattedMessages: ChatMessage[] = messagesWithSenders.map((msg: any) => ({
-        id: msg.id,
-        conversation_id: msg.conversation_id,
-        sender_id: msg.sender_id,
-        content: msg.content,
-        created_at: msg.created_at,
-        read_at: msg.read_at,
-        sender_name: msg.sender ? `${msg.sender.first_name} ${msg.sender.last_name}`.trim() : 'User',
-      }));
-
-      setMessages(formattedMessages);
+      const validMessages = messagesWithSenders.filter(m => m !== null) as ChatMessage[];
+      setMessages(validMessages);
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast({
@@ -141,6 +189,7 @@ export const useChat = () => {
         description: 'Failed to load messages',
         variant: 'destructive',
       });
+      setMessages([]);
     }
   };
 

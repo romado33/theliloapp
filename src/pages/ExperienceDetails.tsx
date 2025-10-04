@@ -271,6 +271,9 @@ const ExperienceDetails = () => {
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
         
+        console.log('Fetching availability for experience:', id);
+        console.log('Date filter (7 days ago):', weekAgo.toISOString());
+        
         const { data, error } = await supabase
           .from('availability')
           .select('*')
@@ -280,7 +283,12 @@ const ExperienceDetails = () => {
           .order('start_time', { ascending: true })
           .limit(20);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching availability:', error);
+          throw error;
+        }
+        
+        console.log('Availability data received:', data?.length || 0, 'slots');
         
         if (data) {
           setAvailability(data);
