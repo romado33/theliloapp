@@ -266,57 +266,62 @@ const ExperienceDetails = () => {
 
     const fetchAvailability = async () => {
       try {
-        // For demo purposes, show availability from 7 days ago to future
-        // This ensures mock data is visible even if dates are slightly off
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
+        console.log('🔍 Fetching availability for experience:', id);
         
-        console.log('Fetching availability for experience:', id);
-        console.log('Date filter (7 days ago):', weekAgo.toISOString());
-        
+        // Fetch ALL available slots for this experience (no date filter for debugging)
         const { data, error } = await supabase
           .from('availability')
           .select('*')
           .eq('experience_id', id)
           .eq('is_available', true)
-          .gte('start_time', weekAgo.toISOString())
-          .order('start_time', { ascending: true })
-          .limit(20);
+          .order('start_time', { ascending: true });
 
         if (error) {
-          console.error('❌ Error fetching availability:', error);
+          console.error('❌ Availability fetch error:', error);
           toast({
-            title: "Debug: Availability fetch error",
-            description: JSON.stringify(error),
+            title: "Error loading time slots",
+            description: error.message,
             variant: "destructive"
           });
-          throw error;
+          return;
         }
         
-        console.log('✅ Availability data received:', data?.length || 0, 'slots');
-        console.log('📅 Availability slots:', data);
+        console.log('✅ Availability data:', data?.length || 0, 'slots found');
+        console.log('📅 Slots:', data);
         
         if (data && data.length > 0) {
-          setAvailability(data);
-          toast({
-            title: "Debug: Availability loaded",
-            description: `Found ${data.length} time slots`,
-          });
+          // Filter to show only future dates
+          const now = new Date();
+          const futureSlots = data.filter(slot => new Date(slot.start_time) > now);
+          
+          console.log('📆 Future slots:', futureSlots.length);
+          setAvailability(futureSlots);
+          
+          if (futureSlots.length === 0) {
+            toast({
+              title: "No upcoming availability",
+              description: "All time slots are in the past",
+            });
+          }
         } else {
-          console.warn('⚠️ No availability data found');
+          console.warn('⚠️ No availability slots in database');
           toast({
-            title: "Debug: No availability",
-            description: "Query returned 0 slots",
-            variant: "destructive"
+            title: "No time slots available",
+            description: "This experience has no availability set up yet",
           });
         }
       } catch (error) {
-        console.error('Error fetching availability:', error);
+        console.error('❌ Availability fetch exception:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load availability",
+          variant: "destructive"
+        });
       }
     };
 
     fetchAvailability();
-  }, [id]);
+  }, [id, toast]);
 
   // Mock reviews - this would come from a real reviews table
   const mockReviews = [
