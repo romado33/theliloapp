@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { RoleSwitcher } from '@/components/RoleSwitcher';
@@ -5,12 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { Search, User, LogOut, Settings, Home, LogIn, MapPin } from 'lucide-react';
+import { Search, User, LogOut, Settings, Home, LogIn, MapPin, Code } from 'lucide-react';
 import { NotificationCenter } from '@/components/NotificationCenter';
+import { DevBypassModal } from '@/components/DevBypassModal';
 
 const Header = () => {
-  const { user, profile, signOut, currentRole, switchRole } = useAuth();
+  const { user, profile, signOut, currentRole, switchRole, devBypass } = useAuth();
   const navigate = useNavigate();
+  const [showDevModal, setShowDevModal] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -18,6 +21,11 @@ const Header = () => {
 
   const handleAuthClick = () => {
     navigate('/auth');
+  };
+
+  const handleDevBypass = async (role: 'user' | 'host') => {
+    await devBypass(role);
+    navigate('/');
   };
 
   return (
@@ -62,6 +70,18 @@ const Header = () => {
               Host an experience
             </Button>
             
+            {import.meta.env.DEV && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2 border-amber-500/30 text-amber-600 hover:bg-amber-500/10"
+                onClick={() => setShowDevModal(true)}
+              >
+                <Code className="w-4 h-4" />
+                <span className="hidden sm:inline">Dev</span>
+              </Button>
+            )}
+            
             {user ? (
               <div className="flex items-center gap-3">
                 <NotificationCenter />
@@ -93,6 +113,12 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      <DevBypassModal 
+        isOpen={showDevModal}
+        onClose={() => setShowDevModal(false)}
+        onSelectRole={handleDevBypass}
+      />
     </header>
   );
 };
