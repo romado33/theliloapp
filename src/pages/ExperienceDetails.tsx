@@ -362,15 +362,25 @@ const ExperienceDetails = () => {
 
     try {
       setBookingLoading(true);
+      
+      // Find the matching availability slot
+      const matchingSlot = availability.find(slot => 
+        slot.start_time === selectedTimeSlot
+      );
+      
+      if (!matchingSlot) {
+        throw new Error("Selected time slot is no longer available");
+      }
+
       const { data, error } = await supabase
         .from('bookings')
         .insert({
           experience_id: experience.id,
-          availability_id: '00000000-0000-0000-0000-000000000000', // Temporary placeholder
+          availability_id: matchingSlot.id,
           guest_id: user.id,
           guest_count: guestCount,
           total_price: experience.price * guestCount,
-          booking_date: selectedTimeSlot,
+          booking_date: matchingSlot.start_time,
           status: 'pending',
           guest_contact_info: { email: user.email }
         })
@@ -381,6 +391,7 @@ const ExperienceDetails = () => {
 
       navigate(`/booking-confirmation/${data.id}`);
     } catch (error: unknown) {
+      console.error('Booking error:', error);
       toast({
         title: "Booking failed",
         description: error instanceof Error ? error.message : "Unknown error",
