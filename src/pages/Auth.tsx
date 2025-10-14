@@ -9,9 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, ArrowLeft, Code } from 'lucide-react';
 
-const DevBypassModal = import.meta.env.DEV
-  ? lazy(() => import('@/components/DevBypassModal').then(module => ({ default: module.DevBypassModal })))
-  : (): null => null;
+const DevBypassModal = lazy(() => import('@/components/DevBypassModal').then(module => ({ default: module.DevBypassModal })));
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -261,34 +259,30 @@ const Auth = () => {
             </Tabs>
 
             {/* Dev Bypass Button */}
-            {import.meta.env.DEV && (
-              <div className="pt-4 border-t">
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowDevModal(true)}
-                  disabled={loading}
-                  className="w-full bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border-yellow-300"
-                >
-                  <Code className="w-4 h-4 mr-2" />
-                  Dev Bypass (Skip Login)
-                </Button>
-                <p className="text-xs text-muted-foreground mt-2 text-center">
-                  For development purposes only
-                </p>
-              </div>
-            )}
+            <div className="pt-4 border-t">
+              <Button
+                variant="secondary"
+                onClick={() => setShowDevModal(true)}
+                disabled={loading}
+                className="w-full bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border-yellow-300"
+              >
+                <Code className="w-4 h-4 mr-2" />
+                Dev Bypass (Skip Login)
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                For development purposes only
+              </p>
+            </div>
           </CardContent>
         </Card>
         
-        {import.meta.env.DEV && (
-          <Suspense fallback={null}>
-            <DevBypassModal
-              isOpen={showDevModal}
-              onClose={() => setShowDevModal(false)}
-              onSelectRole={handleDevBypass}
-            />
-          </Suspense>
-        )}
+        <Suspense fallback={null}>
+          <DevBypassModal
+            isOpen={showDevModal}
+            onClose={() => setShowDevModal(false)}
+            onSelectRole={handleDevBypass}
+          />
+        </Suspense>
       </div>
     </div>
   );
