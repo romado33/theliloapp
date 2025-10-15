@@ -212,7 +212,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const devBypass = import.meta.env.DEV
+  const devBypass = import.meta.env.MODE === 'development'
     ? async (role: 'user' | 'host') => {
         const isHost = role === 'host';
         const timestamp = Date.now();
