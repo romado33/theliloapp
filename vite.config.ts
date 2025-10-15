@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  cacheDir: '.vite',
+  cacheDir: '.vite-cache',
   optimizeDeps: {
     include: ['react', 'react-dom', 'react/jsx-runtime'],
     exclude: [],
