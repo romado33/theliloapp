@@ -9,6 +9,10 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
+    force: true,
+  },
   build: {
     commonjsOptions: {
       include: [/node_modules/],
