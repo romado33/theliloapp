@@ -365,7 +365,7 @@ const ExperienceDetails = () => {
       
       // Find the matching availability slot
       const matchingSlot = availability.find(slot => 
-        slot.start_time === selectedTimeSlot
+        slot.id === selectedTimeSlot
       );
       
       if (!matchingSlot) {
