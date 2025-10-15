@@ -9,21 +9,6 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  optimizeDeps: {
-    include: [
-      'react', 
-      'react-dom', 
-      'react/jsx-runtime',
-      '@radix-ui/react-tooltip',
-      '@radix-ui/react-toast',
-      '@radix-ui/react-dialog',
-      '@radix-ui/react-dropdown-menu',
-      '@radix-ui/react-slot'
-    ],
-    esbuildOptions: {
-      resolveExtensions: ['.tsx', '.ts', '.jsx', '.js'],
-    },
-  },
   build: {
     commonjsOptions: {
       include: [/node_modules/],
@@ -32,11 +17,8 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "react": path.resolve(__dirname, "./node_modules/react/index.js"),
-      "react-dom": path.resolve(__dirname, "./node_modules/react-dom/index.js"),
-      "react/jsx-runtime": path.resolve(__dirname, "./node_modules/react/jsx-runtime.js"),
     },
-    dedupe: ['react', 'react-dom', 'react/jsx-runtime'],
+    dedupe: ['react', 'react-dom'],
   },
   plugins: [
     react(),
