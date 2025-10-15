@@ -11,13 +11,8 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === 'development' && componentTagger(),
   ].filter(Boolean),
-  optimizeDeps: {
-    include: ['react', 'react-dom'],
-    force: true
-  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
