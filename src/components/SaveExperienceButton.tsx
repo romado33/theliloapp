@@ -1,4 +1,4 @@
-import React from 'react';
+import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import { Heart } from 'lucide-react';
 import { useSavedExperiences } from '@/hooks/useSavedExperiences';

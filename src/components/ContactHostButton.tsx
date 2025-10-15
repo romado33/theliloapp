@@ -1,4 +1,4 @@
-import React from 'react';
+import type { FC } from 'react';
 import { Button } from '@/components/ui/button';
 import { MessageCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -13,7 +13,7 @@ interface ContactHostButtonProps {
   className?: string;
 }
 
-const ContactHostButton: React.FC<ContactHostButtonProps> = ({
+const ContactHostButton: FC<ContactHostButtonProps> = ({
   hostId,
   experienceId,
   experienceTitle,

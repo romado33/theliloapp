@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 // @ts-ignore - No types available for this package
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';

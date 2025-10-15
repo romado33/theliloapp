@@ -1,4 +1,4 @@
-import React from 'react';
+import type { FC } from 'react';
 import { Star, MapPin, Clock, Users, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

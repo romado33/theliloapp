@@ -1,4 +1,4 @@
-import React from 'react';
+// React handled by Vite
 import { useChat } from '@/hooks/useChat';
 import { useSecureAuth } from '@/hooks/useSecureAuth';
 import ConversationList from '@/components/ConversationList';
