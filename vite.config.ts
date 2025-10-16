@@ -9,6 +9,7 @@ console.log('🔨 Build ID:', buildId);
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  base: '/v3/', // New base path to force CDN cache bust
   // Add build timestamp to force cache invalidation
   define: {
     'import.meta.env.VITE_BUILD_ID': JSON.stringify(buildId),
