@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { getImageFromUrl } from "@/lib/imageMap";
 
 interface Experience {
   id: string;
@@ -85,7 +86,20 @@ const HostDashboard = () => {
 
       setExperiences(experiencesData || []);
 
-      // Fetch real booking statistics
+      // Fetch all bookings for total count
+      const { data: allBookingsData, error: allBookingsError } = await supabase
+        .from('bookings')
+        .select(`
+          id,
+          experience:experiences!inner(host_id)
+        `)
+        .eq('experience.host_id', user?.id);
+
+      if (allBookingsError) {
+        console.warn('Error fetching all bookings:', allBookingsError);
+      }
+
+      // Fetch confirmed/completed bookings for revenue
       const { data: bookingsData, error: bookingsError } = await supabase
         .from('bookings')
         .select(`
@@ -103,7 +117,7 @@ const HostDashboard = () => {
       // Calculate real stats
       const totalExperiences = experiencesData?.length || 0;
       const activeExperiences = experiencesData?.filter(exp => exp.is_active).length || 0;
-      const totalBookings = bookingsData?.length || 0;
+      const totalBookings = allBookingsData?.length || 0;
       const monthlyEarnings = bookingsData?.reduce((sum, booking) => sum + Number(booking.total_price), 0) || 0;
       
       setStats({
@@ -347,7 +361,7 @@ const HostDashboard = () => {
                       <div className="aspect-video bg-muted relative">
                         {experience.image_urls?.[0] ? (
                           <img 
-                            src={experience.image_urls[0]} 
+                            src={getImageFromUrl(experience.image_urls[0])} 
                             alt={experience.title}
                             className="w-full h-full object-cover"
                           />
