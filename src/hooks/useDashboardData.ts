@@ -25,6 +25,7 @@ export interface BookingWithDetails {
     location: string;
     image_urls?: string[];
     host_id: string;
+    max_guests: number;
   };
   host_profile: {
     first_name: string;
@@ -89,7 +90,8 @@ export const useDashboardData = () => {
               description,
               location,
               image_urls,
-              host_id
+              host_id,
+              max_guests
             )
           `)
           .eq('guest_id', user.id)
@@ -124,6 +126,7 @@ export const useDashboardData = () => {
               location: booking.experiences?.location || 'Unknown Location',
               image_urls: booking.experiences?.image_urls || [],
               host_id: booking.experiences?.host_id || '',
+              max_guests: booking.experiences?.max_guests || 1,
             },
             host_profile: {
               first_name: hostProfile?.first_name || 'Unknown',

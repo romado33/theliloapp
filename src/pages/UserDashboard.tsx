@@ -22,8 +22,14 @@ import {
   Activity,
   User,
   BookOpen,
-  BarChart3
+  BarChart3,
+  X,
+  Edit
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { ModifyBookingDialog } from '@/components/ModifyBookingDialog';
 
 const UserDashboard = () => {
   const { user, profile } = useAuth();
@@ -46,10 +52,40 @@ const UserDashboard = () => {
   };
   
   const [activeTab, setActiveTab] = useState(getInitialTab());
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
+  const [modifyingBooking, setModifyingBooking] = useState<typeof bookings[0] | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     setActiveTab(getInitialTab());
   }, [location.pathname]);
+
+  const handleCancelBooking = async (bookingId: string) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: 'cancelled' })
+        .eq('id', bookingId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Booking cancelled',
+        description: 'Your booking has been successfully cancelled.',
+      });
+
+      refreshData();
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to cancel booking. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setCancelingId(null);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -262,17 +298,39 @@ const UserDashboard = () => {
                             </div>
                           )}
 
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between flex-wrap gap-2">
                             <div className="text-lg font-semibold">
                               Total: ${Number(booking.total_price).toFixed(2)}
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 flex-wrap">
                               <Button variant="outline" size="sm" asChild>
                                 <Link to="/messages">Contact Host</Link>
                               </Button>
                               <Button variant="outline" size="sm" asChild>
                                 <Link to={`/experience/${booking.experience_id}`}>View Details</Link>
                               </Button>
+                              {booking.status === 'pending' && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => setModifyingBooking(booking)}
+                                  className="gap-1"
+                                >
+                                  <Edit className="w-3 h-3" />
+                                  Modify
+                                </Button>
+                              )}
+                              {(booking.status === 'pending' || booking.status === 'confirmed') && (
+                                <Button 
+                                  variant="destructive" 
+                                  size="sm"
+                                  onClick={() => setCancelingId(booking.id)}
+                                  className="gap-1"
+                                >
+                                  <X className="w-3 h-3" />
+                                  Cancel
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -388,6 +446,33 @@ const UserDashboard = () => {
           </div>
         </TabsContent>
       </Tabs>
+
+      <ModifyBookingDialog
+        booking={modifyingBooking}
+        open={!!modifyingBooking}
+        onOpenChange={(open) => !open && setModifyingBooking(null)}
+        onSuccess={refreshData}
+      />
+
+      <AlertDialog open={!!cancelingId} onOpenChange={() => setCancelingId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Booking</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel this booking? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Booking</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => cancelingId && handleCancelBooking(cancelingId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Cancel Booking
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
