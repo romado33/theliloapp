@@ -26,6 +26,7 @@ import {
   Search,
   LogOut
 } from "lucide-react";
+import liloLogo from "@/assets/lilo-logo.png";
 
 const guestItems = [
   { title: "Home", url: "/", icon: Home },
@@ -100,7 +101,7 @@ export function AppSidebar() {
         <div className="p-4 border-b border-border/50 bg-amber-50">
           <div className="flex items-center space-x-3">
             <img 
-              src="/lovable-uploads/6dfadda4-fb06-470c-940d-2bccb95a8f8f.png" 
+              src={liloLogo} 
               alt="LiLo - Live Local" 
               className="h-10 w-auto"
             />
