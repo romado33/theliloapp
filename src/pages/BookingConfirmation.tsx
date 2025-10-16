@@ -398,7 +398,7 @@ const BookingConfirmation = () => {
             </Button>
           ) : (
             <Button 
-              onClick={() => navigate('/dashboard')} 
+              onClick={() => navigate('/bookings')} 
               className="flex-1"
             >
               View My Bookings

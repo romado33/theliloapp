@@ -220,7 +220,12 @@ const QuickBookModal = ({
                   return (
                     <button
                       key={slot.id}
-                      onClick={() => setSelectedSlot(slot.id)}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setSelectedSlot(slot.id);
+                      }}
                       className={`w-full p-3 rounded-lg border text-left transition-colors ${
                         selectedSlot === slot.id
                           ? 'border-primary bg-primary/10'
