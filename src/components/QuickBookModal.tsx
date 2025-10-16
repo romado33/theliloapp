@@ -77,14 +77,31 @@ const QuickBookModal = ({
     },
   });
 
+  // Fetch user profile and auto-fill contact info
+  const { data: userProfile } = useQuery({
+    queryKey: ['profile', user?.id],
+    enabled: !!user?.id && isOpen,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, email, phone')
+        .eq('id', user!.id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
   useEffect(() => {
-    if (isOpen && user?.email) {
-      setContactInfo(prev => ({
-        ...prev,
-        email: user.email || '',
-      }));
+    if (isOpen && userProfile) {
+      setContactInfo({
+        firstName: userProfile.first_name || '',
+        lastName: userProfile.last_name || '',
+        email: userProfile.email || user?.email || '',
+        phone: userProfile.phone || '',
+      });
     }
-  }, [isOpen, user]);
+  }, [isOpen, userProfile, user]);
 
   useEffect(() => {
     if (slotsError) {
