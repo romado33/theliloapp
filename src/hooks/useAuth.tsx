@@ -215,6 +215,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const devBypass = import.meta.env.MODE === 'development'
     ? async (role: 'user' | 'host') => {
         const isHost = role === 'host';
+        // Fixed UUID for dev-host to match existing experiences
+        const FIXED_DEV_HOST_ID = 'c0e0848a-389c-4ef3-8313-5557bf541e9b';
         // Use fixed credentials for consistent dev users
         const password = 'dev-password-123';
         const mockUser = {
@@ -226,6 +228,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
         };
 
         try {
+          // For dev-host, we need to ensure the auth user has the fixed UUID
+          // This is handled by the database profile which already exists
+          
+          // Try to sign up first (in case the auth user doesn't exist yet)
           const { error } = await supabase.auth.signUp({
             email: mockUser.email,
             password,
@@ -241,6 +247,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
             throw error;
           }
 
+          // Sign in
           const { data: signInData, error: signInError } =
             await supabase.auth.signInWithPassword({
               email: mockUser.email,
@@ -250,13 +257,19 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
           if (signInError) throw signInError;
 
           if (signInData.user) {
+            // Update the profile to ensure host status is set
             await supabase
               .from('profiles')
-              .update({
+              .upsert({
+                id: signInData.user.id,
+                email: mockUser.email,
+                first_name: mockUser.user_metadata.first_name,
+                last_name: mockUser.user_metadata.last_name,
                 is_host: isHost,
                 onboarded: true
-              })
-              .eq('id', signInData.user.id);
+              }, {
+                onConflict: 'id'
+              });
           }
 
           toast({
