@@ -215,12 +215,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const devBypass = import.meta.env.MODE === 'development'
     ? async (role: 'user' | 'host') => {
         const isHost = role === 'host';
-        const timestamp = Date.now();
-        const password =
-          import.meta.env.VITE_DEV_BYPASS_PASSWORD || crypto.randomUUID();
+        // Use fixed credentials for consistent dev users
+        const password = 'dev-password-123';
         const mockUser = {
-          id: `dev-${role}-${timestamp}`,
-          email: `dev-${role}-${timestamp}@livelocal.app`,
+          email: `dev-${role}@lilo.local`,
           user_metadata: {
             first_name: 'Dev',
             last_name: isHost ? 'Host' : 'User'
