@@ -30,6 +30,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ModifyBookingDialog } from '@/components/ModifyBookingDialog';
+import { getImageFromUrl } from '@/lib/imageMap';
 
 const UserDashboard = () => {
   const { user, profile } = useAuth();
@@ -251,7 +252,7 @@ const UserDashboard = () => {
                       <div className="flex flex-col md:flex-row">
                         <div className="w-full md:w-48 h-48 md:h-auto bg-muted">
                           <img 
-                            src={booking.experience.image_urls?.[0] || '/placeholder.svg'} 
+                            src={getImageFromUrl(booking.experience.image_urls?.[0] || '/placeholder.svg')} 
                             alt={booking.experience.title}
                             className="w-full h-full object-cover"
                           />
@@ -375,7 +376,7 @@ const UserDashboard = () => {
                   <Card key={saved.id} className="overflow-hidden group hover:shadow-lg transition-shadow">
                     <div className="aspect-video bg-muted">
                       <img 
-                        src={saved.experience.image_urls?.[0] || '/placeholder.svg'}
+                        src={getImageFromUrl(saved.experience.image_urls?.[0] || '/placeholder.svg')}
                         alt={saved.experience.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />

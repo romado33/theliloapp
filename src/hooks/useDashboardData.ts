@@ -13,6 +13,7 @@ export interface DashboardStats {
 export interface BookingWithDetails {
   id: string;
   experience_id: string;
+  availability_id: string;
   booking_date: string;
   guest_count: number;
   total_price: number;
