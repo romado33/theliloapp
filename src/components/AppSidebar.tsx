@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Sidebar,
@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
 import { 
   Home, 
   Heart, 
@@ -22,7 +23,8 @@ import {
   HelpCircle,
   Plus,
   BarChart3,
-  Search
+  Search,
+  LogOut
 } from "lucide-react";
 
 const guestItems = [
@@ -48,9 +50,15 @@ const commonItems = [
 ];
 
 export function AppSidebar() {
-  const { user, profile, currentRole } = useAuth();
+  const { user, profile, currentRole, signOut } = useAuth();
   const { open } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
   
   const isActive = (path: string) => {
     if (path === "/") {
@@ -137,23 +145,46 @@ export function AppSidebar() {
         )}
 
         {/* User Info (at bottom when expanded) */}
-        {user && profile && open && (
+        {user && profile && (
           <SidebarGroup className="mt-auto">
             <SidebarGroupContent>
               <div className="p-3 border-t border-border/30 bg-amber-50">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-brand rounded-full flex items-center justify-center text-white text-sm font-medium shadow-medium">
-                    {profile.first_name?.[0]?.toUpperCase() || 'U'}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate text-lilo-navy">
-                      {profile.first_name} {profile.last_name}
-                    </p>
-                    <p className="text-xs text-lilo-navy/60 truncate">
-                      {currentRole === 'host' ? 'Host Account' : 'Guest Account'}
-                    </p>
-                  </div>
-                </div>
+                {open ? (
+                  <>
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-10 h-10 bg-gradient-brand rounded-full flex items-center justify-center text-white text-sm font-medium shadow-medium">
+                        {profile.first_name?.[0]?.toUpperCase() || 'U'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate text-lilo-navy">
+                          {profile.first_name} {profile.last_name}
+                        </p>
+                        <p className="text-xs text-lilo-navy/60 truncate">
+                          {currentRole === 'host' ? 'Host Account' : 'Guest Account'}
+                        </p>
+                      </div>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full gap-2 border-lilo-navy/30 text-lilo-navy hover:bg-lilo-navy/10"
+                      onClick={handleSignOut}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign out
+                    </Button>
+                  </>
+                ) : (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full p-2 hover:bg-lilo-navy/10"
+                    onClick={handleSignOut}
+                    title="Sign out"
+                  >
+                    <LogOut className="w-4 h-4 text-lilo-navy" />
+                  </Button>
+                )}
               </div>
             </SidebarGroupContent>
           </SidebarGroup>
