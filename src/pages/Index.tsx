@@ -99,8 +99,8 @@ const Index = () => {
     }
   }, [user, profile, currentRole, navigate]);
 
-  // Show welcome screen for logged-in users who haven't onboarded
-  if (user && profile && !profile.onboarded) {
+  // Show welcome screen for logged-in non-host users who haven't onboarded
+  if (user && profile && !profile.onboarded && !profile.is_host) {
     return <WelcomeScreen onComplete={() => navigate(0)} />;
   }
 
