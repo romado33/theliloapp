@@ -2,10 +2,12 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import { FORCE_REBUILD_TOKEN, reactVersion } from './forceRebuild'
 
 // Diagnostic: Check for duplicate React instances
 import { version } from 'react'
-console.log('React version:', version)
+console.log('Force rebuild:', FORCE_REBUILD_TOKEN)
+console.log('React version:', version, reactVersion)
 console.log('React instance:', React)
 
 // Register service worker for PWA
