@@ -57,7 +57,7 @@ export const BookingManagement = () => {
         .select(`
           *,
           experience:experiences(title, location, duration_hours),
-          profiles(first_name, last_name, avatar_url)
+          profiles!bookings_guest_id_fkey(first_name, last_name, avatar_url)
         `)
         .eq('experiences.host_id', user?.id)
         .order('booking_date', { ascending: false });
