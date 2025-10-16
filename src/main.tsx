@@ -1,6 +1,12 @@
+import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+
+// Diagnostic: Check for duplicate React instances
+import { version } from 'react'
+console.log('React version:', version)
+console.log('React instance:', React)
 
 // Register service worker for PWA
 if ('serviceWorker' in navigator) {
@@ -20,4 +26,11 @@ if ('Notification' in window && Notification.permission === 'default') {
   Notification.requestPermission();
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+const rootEl = document.getElementById("root");
+if (!rootEl) throw new Error('#root element not found');
+
+createRoot(rootEl).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);

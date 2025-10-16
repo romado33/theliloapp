@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, type ReactNode } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -28,7 +28,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -277,7 +277,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Dev bypass is only available in development');
       };
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     session,
     loading,
@@ -290,7 +290,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signOut,
     devBypass,
     switchRole
-  };
+  }), [user, session, loading, profile, currentRole]);
 
   return (
     <AuthContext.Provider value={value}>
