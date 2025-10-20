@@ -8,6 +8,8 @@ import { Calendar, Clock, Users, MapPin, Mail, Phone, MessageSquare } from 'luci
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useChat } from '@/hooks/useChat';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 
 interface Booking {
@@ -39,6 +41,8 @@ interface Booking {
 export const BookingManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { createConversation } = useChat();
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
@@ -119,6 +123,31 @@ export const BookingManagement = () => {
         title: "Error",
         description: "Failed to update booking status",
         variant: "destructive"
+      });
+    }
+  };
+
+  const handleMessageGuest = async (booking: Booking) => {
+    try {
+      const conversationId = await createConversation(
+        user!.id, // host_id
+        booking.guest_id, // guest_id
+        booking.experience_id
+      );
+      
+      if (conversationId) {
+        navigate('/messages');
+        toast({
+          title: 'Conversation opened',
+          description: `You can now message ${booking.profiles?.first_name}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error opening conversation:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to open conversation',
+        variant: 'destructive',
       });
     }
   };
@@ -279,6 +308,7 @@ export const BookingManagement = () => {
                       variant="outline"
                       size="sm"
                       className="ml-auto"
+                      onClick={() => handleMessageGuest(booking)}
                     >
                       <MessageSquare className="w-4 h-4 mr-1" />
                       Message Guest
@@ -299,6 +329,7 @@ export const BookingManagement = () => {
                       variant="outline"
                       size="sm"
                       className="ml-auto"
+                      onClick={() => handleMessageGuest(booking)}
                     >
                       <MessageSquare className="w-4 h-4 mr-1" />
                       Message Guest
