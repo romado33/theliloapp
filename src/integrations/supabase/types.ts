@@ -827,6 +827,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -896,6 +917,13 @@ export type Database = {
       halfvec_typmod_in: {
         Args: { "": unknown[] }
         Returns: number
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       hnsw_bit_support: {
         Args: { "": unknown }
@@ -972,6 +1000,7 @@ export type Database = {
     }
     Enums: {
       admin_role: "super_admin" | "platform_admin" | "moderator"
+      app_role: "super_admin" | "platform_admin" | "moderator" | "user"
       experience_status:
         | "submitted"
         | "under_review"
@@ -1106,6 +1135,7 @@ export const Constants = {
   public: {
     Enums: {
       admin_role: ["super_admin", "platform_admin", "moderator"],
+      app_role: ["super_admin", "platform_admin", "moderator", "user"],
       experience_status: [
         "submitted",
         "under_review",

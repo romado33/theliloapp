@@ -52,6 +52,22 @@ export const BookingManagement = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
+      
+      // First, get the host's experience IDs
+      const { data: experiences } = await supabase
+        .from('experiences')
+        .select('id')
+        .eq('host_id', user?.id);
+      
+      const experienceIds = experiences?.map(exp => exp.id) || [];
+      
+      if (experienceIds.length === 0) {
+        setBookings([]);
+        setLoading(false);
+        return;
+      }
+      
+      // Then fetch bookings for those experiences
       const { data, error } = await supabase
         .from('bookings')
         .select(`
@@ -59,7 +75,7 @@ export const BookingManagement = () => {
           experience:experiences(title, location, duration_hours),
           profiles!bookings_guest_id_fkey(first_name, last_name, avatar_url)
         `)
-        .eq('experiences.host_id', user?.id)
+        .in('experience_id', experienceIds)
         .order('booking_date', { ascending: false });
 
       if (error) throw error;
@@ -109,11 +125,11 @@ export const BookingManagement = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800 border-green-200';
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
-      case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'confirmed': return 'bg-primary/10 text-primary border-primary/20';
+      case 'pending': return 'bg-accent/10 text-accent-foreground border-accent/20';
+      case 'cancelled': return 'bg-destructive/10 text-destructive border-destructive/20';
+      case 'completed': return 'bg-secondary/10 text-secondary-foreground border-secondary/20';
+      default: return 'bg-muted text-muted-foreground border-border';
     }
   };
 

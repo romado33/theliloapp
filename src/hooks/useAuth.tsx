@@ -215,7 +215,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   const devBypass = import.meta.env.MODE === 'development'
     ? async (role: 'user' | 'host') => {
         // Fixed credentials for consistent dev users (created via migration)
-        const password = 'dev-password-123';
+        const password = 'dev123456';
         const email = `dev-${role}@lilo.local`;
 
         try {

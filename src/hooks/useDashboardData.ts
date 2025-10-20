@@ -80,8 +80,15 @@ export const useDashboardData = () => {
     try {
       setLoading(true);
 
+      // Fetch all data in parallel for better performance
+      const [
+        bookingsResult,
+        savedResult,
+        unreadCountResult,
+        activityResult
+      ] = await Promise.all([
         // Fetch bookings with experience details
-        const { data: bookingsData, error: bookingsError } = await supabase
+        supabase
           .from('bookings')
           .select(`
             *,
@@ -96,65 +103,48 @@ export const useDashboardData = () => {
             )
           `)
           .eq('guest_id', user.id)
-          .order('booking_date', { ascending: false });
+          .order('booking_date', { ascending: false }),
+        
+        // Fetch saved experiences
+        supabase
+          .from('saved_experiences')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }),
+        
+        // Fetch unread messages count
+        supabase
+          .from('messages')
+          .select('*', { count: 'exact', head: true })
+          .eq('recipient_id', user.id)
+          .eq('is_read', false),
+        
+        // Fetch recent activity
+        supabase
+          .from('activity_log')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10)
+      ]);
 
-        if (bookingsError) {
-          console.error('Error fetching bookings:', bookingsError);
-        }
-
-        // Get safe host profiles for bookings
-        const hostProfiles = new Map();
-        if (bookingsData) {
-          const hostIds = [...new Set(bookingsData.map(b => b.experiences?.host_id).filter(Boolean))];
-          for (const hostId of hostIds) {
-            const { data: hostProfile } = await supabase.rpc('get_safe_host_profile', { 
-              host_user_id: hostId 
-            });
-            if (hostProfile && hostProfile.length > 0) {
-              hostProfiles.set(hostId, hostProfile[0]);
-            }
-          }
-        }
-
-        // Transform bookings data to flatten the nested structure
-        const transformedBookings: BookingWithDetails[] = (bookingsData || []).map(booking => {
-          const hostProfile = hostProfiles.get(booking.experiences?.host_id);
-          return {
-            ...booking,
-            experience: {
-              title: booking.experiences?.title || 'Unknown Experience',
-              description: booking.experiences?.description || '',
-              location: booking.experiences?.location || 'Unknown Location',
-              image_urls: booking.experiences?.image_urls || [],
-              host_id: booking.experiences?.host_id || '',
-              max_guests: booking.experiences?.max_guests || 1,
-            },
-            host_profile: {
-              first_name: hostProfile?.first_name || 'Unknown',
-              last_name: hostProfile?.first_name ? '' : 'Host' // Only show last name if we have first name
-            }
-          };
-        });
-
-      setBookings(transformedBookings);
-
-      // Fetch saved experiences with details - do separate queries to avoid complex joins
-      const { data: savedData, error: savedError } = await supabase
-        .from('saved_experiences')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (savedError) {
-        console.error('Error fetching saved experiences:', savedError);
+      if (bookingsResult.error) {
+        console.error('Error fetching bookings:', bookingsResult.error);
       }
 
+      // Get unique host IDs from bookings
+      const bookingHostIds = [...new Set(
+        bookingsResult.data?.map(b => b.experiences?.host_id).filter(Boolean) || []
+      )];
+
       // Fetch experience details for saved experiences
-      let transformedSaved: SavedExperienceWithDetails[] = [];
-      if (savedData && savedData.length > 0) {
-        const experienceIds = savedData.map(s => s.experience_id);
+      let experiencesData = null;
+      let savedHostIds: string[] = [];
+      
+      if (savedResult.data && savedResult.data.length > 0) {
+        const experienceIds = savedResult.data.map(s => s.experience_id);
         
-        const { data: experiencesData } = await supabase
+        const experiencesResult = await supabase
           .from('experiences')
           .select(`
             id,
@@ -166,62 +156,72 @@ export const useDashboardData = () => {
             host_id
           `)
           .in('id', experienceIds);
-
-        // Get safe host profiles for saved experiences
-        const hostProfiles = new Map();
-        if (experiencesData) {
-          const hostIds = [...new Set(experiencesData.map(exp => exp.host_id).filter(Boolean))];
-          for (const hostId of hostIds) {
-            const { data: hostProfile } = await supabase.rpc('get_safe_host_profile', { 
-              host_user_id: hostId 
-            });
-            if (hostProfile && hostProfile.length > 0) {
-              hostProfiles.set(hostId, hostProfile[0]);
-            }
-          }
-        }
-
-        // Transform saved experiences data
-        transformedSaved = savedData.map(saved => {
-          const experience = experiencesData?.find(exp => exp.id === saved.experience_id);
-          const hostProfile = hostProfiles.get(experience?.host_id);
-          return {
-            ...saved,
-            experience: {
-              id: experience?.id || '',
-              title: experience?.title || 'Unknown Experience',
-              description: experience?.description || '',
-              location: experience?.location || 'Unknown Location',
-              price: experience?.price || 0,
-              image_urls: experience?.image_urls || [],
-              host_id: experience?.host_id || '',
-            },
-            host_profile: {
-              first_name: hostProfile?.first_name || 'Unknown',
-              last_name: hostProfile?.first_name ? '' : 'Host'
-            }
-          };
-        });
+        
+        experiencesData = experiencesResult.data;
+        savedHostIds = [...new Set(experiencesData?.map(exp => exp.host_id).filter(Boolean) || [])];
       }
 
+      // Fetch all unique host profiles in parallel
+      const allHostIds = [...new Set([...bookingHostIds, ...savedHostIds])];
+      const hostProfilesPromises = allHostIds.map(hostId =>
+        supabase.rpc('get_safe_host_profile', { host_user_id: hostId })
+      );
+      
+      const hostProfilesResults = await Promise.all(hostProfilesPromises);
+      
+      // Create a map of host profiles
+      const hostProfiles = new Map();
+      hostProfilesResults.forEach((result, index) => {
+        if (result.data && result.data.length > 0) {
+          hostProfiles.set(allHostIds[index], result.data[0]);
+        }
+      });
+
+      // Transform bookings data
+      const transformedBookings: BookingWithDetails[] = (bookingsResult.data || []).map(booking => {
+        const hostProfile = hostProfiles.get(booking.experiences?.host_id);
+        return {
+          ...booking,
+          experience: {
+            title: booking.experiences?.title || 'Unknown Experience',
+            description: booking.experiences?.description || '',
+            location: booking.experiences?.location || 'Unknown Location',
+            image_urls: booking.experiences?.image_urls || [],
+            host_id: booking.experiences?.host_id || '',
+            max_guests: booking.experiences?.max_guests || 1,
+          },
+          host_profile: {
+            first_name: hostProfile?.first_name || 'Unknown',
+            last_name: hostProfile?.first_name ? '' : 'Host'
+          }
+        };
+      });
+
+      // Transform saved experiences data
+      const transformedSaved: SavedExperienceWithDetails[] = (savedResult.data || []).map(saved => {
+        const experience = experiencesData?.find(exp => exp.id === saved.experience_id);
+        const hostProfile = hostProfiles.get(experience?.host_id);
+        return {
+          ...saved,
+          experience: {
+            id: experience?.id || '',
+            title: experience?.title || 'Unknown Experience',
+            description: experience?.description || '',
+            location: experience?.location || 'Unknown Location',
+            price: experience?.price || 0,
+            image_urls: experience?.image_urls || [],
+            host_id: experience?.host_id || '',
+          },
+          host_profile: {
+            first_name: hostProfile?.first_name || 'Unknown',
+            last_name: hostProfile?.first_name ? '' : 'Host'
+          }
+        };
+      });
+
+      setBookings(transformedBookings);
       setSavedExperiences(transformedSaved);
-
-      // Fetch unread messages count
-      const { count: unreadCount } = await supabase
-        .from('messages')
-        .select('*', { count: 'exact', head: true })
-        .eq('recipient_id', user.id)
-        .eq('is_read', false);
-
-      // Fetch recent activity
-      const { data: activityData } = await supabase
-        .from('activity_log')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      setRecentActivity(activityData || []);
+      setRecentActivity(activityResult.data || []);
 
       // Calculate stats
       const now = new Date();
@@ -236,7 +236,7 @@ export const useDashboardData = () => {
       setStats({
         upcomingBookings,
         savedExperiences: transformedSaved.length,
-        unreadMessages: unreadCount || 0,
+        unreadMessages: unreadCountResult.count || 0,
         totalBookings: transformedBookings.length,
         completedBookings,
       });
