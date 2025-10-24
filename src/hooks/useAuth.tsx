@@ -218,50 +218,18 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
         const email = `dev-${role}@lilo.local`;
 
         try {
-          // Try to sign in first
-          const { error: signInError } = await supabase.auth.signInWithPassword({
+          // Dev users are pre-created with fixed credentials via migration
+          const { error } = await supabase.auth.signInWithPassword({
             email,
             password
           });
 
-          if (signInError) {
-            // If sign in fails, try to create the user
-            const { error: signUpError } = await supabase.auth.signUp({
-              email,
-              password,
-              options: {
-                data: {
-                  first_name: 'Dev',
-                  last_name: role === 'host' ? 'Host' : 'User',
-                  is_host: role === 'host'
-                },
-                emailRedirectTo: `${window.location.origin}/`
-              }
-            });
+          if (error) throw error;
 
-            if (signUpError) {
-              // Handle "User already registered" specifically
-              if (signUpError.message.includes('already registered')) {
-                toast({
-                  title: "Dev account exists with wrong credentials",
-                  description: "Delete the dev user from Supabase Auth Users and try again",
-                  variant: "destructive"
-                });
-                return;
-              }
-              throw signUpError;
-            }
-            
-            toast({
-              title: "Dev account created",
-              description: `Created and signed in as development ${role}`
-            });
-          } else {
-            toast({
-              title: "Dev bypass activated",
-              description: `Signed in as development ${role}`
-            });
-          }
+          toast({
+            title: "Dev bypass activated",
+            description: `Signed in as development ${role}`
+          });
         } catch (error: unknown) {
           toast({
             title: "Dev bypass failed",
