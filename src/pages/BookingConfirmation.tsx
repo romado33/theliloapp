@@ -45,8 +45,6 @@ const BookingConfirmation = () => {
       if (!bookingId || !sessionId) return;
       
       try {
-        console.log('Verifying payment with session ID:', sessionId);
-        
         const { data, error } = await supabase.functions.invoke('verify-payment', {
           body: {
             bookingId,
@@ -60,7 +58,6 @@ const BookingConfirmation = () => {
 
         if (data.success) {
           setPaymentVerified(true);
-          console.log('Payment verified successfully');
           
           toast({
             title: 'Payment Confirmed!',
@@ -70,7 +67,6 @@ const BookingConfirmation = () => {
           throw new Error('Payment verification failed');
         }
       } catch (error: any) {
-        console.error('Payment verification error:', error);
         setVerificationError(error.message || 'Failed to verify payment');
         
         toast({
@@ -96,7 +92,7 @@ const BookingConfirmation = () => {
             }
           });
         } catch (error) {
-          console.error('Failed to send confirmation email:', error);
+          // Silently fail - confirmation email is not critical
         }
       }
     };

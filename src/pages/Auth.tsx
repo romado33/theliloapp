@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,6 +23,7 @@ const Auth = () => {
   const [showDevModal, setShowDevModal] = useState(false);
   
   const { signUp, signIn, signInWithGoogle, signInWithApple, devBypass, user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -37,16 +39,45 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
-    if (isSignUp) {
-      await signUp(email, password, {
-        first_name: firstName,
-        last_name: lastName
+    try {
+      if (isSignUp) {
+        const { error } = await signUp(email, password, {
+          first_name: firstName,
+          last_name: lastName
+        });
+        
+        if (error) {
+          toast({
+            title: "Sign up failed",
+            description: error.message,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Account created!",
+            description: "Please check your email to verify your account."
+          });
+        }
+      } else {
+        const { error } = await signIn(email, password);
+        
+        if (error) {
+          toast({
+            title: "Sign in failed",
+            description: error.message,
+            variant: "destructive"
+          });
+        }
+      }
+    } catch (error) {
+      toast({
+        title: "An error occurred",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive"
       });
-    } else {
-      await signIn(email, password);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handleDevBypass = (role: 'user' | 'host') => {
@@ -56,9 +87,6 @@ const Auth = () => {
     });
   };
 
-  // Debug: Log environment mode
-  console.log('Auth page - DEV mode:', import.meta.env.DEV);
-  console.log('Auth page - MODE:', import.meta.env.MODE);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/20 via-background to-secondary/20 flex items-center justify-center p-4">

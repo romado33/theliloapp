@@ -266,9 +266,6 @@ const ExperienceDetails = () => {
 
     const fetchAvailability = async () => {
       try {
-        console.log('🔍 Fetching availability for experience:', id);
-        
-        // Fetch ALL available slots for this experience (no date filter for debugging)
         const { data, error } = await supabase
           .from('availability')
           .select('*')
@@ -277,7 +274,6 @@ const ExperienceDetails = () => {
           .order('start_time', { ascending: true });
 
         if (error) {
-          console.error('❌ Availability fetch error:', error);
           toast({
             title: "Error loading time slots",
             description: error.message,
@@ -286,15 +282,11 @@ const ExperienceDetails = () => {
           return;
         }
         
-        console.log('✅ Availability data:', data?.length || 0, 'slots found');
-        console.log('📅 Slots:', data);
-        
         if (data && data.length > 0) {
           // Filter to show only future dates
           const now = new Date();
           const futureSlots = data.filter(slot => new Date(slot.start_time) > now);
           
-          console.log('📆 Future slots:', futureSlots.length);
           setAvailability(futureSlots);
           
           if (futureSlots.length === 0) {
@@ -304,14 +296,12 @@ const ExperienceDetails = () => {
             });
           }
         } else {
-          console.warn('⚠️ No availability slots in database');
           toast({
             title: "No time slots available",
             description: "This experience has no availability set up yet",
           });
         }
       } catch (error) {
-        console.error('❌ Availability fetch exception:', error);
         toast({
           title: "Error",
           description: "Failed to load availability",
