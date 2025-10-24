@@ -225,7 +225,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
           });
 
           if (signInError) {
-            // If sign in fails, create the user
+            // If sign in fails, try to create the user
             const { error: signUpError } = await supabase.auth.signUp({
               email,
               password,
@@ -239,7 +239,18 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
               }
             });
 
-            if (signUpError) throw signUpError;
+            if (signUpError) {
+              // Handle "User already registered" specifically
+              if (signUpError.message.includes('already registered')) {
+                toast({
+                  title: "Dev account exists with wrong credentials",
+                  description: "Delete the dev user from Supabase Auth Users and try again",
+                  variant: "destructive"
+                });
+                return;
+              }
+              throw signUpError;
+            }
             
             toast({
               title: "Dev account created",
