@@ -53,7 +53,26 @@ const SearchInterface = ({
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searchType, setSearchType] = useState<'semantic' | 'text'>('semantic');
   const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [queryUnderstanding, setQueryUnderstanding] = useState<any>(null);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const { toast } = useToast();
+
+  // Get user location for distance-based search
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.log('Location access denied:', error);
+        }
+      );
+    }
+  }, []);
 
   const [filters, setFilters] = useState<SearchFilters>({
     category: 'all',
@@ -114,6 +133,13 @@ const SearchInterface = ({
   interface SearchResponse {
     results: SearchResult[];
     searchType: 'semantic' | 'text';
+    query_understanding?: {
+      who: string;
+      constraints: string[];
+      preferences: string[];
+      location_intent?: string;
+      activity_type?: string;
+    };
   }
 
   const searchMutation = useMutation<
@@ -132,6 +158,9 @@ const SearchInterface = ({
           priceMax: searchFilters.priceMax,
           location: searchFilters.location || undefined,
           useSemanticSearch: searchFilters.useSemanticSearch,
+          userLatitude: userLocation?.lat,
+          userLongitude: userLocation?.lng,
+          maxDistanceKm: 50, // Default 50km radius
         },
       });
       if (error) throw error;
@@ -141,12 +170,18 @@ const SearchInterface = ({
       const searchResults = data.results;
       setResults(searchResults);
       setSearchType(data.searchType);
+      setQueryUnderstanding(data.query_understanding);
       onResultsChange?.(searchResults);
       if (searchResults.length === 0 && variables.searchQuery.trim()) {
         toast({
           title: 'No results found',
           description: `No experiences match "${variables.searchQuery}". Try different keywords or remove filters.`,
           variant: 'default',
+        });
+      } else if (data.query_understanding && searchResults.length > 0) {
+        toast({
+          title: '✨ Smart search activated',
+          description: `Found ${searchResults.length} experiences for ${data.query_understanding.who || 'you'}`,
         });
       }
     },
@@ -249,48 +284,78 @@ const SearchInterface = ({
               </button>
             )}
           </div>
-          
           <Button onClick={handleSearch} disabled={loading}>
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
           </Button>
-          
           {showFilters && (
             <Button
-              variant="outline"
+              variant={showFilterPanel ? 'default' : 'outline'}
               onClick={() => setShowFilterPanel(!showFilterPanel)}
-              className={hasActiveFilters ? 'border-primary' : ''}
             >
-              <Filter className="w-4 h-4" />
+              <Filter className="w-4 h-4 mr-2" />
+              Filters
               {hasActiveFilters && (
-                <Badge variant="secondary" className="ml-2 h-5 px-1 text-xs">
-                  Active
+                <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 flex items-center justify-center">
+                  !
                 </Badge>
               )}
             </Button>
           )}
         </div>
 
-        {/* Search Type Indicator */}
-        {(query.trim() || hasActiveFilters) && (
-          <div className="flex items-center gap-2 mt-2">
-            <Badge 
-              variant={searchType === 'semantic' ? 'default' : 'secondary'}
-              className="text-xs"
-            >
-              {searchType === 'semantic' ? (
-                <>
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  Semantic Search
-                </>
-              ) : (
-                'Text Search'
-              )}
-            </Badge>
-            <span className="text-sm text-muted-foreground">
-              {results.length} result{results.length !== 1 ? 's' : ''}
-            </span>
-          </div>
+        {/* Query Understanding Display */}
+        {queryUnderstanding && query && (
+          <Card className="mt-3 bg-primary/5 border-primary/20">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <Sparkles className="w-5 h-5 text-primary mt-1" />
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">Smart Search Understanding:</span>
+                    {queryUnderstanding.who && (
+                      <Badge variant="secondary" className="text-xs">
+                        For: {queryUnderstanding.who}
+                      </Badge>
+                    )}
+                  </div>
+                  {queryUnderstanding.constraints.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      <span className="text-xs text-muted-foreground">Requirements:</span>
+                      {queryUnderstanding.constraints.map((constraint: string, idx: number) => (
+                        <Badge key={idx} variant="outline" className="text-xs">
+                          {constraint}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  {queryUnderstanding.preferences.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      <span className="text-xs text-muted-foreground">Preferences:</span>
+                      {queryUnderstanding.preferences.map((pref: string, idx: number) => (
+                        <Badge key={idx} variant="secondary" className="text-xs">
+                          {pref}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
+
+        {/* Search Type Indicator */}
+        <div className="flex items-center justify-between mt-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            {searchType === 'semantic' && filters.useSemanticSearch && (
+              <Badge variant="secondary" className="text-xs">
+                <Sparkles className="w-3 h-3 mr-1" />
+                AI Search
+              </Badge>
+            )}
+            <span>{results.length} results</span>
+          </div>
+        </div>
       </div>
 
       {/* Filter Panel */}
@@ -385,20 +450,22 @@ const SearchInterface = ({
 
       {/* Results */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {results.map((result) => (
+        {results.map((result: any) => (
           <ExperienceCard
             key={result.id}
             id={result.id}
             title={result.title}
             image={result.image_urls?.[0] || '/placeholder.svg'}
-            category="Experience" // You might want to add category to the results
+            category="Experience"
             price={result.price}
             duration={`${result.duration_hours} hours`}
-            rating={4.5} // You might want to calculate this from reviews
-            reviewCount={0} // You might want to get this from reviews
+            rating={4.5}
+            reviewCount={0}
             location={result.location}
-            hostName="Local Host" // You might want to join with profiles
-            maxGuests={6} // You might want to add this to results
+            hostName="Local Host"
+            maxGuests={6}
+            why={result.why}
+            score={result.score}
           />
         ))}
       </div>

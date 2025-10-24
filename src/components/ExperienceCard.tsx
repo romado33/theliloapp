@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Clock, Users } from "lucide-react";
+import { Star, MapPin, Clock, Users, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import QuickBookModal from "@/components/QuickBookModal";
@@ -23,6 +23,8 @@ interface ExperienceCardProps {
   hostName: string;
   maxGuests: number;
   isNew?: boolean;
+  why?: string;
+  score?: number;
 }
 
 const ExperienceCard = ({ 
@@ -37,7 +39,9 @@ const ExperienceCard = ({
   location, 
   hostName,
   maxGuests,
-  isNew = false
+  isNew = false,
+  why,
+  score
 }: ExperienceCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -133,6 +137,12 @@ const ExperienceCard = ({
             {title}
           </h3>
           <p className="text-sm text-muted-foreground">Hosted by {hostName}</p>
+          {why && (
+            <div className="flex items-start gap-2 p-2 bg-primary/5 rounded-md border border-primary/10">
+              <Sparkles className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-foreground leading-relaxed">{why}</p>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-4 text-sm text-muted-foreground">

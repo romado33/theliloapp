@@ -15,6 +15,26 @@ interface SearchRequest {
   priceMax?: number;
   location?: string;
   useSemanticSearch?: boolean;
+  userLatitude?: number;
+  userLongitude?: number;
+  maxDistanceKm?: number;
+}
+
+interface QueryUnderstanding {
+  who: string;
+  constraints: string[];
+  preferences: string[];
+  location_intent?: string;
+  activity_type?: string;
+}
+
+interface SearchResult {
+  id: string;
+  title: string;
+  description: string;
+  why: string;
+  score: number;
+  metadata: Record<string, any>;
 }
 
 serve(async (req) => {
@@ -37,19 +57,88 @@ serve(async (req) => {
       priceMin, 
       priceMax, 
       location,
-      useSemanticSearch = true
+      useSemanticSearch = true,
+      userLatitude,
+      userLongitude,
+      maxDistanceKm
     }: SearchRequest = await req.json();
 
     console.log('Search request:', { query, useSemanticSearch, category, location });
 
     let results = [];
+    let queryUnderstanding: QueryUnderstanding | null = null;
 
     // Perform semantic search if enabled and OpenAI key is available
     if (useSemanticSearch && openAIApiKey && query.trim()) {
       try {
         console.log('Performing semantic search for:', query);
 
-        // Generate embedding for the search query
+        // Step 1: Use OpenAI to understand the query
+        const understandingResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              {
+                role: 'system',
+                content: 'You are an expert at understanding search queries for local experiences. Extract key information from user queries.'
+              },
+              {
+                role: 'user',
+                content: `Analyze this search query and extract structured information: "${query}"`
+              }
+            ],
+            tools: [{
+              type: 'function',
+              function: {
+                name: 'understand_query',
+                description: 'Extract structured information from a search query',
+                parameters: {
+                  type: 'object',
+                  properties: {
+                    who: {
+                      type: 'string',
+                      description: 'Who is the experience for (e.g., family, couple, solo, kids)'
+                    },
+                    constraints: {
+                      type: 'array',
+                      items: { type: 'string' },
+                      description: 'Hard requirements (e.g., stroller-friendly, wheelchair accessible, indoor, <30min away)'
+                    },
+                    preferences: {
+                      type: 'array',
+                      items: { type: 'string' },
+                      description: 'Nice-to-have features (e.g., animals, hands-on, creative)'
+                    },
+                    location_intent: {
+                      type: 'string',
+                      description: 'Location or distance mentioned (e.g., nearby, within 30 min, in downtown)'
+                    },
+                    activity_type: {
+                      type: 'string',
+                      description: 'Type of activity (e.g., farm visit, cooking class, outdoor adventure)'
+                    }
+                  },
+                  required: ['who', 'constraints', 'preferences']
+                }
+              }
+            }],
+            tool_choice: { type: 'function', function: { name: 'understand_query' } }
+          }),
+        });
+
+        const understandingData = await understandingResponse.json();
+        if (understandingData.choices?.[0]?.message?.tool_calls?.[0]) {
+          const toolCall = understandingData.choices[0].message.tool_calls[0];
+          queryUnderstanding = JSON.parse(toolCall.function.arguments);
+          console.log('Query understanding:', queryUnderstanding);
+        }
+
+        // Step 2: Generate embedding for the search query
         const embeddingResponse = await fetch('https://api.openai.com/v1/embeddings', {
           method: 'POST',
           headers: {
@@ -108,9 +197,9 @@ serve(async (req) => {
           if (!semanticError && semanticResults) {
             console.log('Found experiences with embeddings:', semanticResults.length);
             
-            // Calculate similarities on the client side for now
+            // Calculate similarities and apply constraint filtering
             const resultsWithSimilarity = semanticResults.map(exp => {
-              if (!exp.embedding) return { ...exp, similarity: 0 };
+              if (!exp.embedding) return { ...exp, similarity: 0, matches_constraints: false };
               
               // Calculate cosine similarity
               const dotProduct = queryEmbedding.reduce((sum: number, val: number, i: number) => 
@@ -119,16 +208,89 @@ serve(async (req) => {
               const magnitude2 = Math.sqrt(exp.embedding.reduce((sum: number, val: number) => sum + val * val, 0));
               const similarity = dotProduct / (magnitude1 * magnitude2);
               
-              return { ...exp, similarity };
+              // Check constraint matches
+              let matches_constraints = true;
+              let constraint_score = 0;
+              
+              if (queryUnderstanding) {
+                const searchableText = [
+                  exp.title,
+                  exp.description,
+                  exp.location,
+                  ...(exp.what_included || []),
+                  ...(exp.what_to_bring || [])
+                ].join(' ').toLowerCase();
+                
+                // Check each constraint
+                for (const constraint of queryUnderstanding.constraints) {
+                  const constraintLower = constraint.toLowerCase();
+                  if (constraintLower.includes('stroller') && searchableText.includes('stroller')) {
+                    constraint_score += 0.2;
+                  }
+                  if (constraintLower.includes('wheelchair') && searchableText.includes('wheelchair')) {
+                    constraint_score += 0.2;
+                  }
+                  if (constraintLower.includes('animal') && searchableText.includes('animal')) {
+                    constraint_score += 0.15;
+                  }
+                  if (constraintLower.includes('indoor') && searchableText.includes('indoor')) {
+                    constraint_score += 0.1;
+                  }
+                  if (constraintLower.includes('outdoor') && searchableText.includes('outdoor')) {
+                    constraint_score += 0.1;
+                  }
+                }
+                
+                // Check preferences (bonus points)
+                for (const pref of queryUnderstanding.preferences) {
+                  const prefLower = pref.toLowerCase();
+                  if (searchableText.includes(prefLower)) {
+                    constraint_score += 0.05;
+                  }
+                }
+              }
+              
+              // Calculate distance if user location provided
+              let distance_km = null;
+              if (userLatitude && userLongitude && exp.latitude && exp.longitude) {
+                const R = 6371; // Earth's radius in km
+                const dLat = (exp.latitude - userLatitude) * Math.PI / 180;
+                const dLon = (exp.longitude - userLongitude) * Math.PI / 180;
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                         Math.cos(userLatitude * Math.PI / 180) * Math.cos(exp.latitude * Math.PI / 180) *
+                         Math.sin(dLon/2) * Math.sin(dLon/2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                distance_km = R * c;
+              }
+              
+              // Boost score based on constraint matches
+              const boosted_score = similarity + constraint_score;
+              
+              return { 
+                ...exp, 
+                similarity, 
+                constraint_score,
+                boosted_score,
+                distance_km,
+                matches_constraints 
+              };
             });
 
-            // Filter and sort by similarity
-            results = resultsWithSimilarity
-              .filter(exp => exp.similarity > 0.3) // Similarity threshold
-              .sort((a, b) => b.similarity - a.similarity)
-              .slice(0, limit);
+            // Filter by distance if specified
+            let filteredResults = resultsWithSimilarity;
+            if (maxDistanceKm && userLatitude && userLongitude) {
+              filteredResults = filteredResults.filter(exp => 
+                exp.distance_km === null || exp.distance_km <= maxDistanceKm
+              );
+            }
 
-            console.log('Semantic search results:', results.length);
+            // Sort by boosted score
+            results = filteredResults
+              .filter(exp => exp.boosted_score > 0.3)
+              .sort((a, b) => b.boosted_score - a.boosted_score)
+              .slice(0, Math.min(limit * 2, 50)); // Get top 50 for re-ranking
+
+            console.log('Semantic search results before re-ranking:', results.length);
           } else {
             console.error('Semantic search error:', semanticError);
           }
@@ -221,11 +383,110 @@ serve(async (req) => {
       results = defaultResults || [];
     }
 
+    // Step 3: Use OpenAI Structured Outputs to explain results
+    let shapedResults: SearchResult[] = [];
+    
+    if (results.length > 0 && openAIApiKey && useSemanticSearch) {
+      try {
+        const resultsForExplanation = results.slice(0, 10).map(r => ({
+          id: r.id,
+          title: r.title,
+          description: r.description?.substring(0, 200),
+          location: r.location,
+          price: r.price,
+          duration_hours: r.duration_hours,
+          similarity: r.similarity || 0,
+          constraint_score: r.constraint_score || 0,
+          distance_km: r.distance_km
+        }));
+
+        const explanationResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openAIApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              {
+                role: 'system',
+                content: 'You are an expert at explaining why search results are relevant. Be concise and specific.'
+              },
+              {
+                role: 'user',
+                content: `Original query: "${query}"\n\nQuery understanding: ${JSON.stringify(queryUnderstanding)}\n\nTop results: ${JSON.stringify(resultsForExplanation)}\n\nFor each result, explain why it matches the query in 1-2 sentences.`
+              }
+            ],
+            tools: [{
+              type: 'function',
+              function: {
+                name: 'explain_results',
+                description: 'Explain why each search result is relevant',
+                parameters: {
+                  type: 'object',
+                  properties: {
+                    results: {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'string' },
+                          why: { type: 'string', description: 'Brief explanation of relevance' },
+                          score: { type: 'number', description: 'Relevance score 0-1' }
+                        },
+                        required: ['id', 'why', 'score']
+                      }
+                    }
+                  },
+                  required: ['results']
+                }
+              }
+            }],
+            tool_choice: { type: 'function', function: { name: 'explain_results' } }
+          }),
+        });
+
+        const explanationData = await explanationResponse.json();
+        if (explanationData.choices?.[0]?.message?.tool_calls?.[0]) {
+          const toolCall = explanationData.choices[0].message.tool_calls[0];
+          const explanations = JSON.parse(toolCall.function.arguments);
+          
+          shapedResults = explanations.results.map((expl: any) => {
+            const result = results.find(r => r.id === expl.id);
+            return {
+              ...result,
+              why: expl.why,
+              score: expl.score
+            };
+          });
+          
+          console.log('Results shaped with explanations:', shapedResults.length);
+        }
+      } catch (explainError) {
+        console.error('Failed to generate explanations:', explainError);
+        // Fall back to results without explanations
+        shapedResults = results.map(r => ({
+          ...r,
+          why: 'Matches your search criteria',
+          score: r.boosted_score || r.similarity || 0
+        }));
+      }
+    } else {
+      // No OpenAI or semantic search disabled
+      shapedResults = results.map(r => ({
+        ...r,
+        why: 'Matches your search criteria',
+        score: 0.5
+      }));
+    }
+
     // Remove embedding data from results to reduce response size
-    const cleanResults = results.map(({ embedding, ...rest }) => rest);
+    const cleanResults = shapedResults.map(({ embedding, ...rest }) => rest);
 
     return new Response(
       JSON.stringify({ 
+        query_understanding: queryUnderstanding,
         results: cleanResults,
         query,
         searchType: results.length > 0 && useSemanticSearch ? 'semantic' : 'text',
