@@ -214,23 +214,43 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const devBypass = import.meta.env.MODE === 'development'
     ? async (role: 'user' | 'host') => {
-        // Fixed credentials for consistent dev users (created via migration)
         const password = 'dev123456';
         const email = `dev-${role}@lilo.local`;
 
         try {
-          // Simply sign in - users already exist in database with fixed UUIDs
+          // Try to sign in first
           const { error: signInError } = await supabase.auth.signInWithPassword({
             email,
             password
           });
 
-          if (signInError) throw signInError;
+          if (signInError) {
+            // If sign in fails, create the user
+            const { error: signUpError } = await supabase.auth.signUp({
+              email,
+              password,
+              options: {
+                data: {
+                  first_name: 'Dev',
+                  last_name: role === 'host' ? 'Host' : 'User',
+                  is_host: role === 'host'
+                },
+                emailRedirectTo: `${window.location.origin}/`
+              }
+            });
 
-          toast({
-            title: "Dev bypass activated",
-            description: `Signed in as development ${role}`
-          });
+            if (signUpError) throw signUpError;
+            
+            toast({
+              title: "Dev account created",
+              description: `Created and signed in as development ${role}`
+            });
+          } else {
+            toast({
+              title: "Dev bypass activated",
+              description: `Signed in as development ${role}`
+            });
+          }
         } catch (error: unknown) {
           toast({
             title: "Dev bypass failed",
