@@ -214,21 +214,52 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const devBypass = import.meta.env.MODE === 'development'
     ? async (role: 'user' | 'host') => {
-        const password = 'dev123456';
-        const email = `dev-${role}@lilo.local`;
-
         try {
-          // Dev users are pre-created with fixed credentials via migration
-          const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password
-          });
+          // Set dev bypass flag in window and localStorage
+          (window as any).__DEV_BYPASS_ENABLED = true;
+          localStorage.setItem('__DEV_BYPASS_ROLE', role);
+          
+          // Create mock user and profile
+          const mockUser = {
+            id: `dev-${role}-${Date.now()}`,
+            email: `dev-${role}@lilo.local`,
+            role: 'authenticated',
+            aud: 'authenticated',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            app_metadata: {},
+            user_metadata: {
+              first_name: role === 'host' ? 'Dev Host' : 'Dev User',
+              last_name: 'Account'
+            }
+          } as User;
 
-          if (error) throw error;
+          const mockProfile: Profile = {
+            id: mockUser.id,
+            email: mockUser.email,
+            first_name: role === 'host' ? 'Dev Host' : 'Dev User',
+            last_name: 'Account',
+            is_host: role === 'host',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            onboarded: true,
+            avatar_url: null,
+            phone: null,
+            bio: null,
+            location: null,
+            date_of_birth: null,
+            admin_role: null
+          };
+
+          // Set state directly without database calls
+          setUser(mockUser);
+          setProfile(mockProfile);
+          setCurrentRole(role);
+          setLoading(false);
 
           toast({
             title: "Dev bypass activated",
-            description: `Signed in as development ${role}`
+            description: `Signed in as development ${role}`,
           });
         } catch (error: unknown) {
           toast({
