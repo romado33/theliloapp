@@ -219,9 +219,14 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
           (window as any).__DEV_BYPASS_ENABLED = true;
           localStorage.setItem('__DEV_BYPASS_ROLE', role);
           
-          // Create mock user and profile
+          // Use consistent, valid UUIDs for dev users (namespace UUID approach)
+          const devUserUuid = role === 'user' 
+            ? '00000000-0000-0000-0000-000000000001' 
+            : '00000000-0000-0000-0000-000000000002';
+          
+          // Create mock user and profile with valid UUID
           const mockUser = {
-            id: `dev-${role}-${Date.now()}`,
+            id: devUserUuid,
             email: `dev-${role}@lilo.local`,
             role: 'authenticated',
             aud: 'authenticated',

@@ -49,6 +49,13 @@ export const useChat = () => {
       return;
     }
 
+    // Skip chat for dev bypass users (they have no conversations)
+    if ((window as any).__DEV_BYPASS_ENABLED) {
+      setConversations([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       // First get conversations without joins
       const { data: conversations, error } = await supabase

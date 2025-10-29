@@ -36,6 +36,13 @@ export const useRecommendations = () => {
   const generateRecommendations = async () => {
     if (!user) return;
 
+    // Skip recommendations for dev bypass users (they have no data)
+    if ((window as any).__DEV_BYPASS_ENABLED) {
+      setRecommendations([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
 

@@ -35,6 +35,13 @@ export const useSavedExperiences = () => {
       return;
     }
 
+    // Skip database queries for dev bypass users (they have no data)
+    if ((window as any).__DEV_BYPASS_ENABLED) {
+      setSavedExperiences([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('saved_experiences')
@@ -124,6 +131,16 @@ export const useSavedExperiences = () => {
       return false;
     }
 
+    // Block save actions for dev bypass users
+    if ((window as any).__DEV_BYPASS_ENABLED) {
+      toast({
+        title: 'Dev Mode',
+        description: 'Saving is disabled in dev bypass mode',
+        variant: 'destructive',
+      });
+      return false;
+    }
+
     try {
       const isSaved = isExperienceSaved(experienceId);
       
@@ -179,6 +196,11 @@ export const useSavedExperiences = () => {
   // Remove saved experience
   const removeSavedExperience = async (experienceId: string): Promise<boolean> => {
     if (!user) return false;
+
+    // Block remove actions for dev bypass users
+    if ((window as any).__DEV_BYPASS_ENABLED) {
+      return false;
+    }
 
     try {
       const { error } = await supabase

@@ -77,6 +77,12 @@ export const useDashboardData = () => {
   const fetchDashboardData = async () => {
     if (!user?.id) return;
 
+    // Skip database queries for dev bypass users (they have no data)
+    if ((window as any).__DEV_BYPASS_ENABLED) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
 
