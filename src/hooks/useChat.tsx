@@ -27,6 +27,13 @@ export interface ChatMessage {
   sender_name?: string;
 }
 
+interface SupabaseError {
+  code?: string;
+  message: string;
+  details?: string;
+  hint?: string;
+}
+
 export const useChat = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -38,12 +45,9 @@ export const useChat = () => {
   // Fetch conversations
   const fetchConversations = async () => {
     if (!user) {
-      console.log('No user, skipping conversation fetch');
       setLoading(false);
       return;
     }
-
-    console.log('Fetching conversations for user:', user.id);
 
     try {
       // First get conversations without joins
@@ -57,8 +61,6 @@ export const useChat = () => {
         console.error('Error in initial conversation query:', error);
         throw error;
       }
-      
-      console.log('Conversations found:', conversations?.length || 0);
       
       // If no conversations, just return empty
       if (!conversations || conversations.length === 0) {
@@ -120,10 +122,11 @@ export const useChat = () => {
       // Filter out any failed fetches
       const validConversations = conversationsWithData.filter(c => c !== null) as ChatConversation[];
       setConversations(validConversations);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error fetching conversations:', error);
+      const supabaseError = error as SupabaseError;
       // Don't show toast for "no rows" or relationship errors
-      if (error?.code !== 'PGRST116' && error?.code !== 'PGRST200') {
+      if (supabaseError?.code !== 'PGRST116' && supabaseError?.code !== 'PGRST200') {
         toast({
           title: 'Error',
           description: 'Failed to load conversations',

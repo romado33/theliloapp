@@ -15,6 +15,7 @@ export interface Experience {
   category_id: string;
   latitude?: number;
   longitude?: number;
+  created_at: string;
 }
 
 export interface RecommendationReason {
@@ -127,7 +128,27 @@ export const useRecommendations = () => {
     }
   };
 
-  const calculateUserPreferences = (bookings: any[], savedExperiences: any[]) => {
+  interface BookingWithExperience {
+    experience_id: string;
+    experiences?: {
+      category_id?: string;
+      price?: number;
+      location?: string;
+      latitude?: number;
+      longitude?: number;
+    };
+  }
+
+  interface SavedExperienceWithDetails {
+    experience_id: string;
+    experiences?: {
+      category_id?: string;
+      price?: number;
+      location?: string;
+    };
+  }
+
+  const calculateUserPreferences = (bookings: BookingWithExperience[] | null, savedExperiences: SavedExperienceWithDetails[] | null) => {
     const preferences = {
       categoryIds: new Set<string>(),
       priceRanges: [] as number[],
@@ -177,9 +198,18 @@ export const useRecommendations = () => {
     return preferences;
   };
 
+  interface UserPreferences {
+    categoryIds: Set<string>;
+    priceRanges: number[];
+    locations: Set<string>;
+    avgLatitude: number;
+    avgLongitude: number;
+    coordinatesCount: number;
+  }
+
   const calculateRecommendationScore = (
-    experience: any,
-    preferences: any,
+    experience: Experience,
+    preferences: UserPreferences,
     userLocation?: string,
     bookedExperienceIds: string[] = [],
     savedExperienceIds: string[] = []
@@ -237,11 +267,11 @@ export const useRecommendations = () => {
   };
 
   const generateRecommendationReasons = (
-    experience: any,
-    preferences: any,
+    experience: Experience,
+    preferences: UserPreferences,
     userLocation?: string,
-    bookings?: any[],
-    savedExperiences?: any[]
+    bookings?: BookingWithExperience[] | null,
+    savedExperiences?: SavedExperienceWithDetails[] | null
   ): RecommendationReason[] => {
     const reasons: RecommendationReason[] = [];
 
