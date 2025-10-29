@@ -362,24 +362,24 @@ const ExperienceDetails = () => {
         throw new Error("Selected time slot is no longer available");
       }
 
-      const { data, error } = await supabase
-        .from('bookings')
-        .insert({
-          experience_id: experience.id,
-          availability_id: matchingSlot.id,
-          guest_id: user.id,
-          guest_count: guestCount,
-          total_price: experience.price * guestCount,
-          booking_date: matchingSlot.start_time,
-          status: 'pending',
-          guest_contact_info: { email: user.email }
-        })
-        .select()
-        .single();
+      // Call create-payment edge function to create booking with server-side price calculation
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          experienceId: experience.id,
+          bookingDate: matchingSlot.start_time,
+          guestCount: guestCount,
+          guestContactInfo: { email: user.email }
+        }
+      });
 
       if (error) throw error;
 
-      navigate(`/booking-confirmation/${data.id}`);
+      // Redirect to Stripe checkout
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('Payment URL not received');
+      }
     } catch (error: unknown) {
       console.error('Booking error:', error);
       toast({

@@ -32,15 +32,20 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log("Starting create-payment function");
 
-    // Get authenticated user (optional for guest bookings)
-    let user = null;
+    // Require authentication for payment operations
     const authHeader = req.headers.get("Authorization");
-    if (authHeader) {
-      const token = authHeader.replace("Bearer ", "");
-      const { data } = await supabaseClient.auth.getUser(token);
-      user = data.user;
-      console.log("Authenticated user found:", user?.email);
+    if (!authHeader) {
+      throw new Error('Authentication required');
     }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+    
+    if (authError || !user) {
+      throw new Error('Invalid authentication');
+    }
+
+    console.log("Authenticated user:", user.email);
 
     const {
       experienceId,
@@ -72,18 +77,24 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Experience found:", experience.title);
 
-    // Calculate total price
+    // Validate guest count
+    if (guestCount < 1 || guestCount > experience.max_guests) {
+      throw new Error(`Guest count must be between 1 and ${experience.max_guests}`);
+    }
+
+    // Calculate total price SERVER-SIDE (never trust client)
     const totalPrice = experience.price * guestCount;
+    console.log("Server-calculated price:", totalPrice);
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Determine customer email
-    const customerEmail = user?.email || guestContactInfo?.email;
+    // Use authenticated user's email
+    const customerEmail = user.email;
     if (!customerEmail) {
-      throw new Error('Customer email is required');
+      throw new Error('User email not found');
     }
 
     // Check if Stripe customer exists
@@ -103,13 +114,13 @@ const handler = async (req: Request): Promise<Response> => {
       .from('bookings')
       .insert({
         experience_id: experienceId,
-        guest_id: user?.id || null,
+        guest_id: user.id,
         booking_date: bookingDate,
         guest_count: guestCount,
-        total_price: totalPrice,
+        total_price: totalPrice, // Server-calculated price only
         status: 'pending',
         special_requests: specialRequests,
-        guest_contact_info: guestContactInfo || null,
+        guest_contact_info: guestContactInfo || { email: user.email },
         created_at: new Date().toISOString()
       })
       .select()

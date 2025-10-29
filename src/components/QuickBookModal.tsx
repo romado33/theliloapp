@@ -131,27 +131,30 @@ const QuickBookModal = ({
   const bookingMutation = useMutation({
     retry: 1,
     mutationFn: async ({ selectedTimeSlot }: { selectedTimeSlot: TimeSlot }) => {
-      const { error } = await supabase
-        .from('bookings')
-        .insert({
-          experience_id: experienceId,
-          availability_id: selectedSlot,
-          guest_id: user!.id,
-          guest_count: guestCount,
-          total_price: experiencePrice * guestCount,
-          booking_date: selectedTimeSlot.start_time,
-          guest_contact_info: contactInfo,
-          special_requests: specialRequests || null,
-          status: 'pending',
-        });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      toast({
-        title: "Booking confirmed!",
-        description: `Your booking for ${experienceTitle} has been confirmed.`,
+      // Call create-payment edge function for server-side price calculation
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          experienceId: experienceId,
+          bookingDate: selectedTimeSlot.start_time,
+          guestCount: guestCount,
+          guestContactInfo: contactInfo,
+          specialRequests: specialRequests || null
+        }
       });
-      onClose();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      // Redirect to Stripe checkout
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        toast({
+          title: "Booking initiated",
+          description: "Redirecting to payment...",
+        });
+        onClose();
+      }
     },
     onError: () => {
       toast({

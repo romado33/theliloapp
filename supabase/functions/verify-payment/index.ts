@@ -26,6 +26,19 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log("Starting verify-payment function");
 
+    // Require authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      throw new Error('Authentication required');
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+    
+    if (authError || !user) {
+      throw new Error('Invalid authentication');
+    }
+
     const { sessionId, bookingId }: VerifyPaymentRequest = await req.json();
 
     console.log("Verifying payment:", { sessionId, bookingId });
@@ -44,6 +57,17 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Payment verified successfully");
 
+    // Verify booking belongs to authenticated user before updating
+    const { data: existingBooking } = await supabaseClient
+      .from('bookings')
+      .select('guest_id')
+      .eq('id', bookingId)
+      .single();
+
+    if (!existingBooking || existingBooking.guest_id !== user.id) {
+      throw new Error('Unauthorized: Booking does not belong to user');
+    }
+
     // Update booking status to confirmed
     const { data: updatedBooking, error: updateError } = await supabaseClient
       .from('bookings')
@@ -53,6 +77,7 @@ const handler = async (req: Request): Promise<Response> => {
         updated_at: new Date().toISOString()
       })
       .eq('id', bookingId)
+      .eq('guest_id', user.id) // Additional security check
       .select(`
         *,
         experiences (
