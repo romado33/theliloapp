@@ -35,6 +35,8 @@ import sunsetYoga from '@/assets/sunset-yoga.jpg';
 import waterfallHike from '@/assets/waterfall-hike.jpg';
 import wineTasting from '@/assets/wine-tasting.jpg';
 import { getImageFromUrl } from '@/lib/imageMap';
+import { isValidUUID } from '@/lib/dateUtils';
+import { logger } from '@/lib/logger';
 import type { Availability, Experience } from '@/types';
 import SaveExperienceButton from '@/components/SaveExperienceButton';
 import ContactHostButton from '@/components/ContactHostButton';
@@ -66,12 +68,6 @@ const ExperienceDetails = () => {
   useEffect(() => {
     if (!id) return;
     
-    // Helper function to check if string is a valid UUID
-    const isValidUUID = (str: string) => {
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-      return uuidRegex.test(str);
-    };
-
     // Mock experience data for fallback
     const mockExperiences: Record<string, ExperienceWithRelations> = {
       "550e8400-e29b-41d4-a716-446655440001": {
@@ -238,7 +234,7 @@ const ExperienceDetails = () => {
           }
         }
         } catch (error: unknown) {
-          console.error('Error fetching experience:', error);
+          logger.error('Error fetching experience:', error);
         
         // Try fallback to mock data on database error too
         const mockExperience = mockExperiences[id as string];
@@ -381,7 +377,7 @@ const ExperienceDetails = () => {
         throw new Error('Payment URL not received');
       }
     } catch (error: unknown) {
-      console.error('Booking error:', error);
+      logger.error('Booking error:', error);
       toast({
         title: "Booking failed",
         description: error instanceof Error ? error.message : "Unknown error",

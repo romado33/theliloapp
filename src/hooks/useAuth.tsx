@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useMemo, type Re
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 import type { Profile } from '@/types';
 
 interface AuthContextType {
@@ -50,7 +51,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
         setCurrentRole(data.is_host ? 'host' : 'user');
       }
     } catch (error: unknown) {
-      console.error('Error fetching profile:', error);
+      logger.error('Error fetching profile:', error);
     }
   };
 
@@ -216,7 +217,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     ? async (role: 'user' | 'host') => {
         try {
           // Set dev bypass flag in window and localStorage
-          (window as any).__DEV_BYPASS_ENABLED = true;
+          window.__DEV_BYPASS_ENABLED = true;
           localStorage.setItem('__DEV_BYPASS_ROLE', role);
           
           // Use consistent, valid UUIDs for dev users (namespace UUID approach)

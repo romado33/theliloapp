@@ -22,6 +22,7 @@ const imageMap: Record<string, string> = {
   '/placeholder-experience.jpg': heroImage,
 };
 
-export const getImageFromUrl = (url: string): string => {
+export const getImageFromUrl = (url: string | undefined): string => {
+  if (!url) return potteryClass;
   return imageMap[url] || url;
 };

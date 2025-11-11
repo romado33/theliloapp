@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { WriteReviewModal } from '@/components/WriteReviewModal';
+import { formatDateTime } from '@/lib/dateUtils';
+import { getStatusBadgeVariant, getStatusText, type BookingStatus } from '@/lib/bookingUtils';
 import {
   CheckCircle,
   Calendar,
@@ -66,8 +68,9 @@ const BookingConfirmation = () => {
         } else {
           throw new Error('Payment verification failed');
         }
-      } catch (error: any) {
-        setVerificationError(error.message || 'Failed to verify payment');
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to verify payment';
+        setVerificationError(errorMessage);
         
         toast({
           title: 'Payment Verification Error',
@@ -146,40 +149,6 @@ const BookingConfirmation = () => {
       title: 'Review submitted!',
       description: 'Thank you for sharing your experience',
     });
-  };
-
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return {
-      date: date.toLocaleDateString('en-US', { 
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long', 
-        day: 'numeric' 
-      }),
-      time: date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      })
-    };
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed': return 'default';
-      case 'pending': return 'secondary';
-      case 'cancelled': return 'destructive';
-      default: return 'secondary';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'confirmed': return 'Confirmed';
-      case 'pending': return 'Pending Confirmation';
-      case 'cancelled': return 'Cancelled';
-      default: return status;
-    }
   };
 
   if (isLoading) {
@@ -276,8 +245,8 @@ const BookingConfirmation = () => {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl">{booking.experience.title}</CardTitle>
-              <Badge variant={getStatusColor(booking.status)}>
-                {getStatusText(booking.status)}
+              <Badge variant={getStatusBadgeVariant(booking.status as BookingStatus)}>
+                {getStatusText(booking.status as BookingStatus)}
               </Badge>
             </div>
           </CardHeader>

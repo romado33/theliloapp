@@ -31,6 +31,8 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ModifyBookingDialog } from '@/components/ModifyBookingDialog';
 import { getImageFromUrl } from '@/lib/imageMap';
+import { getStatusColor, getStatusText, type BookingStatus } from '@/lib/bookingUtils';
+import { logger } from '@/lib/logger';
 
 const UserDashboard = () => {
   const { user, profile } = useAuth();
@@ -77,7 +79,7 @@ const UserDashboard = () => {
 
       refreshData();
     } catch (error) {
-      console.error('Error cancelling booking:', error);
+      logger.error('Error cancelling booking:', error);
       toast({
         title: 'Error',
         description: 'Failed to cancel booking. Please try again.',
@@ -85,24 +87,6 @@ const UserDashboard = () => {
       });
     } finally {
       setCancelingId(null);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800'; 
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'confirmed': return 'Confirmed';
-      case 'pending': return 'Awaiting Host Approval';
-      case 'cancelled': return 'Cancelled';
-      default: return status;
     }
   };
 
@@ -267,8 +251,8 @@ const UserDashboard = () => {
                                 Hosted by {booking.host_profile.first_name} {booking.host_profile.last_name}
                               </p>
                             </div>
-                            <Badge className={getStatusColor(booking.status)}>
-                              {getStatusText(booking.status)}
+                            <Badge className={getStatusColor(booking.status as BookingStatus)}>
+                              {getStatusText(booking.status as BookingStatus)}
                             </Badge>
                           </div>
 

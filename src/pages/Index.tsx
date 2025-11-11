@@ -13,28 +13,8 @@ import { useRecommendations } from "@/hooks/useRecommendations";
 import { TrendingUp, Heart, Database } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
-import farmersMarket from "@/assets/farmers-market.jpg";
-import cookingClass from "@/assets/cooking-class.jpg";
 import type { SearchResult } from "@/types";
-
-// Map placeholder URLs to actual assets - simplified approach  
-const getImageFromUrl = (url: string | undefined): string => {
-  if (!url) return potteryClass;
-  
-  // Direct mapping without complex logic
-  if (url === '/placeholder-cooking.jpg') return cookingClass;
-  if (url === '/placeholder-pasta.jpg') return cookingClass; 
-  if (url === '/placeholder-pottery.jpg') return potteryClass;
-  if (url === '/placeholder-workshop.jpg') return potteryClass;
-  if (url === '/placeholder-yoga.jpg') return potteryClass;
-  if (url === '/placeholder-hike.jpg') return farmersMarket;
-  if (url === '/placeholder-wine.jpg') return farmersMarket;
-  if (url === '/placeholder-market.jpg') return farmersMarket;
-  if (url === '/placeholder-farm.jpg') return farmersMarket;
-  if (url === '/placeholder-nature.jpg') return farmersMarket;
-  
-  return potteryClass; // fallback
-};
+import { getImageFromUrl } from "@/lib/imageMap";
 
 // Mock experiences using imported assets directly
 const mockExperiences = [
@@ -222,11 +202,7 @@ const Index = () => {
                      <ExperienceCard 
                        id={experience.id}
                        title={experience.title}
-                       image={(() => {
-                         const originalUrl = experience.image_urls?.[0];
-                         const mappedUrl = getImageFromUrl(originalUrl);
-                         return mappedUrl;
-                       })()}
+                       image={getImageFromUrl(experience.image_urls?.[0] || '/placeholder-experience.jpg')}
                         category="Experience"
                         price={experience.price}
                         duration={`${experience.duration_hours || 2} hours`}

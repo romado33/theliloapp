@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 export interface ChatConversation {
   id: string;
@@ -50,7 +51,7 @@ export const useChat = () => {
     }
 
     // Skip chat for dev bypass users (they have no conversations)
-    if ((window as any).__DEV_BYPASS_ENABLED) {
+    if (window.__DEV_BYPASS_ENABLED) {
       setConversations([]);
       setLoading(false);
       return;
@@ -65,7 +66,7 @@ export const useChat = () => {
         .order('updated_at', { ascending: false });
 
       if (error) {
-        console.error('Error in initial conversation query:', error);
+        logger.error('Error in initial conversation query:', error);
         throw error;
       }
       
@@ -78,7 +79,7 @@ export const useChat = () => {
       
       // Fetch related data separately for each conversation
       const conversationsWithData = await Promise.all(
-        conversations.map(async (conv: any) => {
+        conversations.map(async (conv) => {
           try {
             // Fetch profiles
             const { data: guestProfile } = await supabase
@@ -120,7 +121,7 @@ export const useChat = () => {
               experience_title: experienceTitle,
             };
           } catch (err) {
-            console.error('Error fetching conversation data:', err);
+            logger.error('Error fetching conversation data:', err);
             return null;
           }
         })
@@ -130,7 +131,7 @@ export const useChat = () => {
       const validConversations = conversationsWithData.filter(c => c !== null) as ChatConversation[];
       setConversations(validConversations);
     } catch (error) {
-      console.error('Error fetching conversations:', error);
+      logger.error('Error fetching conversations:', error);
       const supabaseError = error as SupabaseError;
       // Don't show toast for "no rows" or relationship errors
       if (supabaseError?.code !== 'PGRST116' && supabaseError?.code !== 'PGRST200') {
@@ -164,7 +165,7 @@ export const useChat = () => {
       
       // Fetch sender profiles separately
       const messagesWithSenders = await Promise.all(
-        messages.map(async (msg: any) => {
+        messages.map(async (msg) => {
           try {
             const { data: senderProfile } = await supabase
               .from('profiles')
@@ -184,7 +185,7 @@ export const useChat = () => {
                 : 'User',
             };
           } catch (err) {
-            console.error('Error fetching sender profile:', err);
+            logger.error('Error fetching sender profile:', err);
             return null;
           }
         })
@@ -193,7 +194,7 @@ export const useChat = () => {
       const validMessages = messagesWithSenders.filter(m => m !== null) as ChatMessage[];
       setMessages(validMessages);
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      logger.error('Error fetching messages:', error);
       toast({
         title: 'Error',
         description: 'Failed to load messages',
@@ -218,7 +219,7 @@ export const useChat = () => {
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error sending message:', error);
+      logger.error('Error sending message:', error);
       toast({
         title: 'Error',
         description: 'Failed to send message',
@@ -245,7 +246,7 @@ export const useChat = () => {
       await fetchConversations();
       return data.id;
     } catch (error) {
-      console.error('Error creating conversation:', error);
+      logger.error('Error creating conversation:', error);
       toast({
         title: 'Error',
         description: 'Failed to create conversation',
@@ -267,7 +268,7 @@ export const useChat = () => {
         .neq('sender_id', user.id)
         .is('read_at', null);
     } catch (error) {
-      console.error('Error marking messages as read:', error);
+      logger.error('Error marking messages as read:', error);
     }
   };
 
@@ -304,7 +305,7 @@ export const useChat = () => {
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            const newMessage = payload.new as any;
+            const newMessage = payload.new as ChatMessage;
             if (newMessage.conversation_id === activeConversationId) {
               fetchMessages(activeConversationId);
             }

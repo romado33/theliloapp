@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { logger } from '@/lib/logger';
 
 export interface Experience {
   id: string;
@@ -37,7 +38,7 @@ export const useRecommendations = () => {
     if (!user) return;
 
     // Skip recommendations for dev bypass users (they have no data)
-    if ((window as any).__DEV_BYPASS_ENABLED) {
+    if (window.__DEV_BYPASS_ENABLED) {
       setRecommendations([]);
       setLoading(false);
       return;
@@ -129,7 +130,7 @@ export const useRecommendations = () => {
       setRecommendations(recommendedExperiences);
 
     } catch (error) {
-      console.error('Error generating recommendations:', error);
+      logger.error('Error generating recommendations:', error);
     } finally {
       setLoading(false);
     }
