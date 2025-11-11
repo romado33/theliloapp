@@ -18,7 +18,7 @@ import cookingClass from "@/assets/cooking-class.jpg";
 import type { SearchResult } from "@/types";
 import { getImageFromUrl } from "@/lib/imageMap";
 
-// Mock experiences using imported assets directly
+// Mock experiences using imported assets
 const mockExperiences = [
   {
     id: "550e8400-e29b-41d4-a716-446655440001",
