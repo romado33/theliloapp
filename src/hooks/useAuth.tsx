@@ -217,7 +217,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     ? async (role: 'user' | 'host') => {
         try {
           // Set dev bypass flag in window and localStorage
-          window.__DEV_BYPASS_ENABLED = true;
+          (window as any).__DEV_BYPASS_ENABLED = true;
           localStorage.setItem('__DEV_BYPASS_ROLE', role);
           
           // Use consistent, valid UUIDs for dev users (namespace UUID approach)

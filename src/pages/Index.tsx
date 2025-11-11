@@ -13,6 +13,8 @@ import { useRecommendations } from "@/hooks/useRecommendations";
 import { TrendingUp, Heart, Database } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
+import farmersMarket from "@/assets/farmers-market.jpg";
+import cookingClass from "@/assets/cooking-class.jpg";
 import type { SearchResult } from "@/types";
 import { getImageFromUrl } from "@/lib/imageMap";
 

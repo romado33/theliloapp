@@ -29,8 +29,6 @@ export const getStatusText = (status: BookingStatus): string => {
       return 'Cancelled';
     case 'completed':
       return 'Completed';
-    default:
-      return status.charAt(0).toUpperCase() + status.slice(1);
   }
 };
 
