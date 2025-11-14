@@ -60,6 +60,40 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Testing
+
+This project includes comprehensive automated testing for both guest and host features.
+
+### Running Tests
+
+```sh
+# Run tests in watch mode
+npm test
+
+# Run tests with UI
+npm run test:ui
+
+# Run tests once
+npm run test:run
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+### Test Structure
+
+- **Unit Tests**: Component and utility function tests in `src/**/__tests__/`
+- **Integration Tests**: Feature tests for guest and host workflows
+- **Test Utilities**: Shared test utilities in `src/test/`
+
+### Test Coverage
+
+Tests cover:
+- Guest features: Search, booking, reviews, saved experiences, dashboard
+- Host features: Experience management, availability, bookings, analytics
+- Shared features: Authentication, messaging, notifications
+- Utility functions: Date formatting, booking status helpers
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/2899d765-c6ab-4ac5-aea2-08a4c08a1309) and click on Share -> Publish.
