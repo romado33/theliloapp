@@ -6,6 +6,7 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 
 vi.mock('@/hooks/useAuth');
 vi.mock('@/hooks/useDashboardData');
+// Supabase is mocked globally in setup.ts
 
 const mockUseAuth = vi.mocked(useAuth);
 const mockUseDashboardData = vi.mocked(useDashboardData);
@@ -77,4 +78,7 @@ describe('UserDashboard - Guest Features', () => {
     expect(screen.getByText(/No bookings yet/i)).toBeInTheDocument();
   });
 });
+
+
+
 

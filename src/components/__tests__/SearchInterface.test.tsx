@@ -3,35 +3,7 @@ import { render, screen } from '@/test/utils';
 import SearchInterface from '@/components/SearchInterface';
 import userEvent from '@testing-library/user-event';
 
-vi.mock('@/integrations/supabase/client', () => ({
-  supabase: {
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          order: vi.fn(() => ({
-            limit: vi.fn(() =>
-              Promise.resolve({
-                data: [],
-                error: null,
-              })
-            ),
-          })),
-        })),
-      })),
-    })),
-    functions: {
-      invoke: vi.fn(() =>
-        Promise.resolve({
-          data: {
-            results: [],
-            searchType: 'text',
-          },
-          error: null,
-        })
-      ),
-    },
-  },
-}));
+// Supabase is mocked globally in setup.ts
 
 describe('SearchInterface Component', () => {
   beforeEach(() => {
@@ -68,4 +40,7 @@ describe('SearchInterface Component', () => {
     expect(screen.getByText(/Filters/i)).toBeInTheDocument();
   });
 });
+
+
+
 

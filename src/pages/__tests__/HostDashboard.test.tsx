@@ -4,22 +4,7 @@ import HostDashboard from '@/pages/HostDashboard';
 import { useAuth } from '@/hooks/useAuth';
 
 vi.mock('@/hooks/useAuth');
-vi.mock('@/integrations/supabase/client', () => ({
-  supabase: {
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          order: vi.fn(() =>
-            Promise.resolve({
-              data: [],
-              error: null,
-            })
-          ),
-        })),
-      })),
-    })),
-  },
-}));
+// Supabase is mocked globally in setup.ts
 
 const mockUseAuth = vi.mocked(useAuth);
 
@@ -81,4 +66,7 @@ describe('HostDashboard - Host Features', () => {
     });
   });
 });
+
+
+
 

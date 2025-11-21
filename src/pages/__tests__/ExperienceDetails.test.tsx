@@ -14,29 +14,74 @@ vi.mock('react-router-dom', async () => {
 
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({
-        eq: vi.fn(() => ({
-          maybeSingle: vi.fn(() =>
-            Promise.resolve({
-              data: {
-                id: 'exp-1',
-                title: 'Pottery Workshop',
-                description: 'Learn pottery',
-                price: 65,
-                duration_hours: 2,
-                max_guests: 8,
-                location: 'Ottawa',
-                image_urls: ['/placeholder.jpg'],
-                categories: { name: 'Arts & Crafts' },
-                profiles: { first_name: 'John' },
-              },
-              error: null,
-            })
-          ),
+    from: vi.fn((table) => {
+      if (table === 'experiences') {
+        return {
+          select: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                maybeSingle: vi.fn(() =>
+                  Promise.resolve({
+                    data: {
+                      id: 'exp-1',
+                      title: 'Pottery Workshop',
+                      description: 'Learn pottery',
+                      price: 65,
+                      duration_hours: 2,
+                      max_guests: 8,
+                      location: 'Ottawa',
+                      image_urls: ['/placeholder.jpg'],
+                      categories: { name: 'Arts & Crafts' },
+                      profiles: { first_name: 'John' },
+                    },
+                    error: null,
+                  })
+                ),
+              })),
+            })),
+          })),
+        };
+      }
+      if (table === 'availability') {
+        return {
+          select: vi.fn(() => ({
+            eq: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                order: vi.fn(() => Promise.resolve({ data: [], error: null })),
+              })),
+            })),
+          })),
+        };
+      }
+      return {
+        select: vi.fn(() => ({
+          eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
         })),
-      })),
-    })),
+      };
+    }),
+    auth: {
+      onAuthStateChange: vi.fn((callback: (event: string, session: any) => void) => {
+        callback('SIGNED_OUT', null);
+        return {
+          data: {
+            subscription: {
+              unsubscribe: vi.fn(),
+            },
+          },
+        };
+      }),
+      getSession: vi.fn(() =>
+        Promise.resolve({
+          data: { session: null },
+          error: null,
+        })
+      ),
+      signUp: vi.fn(() => Promise.resolve({ error: null })),
+      signInWithPassword: vi.fn(() => Promise.resolve({ error: null })),
+      signInWithOAuth: vi.fn(() => Promise.resolve({ error: null })),
+      signOut: vi.fn(() => Promise.resolve({ error: null })),
+    },
+    rpc: vi.fn(() => Promise.resolve({ data: [{ first_name: 'John' }], error: null })),
     functions: {
       invoke: vi.fn(() => Promise.resolve({ data: { url: 'https://stripe.com/checkout' }, error: null })),
     },
@@ -84,4 +129,7 @@ describe('ExperienceDetails - Guest Features', () => {
     });
   });
 });
+
+
+
 

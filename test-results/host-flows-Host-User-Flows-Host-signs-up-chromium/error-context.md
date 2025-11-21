@@ -1,0 +1,99 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - heading "Login" [level=2] [ref=e3]
+    - generic [ref=e4]:
+      - table [ref=e5]:
+        - rowgroup [ref=e6]:
+          - row "System MySQL / MariaDB" [ref=e7]:
+            - cell "System" [ref=e8]
+            - cell "MySQL / MariaDB" [ref=e9]:
+              - combobox [ref=e10]:
+                - option "MySQL / MariaDB" [selected]
+                - option "SQLite"
+                - option "PostgreSQL"
+                - option "Oracle (beta)"
+                - option "MS SQL"
+          - row "Server pg-n8n" [ref=e11]:
+            - cell "Server" [ref=e12]
+            - cell "pg-n8n" [ref=e13]:
+              - textbox "hostname[:port]" [ref=e14]:
+                - /placeholder: localhost
+                - text: pg-n8n
+          - row "Username" [ref=e15]:
+            - cell "Username" [ref=e16]
+            - cell [ref=e17]:
+              - textbox [active] [ref=e18]
+          - row "Password" [ref=e19]:
+            - cell "Password" [ref=e20]
+            - cell [ref=e21]:
+              - textbox [ref=e22]
+          - row "Database" [ref=e23]:
+            - cell "Database" [ref=e24]
+            - cell [ref=e25]:
+              - textbox [ref=e26]
+      - paragraph [ref=e27]:
+        - button "Login" [ref=e28]
+        - generic [ref=e29]:
+          - checkbox "Permanent login" [ref=e30]
+          - text: Permanent login
+  - generic [ref=e31]:
+    - heading "Adminer 5.4.1" [level=1] [ref=e32]:
+      - link "Adminer" [ref=e33] [cursor=pointer]:
+        - /url: https://www.adminer.org/
+      - generic [ref=e34]:
+        - text: 5.4.1
+        - link:
+          - /url: https://www.adminer.org/#download
+    - generic [ref=e36]:
+      - text: "Language:"
+      - combobox "Language:" [ref=e37]:
+        - option "English" [selected]
+        - option "العربية"
+        - option "Български"
+        - option "বাংলা"
+        - option "Bosanski"
+        - option "Català"
+        - option "Čeština"
+        - option "Dansk"
+        - option "Deutsch"
+        - option "Ελληνικά"
+        - option "Español"
+        - option "Eesti"
+        - option "فارسی"
+        - option "Suomi"
+        - option "Français"
+        - option "Galego"
+        - option "עברית"
+        - option "हिन्दी"
+        - option "Magyar"
+        - option "Bahasa Indonesia"
+        - option "Italiano"
+        - option "日本語"
+        - option "ქართული"
+        - option "한국어"
+        - option "Lietuvių"
+        - option "Latviešu"
+        - option "Bahasa Melayu"
+        - option "Nederlands"
+        - option "Norsk"
+        - option "Polski"
+        - option "Português"
+        - option "Português (Brazil)"
+        - option "Limba Română"
+        - option "Русский"
+        - option "Slovenčina"
+        - option "Slovenski"
+        - option "Српски"
+        - option "Svenska"
+        - option "த‌மிழ்"
+        - option "ภาษาไทย"
+        - option "Türkçe"
+        - option "Українська"
+        - option "Oʻzbekcha"
+        - option "Tiếng Việt"
+        - option "简体中文"
+        - option "繁體中文"
+```

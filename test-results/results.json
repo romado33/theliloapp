@@ -1,0 +1,905 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\playwright.config.ts",
+    "rootDir": "C:/Users/RobDods/Apps/CursorTheLiloApp/theliloapp/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 8
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "html",
+        null
+      ],
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "test-results/results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/Users/RobDods/Apps/CursorTheLiloApp/theliloapp/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 8
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/RobDods/Apps/CursorTheLiloApp/theliloapp/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 8,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:8080",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "guest-flows.spec.ts",
+      "file": "guest-flows.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Guest User Flows",
+          "file": "guest-flows.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Guest signs up",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 30606,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts",
+                            "column": 58,
+                            "line": 8
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /sign up/i })\u001b[22m\n\n\n   6 |     \n   7 |     // Click sign up\n>  8 |     await page.getByRole('button', { name: /sign up/i }).click();\n     |                                                          ^\n   9 |     \n  10 |     // Fill sign up form\n  11 |     await page.fill('input[type=\"email\"]', guestUser.email);\n    at C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts:8:58"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-21T21:25:52.653Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-signs-up-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-signs-up-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-signs-up-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "a2ac38d2886f394d25bf-6e5c3f855d837f0593c8",
+              "file": "guest-flows.spec.ts",
+              "line": 4,
+              "column": 3
+            },
+            {
+              "title": "Guest signs in for first time",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "timedOut",
+                      "duration": 30536,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts",
+                            "column": 58,
+                            "line": 24
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /sign up/i })\u001b[22m\n\n\n  22 |     // First sign up\n  23 |     await page.goto('/auth');\n> 24 |     await page.getByRole('button', { name: /sign up/i }).click();\n     |                                                          ^\n  25 |     await page.fill('input[type=\"email\"]', guestUser.email);\n  26 |     await page.fill('input[type=\"password\"]', guestUser.password);\n  27 |     await page.getByRole('button', { name: /sign up|create account/i }).click();\n    at C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts:24:58"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-21T21:25:52.709Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-signs-in-for-first-time-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-signs-in-for-first-time-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-signs-in-for-first-time-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "a2ac38d2886f394d25bf-4802fc391ddea0200275",
+              "file": "guest-flows.spec.ts",
+              "line": 21,
+              "column": 3
+            },
+            {
+              "title": "Guest searches for experience",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "timedOut",
+                      "duration": 30493,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts",
+                            "column": 23,
+                            "line": 46
+                          },
+                          "message": "Error: locator.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[placeholder*=\"Search\"], input[type=\"search\"]').first()\u001b[22m\n\n\n  44 |     // Search for cooking class\n  45 |     const searchInput = page.locator('input[placeholder*=\"Search\"], input[type=\"search\"]').first();\n> 46 |     await searchInput.fill('cooking class');\n     |                       ^\n  47 |     await page.getByRole('button', { name: /search/i }).click();\n  48 |     \n  49 |     // Wait for results\n    at C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts:46:23"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-21T21:25:52.683Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-searches-for-experience-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-searches-for-experience-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-searches-for-experience-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "a2ac38d2886f394d25bf-dff4a0e3d2d468e1c523",
+              "file": "guest-flows.spec.ts",
+              "line": 41,
+              "column": 3
+            },
+            {
+              "title": "Guest books experience",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "timedOut",
+                      "duration": 30533,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts",
+                            "column": 16,
+                            "line": 60
+                          },
+                          "message": "Error: page.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[type=\"email\"]')\u001b[22m\n\n\n  58 |     // Sign in first\n  59 |     await page.goto('/auth');\n> 60 |     await page.fill('input[type=\"email\"]', guestUser.email);\n     |                ^\n  61 |     await page.fill('input[type=\"password\"]', guestUser.password);\n  62 |     await page.getByRole('button', { name: /sign in|log in/i }).click();\n  63 |     await page.waitForURL(/\\/(?!auth)/, { timeout: 10000 });\n    at C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts:60:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-21T21:25:52.648Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-books-experience-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-books-experience-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-books-experience-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "a2ac38d2886f394d25bf-ded9acf009ec38b13981",
+              "file": "guest-flows.spec.ts",
+              "line": 57,
+              "column": 3
+            },
+            {
+              "title": "Guest cancels or modifies booking",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 4,
+                      "status": "timedOut",
+                      "duration": 30495,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts",
+                            "column": 16,
+                            "line": 90
+                          },
+                          "message": "Error: page.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[type=\"email\"]')\u001b[22m\n\n\n  88 |     // Sign in\n  89 |     await page.goto('/auth');\n> 90 |     await page.fill('input[type=\"email\"]', guestUser.email);\n     |                ^\n  91 |     await page.fill('input[type=\"password\"]', guestUser.password);\n  92 |     await page.getByRole('button', { name: /sign in|log in/i }).click();\n  93 |     await page.waitForURL(/\\/(?!auth)/, { timeout: 10000 });\n    at C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts:90:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-21T21:25:52.792Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flo-ecaab-cancels-or-modifies-booking-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flo-ecaab-cancels-or-modifies-booking-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flo-ecaab-cancels-or-modifies-booking-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "a2ac38d2886f394d25bf-e1946d21a6bb31b43d66",
+              "file": "guest-flows.spec.ts",
+              "line": 87,
+              "column": 3
+            },
+            {
+              "title": "Guest messages Host",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 5,
+                      "status": "timedOut",
+                      "duration": 30422,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts",
+                            "column": 16,
+                            "line": 120
+                          },
+                          "message": "Error: page.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[type=\"email\"]')\u001b[22m\n\n\n  118 |     // Sign in\n  119 |     await page.goto('/auth');\n> 120 |     await page.fill('input[type=\"email\"]', guestUser.email);\n      |                ^\n  121 |     await page.fill('input[type=\"password\"]', guestUser.password);\n  122 |     await page.getByRole('button', { name: /sign in|log in/i }).click();\n  123 |     await page.waitForURL(/\\/(?!auth)/, { timeout: 10000 });\n    at C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts:120:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-21T21:25:52.745Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-messages-Host-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-messages-Host-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-messages-Host-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "a2ac38d2886f394d25bf-0002a75195d4442b83d6",
+              "file": "guest-flows.spec.ts",
+              "line": 117,
+              "column": 3
+            },
+            {
+              "title": "Guest tries to pay",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 6,
+                      "status": "timedOut",
+                      "duration": 30608,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts",
+                            "column": 16,
+                            "line": 148
+                          },
+                          "message": "Error: page.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[type=\"email\"]')\u001b[22m\n\n\n  146 |     // Sign in\n  147 |     await page.goto('/auth');\n> 148 |     await page.fill('input[type=\"email\"]', guestUser.email);\n      |                ^\n  149 |     await page.fill('input[type=\"password\"]', guestUser.password);\n  150 |     await page.getByRole('button', { name: /sign in|log in/i }).click();\n  151 |     await page.waitForURL(/\\/(?!auth)/, { timeout: 10000 });\n    at C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts:148:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-21T21:25:52.778Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-tries-to-pay-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-tries-to-pay-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-tries-to-pay-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "a2ac38d2886f394d25bf-0b3c477bcbc058767777",
+              "file": "guest-flows.spec.ts",
+              "line": 145,
+              "column": 3
+            },
+            {
+              "title": "Guest leaves review",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 7,
+                      "status": "timedOut",
+                      "duration": 30410,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts",
+                            "column": 16,
+                            "line": 176
+                          },
+                          "message": "Error: page.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[type=\"email\"]')\u001b[22m\n\n\n  174 |     // Sign in\n  175 |     await page.goto('/auth');\n> 176 |     await page.fill('input[type=\"email\"]', guestUser.email);\n      |                ^\n  177 |     await page.fill('input[type=\"password\"]', guestUser.password);\n  178 |     await page.getByRole('button', { name: /sign in|log in/i }).click();\n  179 |     await page.waitForURL(/\\/(?!auth)/, { timeout: 10000 });\n    at C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\guest-flows.spec.ts:176:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-21T21:25:52.762Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-leaves-review-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-leaves-review-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\guest-flows-Guest-User-Flows-Guest-leaves-review-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "a2ac38d2886f394d25bf-6bed5f988c1b9069f772",
+              "file": "guest-flows.spec.ts",
+              "line": 173,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "host-flows.spec.ts",
+      "file": "host-flows.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Host User Flows",
+          "file": "host-flows.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Host signs up",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 9,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 30187,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\host-flows.spec.ts",
+                            "column": 58,
+                            "line": 8
+                          },
+                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /sign up/i })\u001b[22m\n\n\n   6 |     \n   7 |     // Click sign up\n>  8 |     await page.getByRole('button', { name: /sign up/i }).click();\n     |                                                          ^\n   9 |     \n  10 |     // Fill sign up form\n  11 |     await page.fill('input[type=\"email\"]', hostUser.email);\n    at C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\host-flows.spec.ts:8:58"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-21T21:26:26.743Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\host-flows-Host-User-Flows-Host-signs-up-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\host-flows-Host-User-Flows-Host-signs-up-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\host-flows-Host-User-Flows-Host-signs-up-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "2af463c3a0f0461765f8-e42f695b911d084cad80",
+              "file": "host-flows.spec.ts",
+              "line": 4,
+              "column": 3
+            },
+            {
+              "title": "Host adds experience info",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 10,
+                      "parallelIndex": 2,
+                      "status": "timedOut",
+                      "duration": 30194,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\host-flows.spec.ts",
+                            "column": 16,
+                            "line": 30
+                          },
+                          "message": "Error: page.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[type=\"email\"]')\u001b[22m\n\n\n  28 |     // Sign in as host\n  29 |     await page.goto('/auth');\n> 30 |     await page.fill('input[type=\"email\"]', hostUser.email);\n     |                ^\n  31 |     await page.fill('input[type=\"password\"]', hostUser.password);\n  32 |     await page.getByRole('button', { name: /sign in|log in/i }).click();\n  33 |     await page.waitForURL(/\\/(?!auth)/, { timeout: 10000 });\n    at C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\host-flows.spec.ts:30:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-21T21:26:26.743Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\host-flows-Host-User-Flows-Host-adds-experience-info-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\host-flows-Host-User-Flows-Host-adds-experience-info-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\host-flows-Host-User-Flows-Host-adds-experience-info-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "2af463c3a0f0461765f8-ce5f68cb1c5cff8c82f4",
+              "file": "host-flows.spec.ts",
+              "line": 27,
+              "column": 3
+            },
+            {
+              "title": "Host adds experience photos",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 8,
+                      "parallelIndex": 4,
+                      "status": "timedOut",
+                      "duration": 30200,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\host-flows.spec.ts",
+                            "column": 16,
+                            "line": 62
+                          },
+                          "message": "Error: page.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[type=\"email\"]')\u001b[22m\n\n\n  60 |     // Sign in\n  61 |     await page.goto('/auth');\n> 62 |     await page.fill('input[type=\"email\"]', hostUser.email);\n     |                ^\n  63 |     await page.fill('input[type=\"password\"]', hostUser.password);\n  64 |     await page.getByRole('button', { name: /sign in|log in/i }).click();\n  65 |     await page.waitForURL(/\\/(?!auth)/, { timeout: 10000 });\n    at C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\host-flows.spec.ts:62:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-21T21:26:26.743Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\host-flows-Host-User-Flows-Host-adds-experience-photos-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\host-flows-Host-User-Flows-Host-adds-experience-photos-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\host-flows-Host-User-Flows-Host-adds-experience-photos-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "2af463c3a0f0461765f8-c73144869e94ccbd82d0",
+              "file": "host-flows.spec.ts",
+              "line": 59,
+              "column": 3
+            },
+            {
+              "title": "Host messages guest with booking",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 11,
+                      "parallelIndex": 6,
+                      "status": "timedOut",
+                      "duration": 30200,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\host-flows.spec.ts",
+                            "column": 16,
+                            "line": 95
+                          },
+                          "message": "Error: page.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[type=\"email\"]')\u001b[22m\n\n\n  93 |     // Sign in as host\n  94 |     await page.goto('/auth');\n> 95 |     await page.fill('input[type=\"email\"]', hostUser.email);\n     |                ^\n  96 |     await page.fill('input[type=\"password\"]', hostUser.password);\n  97 |     await page.getByRole('button', { name: /sign in|log in/i }).click();\n  98 |     await page.waitForURL(/\\/(?!auth)/, { timeout: 10000 });\n    at C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\e2e\\host-flows.spec.ts:95:16"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-21T21:26:26.743Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\host-flows-Host-User-Flows-Host-messages-guest-with-booking-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\host-flows-Host-User-Flows-Host-messages-guest-with-booking-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RobDods\\Apps\\CursorTheLiloApp\\theliloapp\\test-results\\host-flows-Host-User-Flows-Host-messages-guest-with-booking-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "2af463c3a0f0461765f8-819c98b31a186381487f",
+              "file": "host-flows.spec.ts",
+              "line": 92,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-11-21T21:25:49.440Z",
+    "duration": 68131.916,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 12,
+    "flaky": 0
+  }
+}
