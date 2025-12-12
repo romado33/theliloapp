@@ -34,6 +34,7 @@ describe('UserDashboard - Guest Features', () => {
         upcomingBookings: 2,
         savedExperiences: 5,
         unreadMessages: 3,
+        totalBookings: 12,
         completedBookings: 10,
       },
       bookings: [],

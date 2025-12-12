@@ -34,11 +34,13 @@ export const mockBookings: BookingDetails[] = [
     id: 'booking-1',
     experience_id: 'exp-1',
     guest_id: 'guest-1',
+    availability_id: 'avail-1',
     booking_date: new Date().toISOString(),
     guest_count: 2,
     total_price: 130,
     status: 'confirmed',
     special_requests: null,
+    payment_intent_id: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     guest_contact_info: { email: 'guest@test.com' },
@@ -86,7 +88,7 @@ export const handlers = [
   }),
 
   http.post('/api/bookings', async ({ request }) => {
-    const body = await request.json();
+    const body = (await request.json()) as Record<string, unknown>;
     return HttpResponse.json({
       data: { id: 'new-booking', ...body },
       error: null,
