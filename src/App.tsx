@@ -18,6 +18,8 @@ import BookingConfirmation from "./pages/BookingConfirmation";
 import Messages from "./pages/Messages";
 import SavedExperiences from "./pages/SavedExperiences";
 import Support from "./pages/Support";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCanceled from "./pages/PaymentCanceled";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -72,6 +74,11 @@ const App = () => (
                   
                   <Route path="/booking-confirmation/:bookingId" element={<BookingConfirmation />} />
                   <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+                  
+                  {/* Payment Routes */}
+                  <Route path="/payment-success" element={<PaymentSuccess />} />
+                  <Route path="/payment-canceled" element={<PaymentCanceled />} />
+                  
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
