@@ -31,6 +31,7 @@ describe('Index Page - Guest Features', () => {
     mockUseRecommendations.mockReturnValue({
       recommendations: [],
       loading: false,
+      refreshRecommendations: vi.fn(),
     });
   });
 
@@ -76,6 +77,7 @@ describe('Index Page - Guest Features', () => {
         } as any,
       ],
       loading: false,
+      refreshRecommendations: vi.fn(),
     });
 
     render(<Index />);
