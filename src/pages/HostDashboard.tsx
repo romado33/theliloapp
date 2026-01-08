@@ -9,6 +9,7 @@ import { BookingManagement } from "@/components/host/BookingManagement";
 import { AvailabilityCalendar } from "@/components/host/AvailabilityCalendar";
 import { RevenueAnalytics } from "@/components/host/RevenueAnalytics";
 import { EditExperienceModal } from "@/components/host/EditExperienceModal";
+import { SubscriptionStatus } from "@/components/payment/SubscriptionStatus";
 import { 
   Plus, 
   Eye, 
@@ -21,11 +22,13 @@ import {
   Edit,
   Trash2,
   BarChart3,
-  Settings
+  Settings,
+  CreditCard
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { getImageFromUrl } from "@/lib/imageMap";
+import { Link } from "react-router-dom";
 
 interface Experience {
   id: string;
@@ -277,12 +280,13 @@ const HostDashboard = () => {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="experiences">Experiences</TabsTrigger>
             <TabsTrigger value="bookings">Bookings</TabsTrigger>
             <TabsTrigger value="availability">Availability</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="subscription">Subscription</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
           </TabsList>
 
@@ -440,6 +444,26 @@ const HostDashboard = () => {
 
           <TabsContent value="analytics" className="mt-6">
             <RevenueAnalytics />
+          </TabsContent>
+
+          <TabsContent value="subscription" className="mt-6">
+            <div className="max-w-2xl">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <CreditCard className="w-6 h-6" />
+                  Your Subscription
+                </h2>
+                <p className="text-muted-foreground mt-1">
+                  Manage your host subscription plan
+                </p>
+              </div>
+              <SubscriptionStatus />
+              <div className="mt-6">
+                <Button asChild>
+                  <Link to="/pricing">View All Plans</Link>
+                </Button>
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="messages" className="mt-6">

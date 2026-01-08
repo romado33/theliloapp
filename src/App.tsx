@@ -20,6 +20,7 @@ import SavedExperiences from "./pages/SavedExperiences";
 import Support from "./pages/Support";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCanceled from "./pages/PaymentCanceled";
+import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -76,6 +77,7 @@ const App = () => (
                   <Route path="/booking-confirmation" element={<BookingConfirmation />} />
                   
                   {/* Payment Routes */}
+                  <Route path="/pricing" element={<Pricing />} />
                   <Route path="/payment-success" element={<PaymentSuccess />} />
                   <Route path="/payment-canceled" element={<PaymentCanceled />} />
                   
