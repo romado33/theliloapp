@@ -120,4 +120,94 @@ test.describe('Host User Flows', () => {
   });
 });
 
+test.describe('Host Dashboard Features', () => {
+  test('Host views subscription tab', async ({ page, hostUser }) => {
+    await page.goto('/auth');
+    await page.fill('input[type="email"]', hostUser.email);
+    await page.fill('input[type="password"]', hostUser.password);
+    await page.getByRole('button', { name: /sign in|log in/i }).click();
+    await page.waitForURL(/\/(?!auth)/, { timeout: 10000 });
+    
+    await page.goto('/host-dashboard');
+    
+    // Click subscription tab
+    const subscriptionTab = page.getByRole('tab', { name: /subscription/i });
+    await expect(subscriptionTab).toBeVisible({ timeout: 5000 });
+    await subscriptionTab.click();
+    
+    // Should show subscription content
+    await expect(page.locator('text=/subscription|plan|pricing/i').first()).toBeVisible({ timeout: 5000 });
+  });
+
+  test('Host views booking management', async ({ page, hostUser }) => {
+    await page.goto('/auth');
+    await page.fill('input[type="email"]', hostUser.email);
+    await page.fill('input[type="password"]', hostUser.password);
+    await page.getByRole('button', { name: /sign in|log in/i }).click();
+    await page.waitForURL(/\/(?!auth)/, { timeout: 10000 });
+    
+    await page.goto('/host-dashboard');
+    
+    // Click bookings tab
+    const bookingsTab = page.getByRole('tab', { name: /bookings/i });
+    await expect(bookingsTab).toBeVisible({ timeout: 5000 });
+    await bookingsTab.click();
+    
+    // Should show booking filters or empty state
+    const hasBookingContent = await page.locator('text=/pending|confirmed|completed|cancelled|no bookings/i').first().isVisible({ timeout: 5000 });
+    expect(hasBookingContent).toBeTruthy();
+  });
+
+  test('Host views availability calendar', async ({ page, hostUser }) => {
+    await page.goto('/auth');
+    await page.fill('input[type="email"]', hostUser.email);
+    await page.fill('input[type="password"]', hostUser.password);
+    await page.getByRole('button', { name: /sign in|log in/i }).click();
+    await page.waitForURL(/\/(?!auth)/, { timeout: 10000 });
+    
+    await page.goto('/host-dashboard');
+    
+    // Click availability tab
+    const availabilityTab = page.getByRole('tab', { name: /availability/i });
+    await expect(availabilityTab).toBeVisible({ timeout: 5000 });
+    await availabilityTab.click();
+    
+    // Should show calendar UI
+    const hasCalendarContent = await page.locator('[role="grid"], .rdp, text=/calendar|availability|select date/i').first().isVisible({ timeout: 5000 });
+    expect(hasCalendarContent).toBeTruthy();
+  });
+
+  test('Host views revenue analytics', async ({ page, hostUser }) => {
+    await page.goto('/auth');
+    await page.fill('input[type="email"]', hostUser.email);
+    await page.fill('input[type="password"]', hostUser.password);
+    await page.getByRole('button', { name: /sign in|log in/i }).click();
+    await page.waitForURL(/\/(?!auth)/, { timeout: 10000 });
+    
+    await page.goto('/host-dashboard');
+    
+    // Click analytics tab
+    const analyticsTab = page.getByRole('tab', { name: /analytics/i });
+    await expect(analyticsTab).toBeVisible({ timeout: 5000 });
+    await analyticsTab.click();
+    
+    // Should show analytics content
+    const hasAnalyticsContent = await page.locator('text=/revenue|earnings|bookings|performance/i').first().isVisible({ timeout: 5000 });
+    expect(hasAnalyticsContent).toBeTruthy();
+  });
+
+  test('Host dashboard shows stats overview', async ({ page, hostUser }) => {
+    await page.goto('/auth');
+    await page.fill('input[type="email"]', hostUser.email);
+    await page.fill('input[type="password"]', hostUser.password);
+    await page.getByRole('button', { name: /sign in|log in/i }).click();
+    await page.waitForURL(/\/(?!auth)/, { timeout: 10000 });
+    
+    await page.goto('/host-dashboard');
+    
+    // Should show overview stats on default tab
+    await expect(page.locator('text=/total experiences|active experiences|total bookings/i').first()).toBeVisible({ timeout: 5000 });
+  });
+});
+
 
