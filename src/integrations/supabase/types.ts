@@ -909,6 +909,16 @@ export type Database = {
         Args: { p_experience_id: string }
         Returns: string
       }
+      get_guest_booking_info: {
+        Args: { p_booking_id: string }
+        Returns: {
+          booking_date: string
+          guest_count: number
+          guest_first_name: string
+          special_requests: string
+          status: string
+        }[]
+      }
       get_host_booking_info: {
         Args: { booking_id: string }
         Returns: {
