@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
@@ -278,6 +278,11 @@ const Index = () => {
               </div>
             </div>
             <p className="font-medium">Supporting Ottawa families through authentic local connections</p>
+            <div className="mt-4 flex justify-center gap-6 text-sm">
+              <Link to="/privacy" className="hover:text-lilo-green transition-colors">Privacy Policy</Link>
+              <Link to="/terms" className="hover:text-lilo-green transition-colors">Terms of Service</Link>
+              <Link to="/support" className="hover:text-lilo-green transition-colors">Help Center</Link>
+            </div>
             <div className="mt-2 text-sm">
               <span className="bg-gradient-brand bg-clip-text text-transparent font-semibold">Neighbors helping neighbors discover more</span>
             </div>
