@@ -1,22 +1,29 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import { z } from "https://esm.sh/zod@3.25.76";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface PaymentRequest {
-  experienceId: string;
-  bookingDate: string;
-  guestCount: number;
-  specialRequests?: string;
-  guestContactInfo?: {
-    email: string;
-    phone?: string;
-  };
-}
+// Strict validation schema for guest contact info
+const guestContactInfoSchema = z.object({
+  email: z.string().email().max(255),
+  phone: z.string().regex(/^[\d\s\-\+\(\)]{7,20}$/).optional(),
+}).strict(); // Reject any extra fields
+
+// Full payment request validation
+const paymentRequestSchema = z.object({
+  experienceId: z.string().uuid(),
+  bookingDate: z.string().datetime(),
+  guestCount: z.number().int().min(1).max(50),
+  specialRequests: z.string().max(500).optional(),
+  guestContactInfo: guestContactInfoSchema.optional(),
+});
+
+type PaymentRequest = z.infer<typeof paymentRequestSchema>;
 
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
@@ -47,15 +54,24 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Authenticated user:", user.email);
 
+    const rawBody = await req.json();
+    
+    // Validate and sanitize all input
+    const parseResult = paymentRequestSchema.safeParse(rawBody);
+    if (!parseResult.success) {
+      console.error("Validation error:", parseResult.error.errors);
+      throw new Error(`Invalid request: ${parseResult.error.errors.map(e => e.message).join(', ')}`);
+    }
+    
     const {
       experienceId,
       bookingDate,
       guestCount,
       specialRequests,
       guestContactInfo
-    }: PaymentRequest = await req.json();
+    } = parseResult.data;
 
-    console.log("Payment request received:", { experienceId, bookingDate, guestCount });
+    console.log("Payment request validated:", { experienceId, bookingDate, guestCount });
 
     // Get experience details
     const { data: experience, error: expError } = await supabaseClient

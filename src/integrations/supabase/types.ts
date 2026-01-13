@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
@@ -931,6 +931,10 @@ export type Database = {
           status: string
           total_price: number
         }[]
+      }
+      get_masked_guest_contact: {
+        Args: { p_booking_id: string }
+        Returns: Json
       }
       get_public_host_profile: {
         Args: { host_user_id: string }
