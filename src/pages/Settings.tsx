@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,16 +18,18 @@ import {
   CreditCard, 
   LogOut, 
   Trash2,
-  Eye,
-  EyeOff,
-  Save
+  Save,
+  AlertTriangle
 } from "lucide-react";
 
 const Settings = () => {
   const { user, profile, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [profileData, setProfileData] = useState({
     first_name: profile?.first_name || "",
     last_name: profile?.last_name || "",
@@ -358,51 +361,80 @@ const Settings = () => {
 
             <Card className="border-destructive/20">
               <CardHeader>
-                <CardTitle className="text-destructive">Danger Zone</CardTitle>
+                <CardTitle className="text-destructive flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5" />
+                  Danger Zone
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between p-4 border border-destructive/20 rounded-lg bg-destructive/5">
-                  <div>
-                    <Label className="text-base font-medium text-destructive">Delete Account</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Permanently delete your account and all associated data
-                    </p>
-                  </div>
-                  <Button 
-                    variant="destructive" 
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="flex items-center gap-2"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete Account
-                  </Button>
-                </div>
-                
-                {showDeleteConfirm && (
-                  <div className="mt-4 p-4 border border-destructive/30 rounded-lg bg-destructive/10">
-                    <p className="text-sm font-medium text-destructive mb-2">
-                      Are you sure you want to delete your account?
-                    </p>
-                    <p className="text-xs text-muted-foreground mb-4">
-                      This action cannot be undone. All your data will be permanently deleted.
-                    </p>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                      >
-                        Yes, Delete My Account
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowDeleteConfirm(false)}
-                      >
-                        Cancel
-                      </Button>
+                <div className="p-4 border border-destructive/20 rounded-lg bg-destructive/5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <Label className="text-base font-medium text-destructive">Delete Account</Label>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Permanently delete your account and all associated data. This action cannot be undone.
+                      </p>
                     </div>
+                    <Button 
+                      variant="destructive" 
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="flex items-center gap-2 shrink-0"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete Account
+                    </Button>
                   </div>
-                )}
+                  
+                  {showDeleteConfirm && (
+                    <div className="mt-4 p-4 border border-destructive/30 rounded-lg bg-destructive/10">
+                      <div className="flex items-center gap-2 mb-3">
+                        <AlertTriangle className="w-5 h-5 text-destructive" />
+                        <p className="text-sm font-medium text-destructive">
+                          This will permanently delete:
+                        </p>
+                      </div>
+                      <ul className="text-xs text-muted-foreground mb-4 list-disc list-inside space-y-1">
+                        <li>Your profile and personal information</li>
+                        <li>All your bookings and booking history</li>
+                        <li>Your saved experiences and preferences</li>
+                        <li>All messages and conversations</li>
+                        {profile?.is_host && <li>All your hosted experiences and their data</li>}
+                      </ul>
+                      <div className="mb-4">
+                        <Label htmlFor="delete-confirm" className="text-sm font-medium">
+                          Type DELETE to confirm:
+                        </Label>
+                        <Input
+                          id="delete-confirm"
+                          value={deleteConfirmText}
+                          onChange={(e) => setDeleteConfirmText(e.target.value)}
+                          placeholder="DELETE"
+                          className="mt-1"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={handleDeleteAccount}
+                          disabled={deleteLoading || deleteConfirmText !== "DELETE"}
+                        >
+                          {deleteLoading ? "Deleting..." : "Yes, Delete My Account"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setShowDeleteConfirm(false);
+                            setDeleteConfirmText("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>
