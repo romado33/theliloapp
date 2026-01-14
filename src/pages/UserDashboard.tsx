@@ -30,6 +30,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ModifyBookingDialog } from '@/components/ModifyBookingDialog';
+import { CalendarExportButton } from '@/components/CalendarExportButton';
 import { getImageFromUrl } from '@/lib/imageMap';
 import { getStatusColor, getStatusText, type BookingStatus } from '@/lib/bookingUtils';
 import { logger } from '@/lib/logger';
@@ -288,6 +289,7 @@ const UserDashboard = () => {
                               Total: ${Number(booking.total_price).toFixed(2)}
                             </div>
                             <div className="flex gap-2 flex-wrap">
+                              <CalendarExportButton booking={booking} />
                               <Button variant="outline" size="sm" asChild>
                                 <Link to="/messages">Contact Host</Link>
                               </Button>
