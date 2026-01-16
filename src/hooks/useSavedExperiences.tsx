@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { isDevBypassEnabled } from '@/lib/devUtils';
 
 export interface SavedExperience {
   id: string;
@@ -36,7 +37,7 @@ export const useSavedExperiences = () => {
     }
 
     // Skip database queries for dev bypass users (they have no data)
-    if ((window as any).__DEV_BYPASS_ENABLED) {
+    if (isDevBypassEnabled()) {
       setSavedExperiences([]);
       setLoading(false);
       return;

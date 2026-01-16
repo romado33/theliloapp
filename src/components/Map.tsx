@@ -91,8 +91,16 @@ const Map: React.FC<MapProps> = ({
 
     map.current.addControl(geocoder, 'top-left');
 
+    // Define geocoder result event type
+    interface GeocoderResult {
+      result: {
+        center: [number, number];
+        place_name: string;
+      };
+    }
+
     // Handle geocoder result
-    geocoder.on('result', (e: any) => {
+    geocoder.on('result', (e: GeocoderResult) => {
       const { center, place_name } = e.result;
       onLocationSelect?.({
         lat: center[1],
