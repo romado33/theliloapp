@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { isDevBypassEnabled } from '@/lib/devUtils';
 
 export interface DashboardStats {
   upcomingBookings: number;
@@ -78,7 +79,7 @@ export const useDashboardData = () => {
     if (!user?.id) return;
 
     // Skip database queries for dev bypass users (they have no data)
-    if ((window as any).__DEV_BYPASS_ENABLED) {
+    if (isDevBypassEnabled()) {
       setLoading(false);
       return;
     }

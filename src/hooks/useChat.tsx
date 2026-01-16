@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { logger } from '@/lib/logger';
+import { isDevBypassEnabled } from '@/lib/devUtils';
 
 export interface ChatConversation {
   id: string;
@@ -51,7 +52,7 @@ export const useChat = () => {
     }
 
     // Skip chat for dev bypass users (they have no conversations)
-    if (window.__DEV_BYPASS_ENABLED) {
+    if (isDevBypassEnabled()) {
       setConversations([]);
       setLoading(false);
       return;

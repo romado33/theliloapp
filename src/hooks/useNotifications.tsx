@@ -2,17 +2,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { type Notification, parseNotificationData } from '@/types/notifications';
+import type { Json } from '@/integrations/supabase/types';
 
-export interface Notification {
-  id: string;
-  type: string;
-  title: string;
-  message: string;
-  data: any;
-  read: boolean;
-  created_at: string;
-  updated_at: string;
-}
+export type { Notification };
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -34,8 +27,20 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
-      setNotifications(data || []);
-      setUnreadCount(data?.filter(n => !n.read).length || 0);
+      // Map database records to typed Notification objects
+      const typedNotifications: Notification[] = (data || []).map(n => ({
+        id: n.id,
+        type: n.type,
+        title: n.title,
+        message: n.message,
+        data: parseNotificationData(n.data),
+        read: n.read,
+        created_at: n.created_at,
+        updated_at: n.updated_at,
+      }));
+
+      setNotifications(typedNotifications);
+      setUnreadCount(typedNotifications.filter(n => !n.read).length);
     } catch (error) {
       console.error('Error fetching notifications:', error);
       toast({
@@ -124,6 +129,18 @@ export const useNotifications = () => {
 
     fetchNotifications();
 
+    // Helper to map raw payload to typed Notification
+    const mapToNotification = (raw: Record<string, unknown>): Notification => ({
+      id: raw.id as string,
+      type: raw.type as string,
+      title: raw.title as string,
+      message: raw.message as string,
+      data: parseNotificationData(raw.data as Json | null),
+      read: raw.read as boolean,
+      created_at: raw.created_at as string,
+      updated_at: raw.updated_at as string,
+    });
+
     // Subscribe to real-time notifications
     const channel = supabase
       .channel('notifications')
@@ -137,7 +154,7 @@ export const useNotifications = () => {
         },
         (payload) => {
           console.log('New notification received:', payload);
-          const newNotification = payload.new as Notification;
+          const newNotification = mapToNotification(payload.new as Record<string, unknown>);
           
           setNotifications(prev => [newNotification, ...prev]);
           setUnreadCount(prev => prev + 1);
@@ -149,8 +166,8 @@ export const useNotifications = () => {
           });
 
           // Request permission and show browser notification
-          if (Notification.permission === 'granted') {
-            new Notification(newNotification.title, {
+          if (globalThis.Notification?.permission === 'granted') {
+            new globalThis.Notification(newNotification.title, {
               body: newNotification.message,
               icon: '/lovable-uploads/6dfadda4-fb06-470c-940d-2bccb95a8f8f.png'
             });
@@ -166,7 +183,7 @@ export const useNotifications = () => {
           filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          const updatedNotification = payload.new as Notification;
+          const updatedNotification = mapToNotification(payload.new as Record<string, unknown>);
           setNotifications(prev => 
             prev.map(n => n.id === updatedNotification.id ? updatedNotification : n)
           );
