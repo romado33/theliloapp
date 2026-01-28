@@ -119,26 +119,36 @@ const handler = async (req: Request): Promise<Response> => {
     if (customerEmail) {
       console.log("Sending confirmation email to:", customerEmail);
       
-      const emailResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-booking-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
-        },
-        body: JSON.stringify({
-          bookingId: updatedBooking.id,
-          customerEmail,
-          experienceTitle: experience.title,
-          hostName,
-          bookingDate: updatedBooking.booking_date,
-          guestCount: updatedBooking.guest_count,
-          totalPrice: updatedBooking.total_price,
-          location: experience.location,
-        }),
-      });
+      try {
+        const emailResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+          },
+          body: JSON.stringify({
+            type: 'booking_confirmation',
+            to: customerEmail,
+            data: {
+              guestName: updatedBooking.guest_contact_info?.firstName || 'Guest',
+              experienceTitle: experience.title,
+              hostName,
+              bookingDate: updatedBooking.booking_date,
+              guestCount: updatedBooking.guest_count,
+              totalPrice: updatedBooking.total_price,
+              location: experience.location,
+              bookingId: updatedBooking.id,
+            },
+          }),
+        });
 
-      if (!emailResponse.ok) {
-        console.warn("Failed to send confirmation email, but booking is confirmed");
+        if (!emailResponse.ok) {
+          console.warn("Failed to send confirmation email, but booking is confirmed");
+        } else {
+          console.log("Confirmation email sent successfully");
+        }
+      } catch (emailError) {
+        console.warn("Email sending failed:", emailError);
       }
     }
 
