@@ -87,18 +87,50 @@ export const ModifyBookingDialog = ({ booking, open, onOpenChange, onSuccess }: 
       setSubmitting(true);
 
       const selectedSlot = availableSlots.find(s => s.id === selectedSlotId);
+      const newBookingDate = selectedSlot?.start_time || booking.booking_date;
       
       const { error } = await supabase
         .from('bookings')
         .update({
           availability_id: selectedSlotId,
-          booking_date: selectedSlot?.start_time || booking.booking_date,
+          booking_date: newBookingDate,
           guest_count: guestCount,
           special_requests: specialRequests || null,
         })
         .eq('id', booking.id);
 
       if (error) throw error;
+
+      // Send modification email notification
+      try {
+        const { data: bookingDetails } = await supabase
+          .from('bookings')
+          .select(`
+            guest_contact_info,
+            experience:experiences(title, location)
+          `)
+          .eq('id', booking.id)
+          .single();
+        
+        const guestEmail = (bookingDetails?.guest_contact_info as { email?: string })?.email;
+        if (guestEmail && bookingDetails?.experience) {
+          await supabase.functions.invoke('send-email', {
+            body: {
+              type: 'booking_modified',
+              to: guestEmail,
+              data: {
+                experienceTitle: bookingDetails.experience.title,
+                bookingDate: newBookingDate,
+                guestCount: guestCount,
+                location: bookingDetails.experience.location,
+                bookingId: booking.id,
+              },
+            },
+          });
+        }
+      } catch (emailError) {
+        console.warn('Failed to send modification email:', emailError);
+      }
 
       toast({
         title: 'Booking updated',

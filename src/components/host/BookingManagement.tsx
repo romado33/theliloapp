@@ -105,12 +105,44 @@ export const BookingManagement = () => {
 
   const updateBookingStatus = async (bookingId: string, newStatus: string) => {
     try {
+      const booking = bookings.find(b => b.id === bookingId);
+      
       const { error } = await supabase
         .from('bookings')
         .update({ status: newStatus })
         .eq('id', bookingId);
 
       if (error) throw error;
+
+      // Send email notification based on status change
+      if (booking?.guest_contact_info?.email) {
+        const emailType = newStatus === 'confirmed' ? 'booking_confirmation' 
+                        : newStatus === 'cancelled' ? 'booking_cancellation' 
+                        : null;
+        
+        if (emailType) {
+          try {
+            await supabase.functions.invoke('send-email', {
+              body: {
+                type: emailType,
+                to: booking.guest_contact_info.email,
+                data: {
+                  guestName: booking.profiles?.first_name || 'Guest',
+                  experienceTitle: booking.experience.title,
+                  hostName: user?.user_metadata?.first_name || 'Host',
+                  bookingDate: booking.booking_date,
+                  guestCount: booking.guest_count,
+                  totalPrice: booking.total_price,
+                  location: booking.experience.location,
+                  bookingId: booking.id,
+                },
+              },
+            });
+          } catch (emailError) {
+            console.warn('Failed to send email notification:', emailError);
+          }
+        }
+      }
 
       await fetchBookings();
       toast({
