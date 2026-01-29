@@ -23,10 +23,16 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import './index.css'
+import { initErrorMonitoring } from './lib/errorMonitoring'
 
-// Diagnostic logging
-console.info('🏗️ BUILD_ID:', import.meta.env.VITE_BUILD_ID);
-console.info('⚛️ React version:', React.version);
+// Initialize error monitoring for production
+initErrorMonitoring();
+
+// Diagnostic logging (only in development)
+if (import.meta.env.DEV) {
+  console.info('🏗️ BUILD_ID:', import.meta.env.VITE_BUILD_ID);
+  console.info('⚛️ React version:', React.version);
+}
 
 // Request notification permission
 if ('Notification' in window && Notification.permission === 'default') {

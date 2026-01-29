@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, ArrowLeft, Code, Mail } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { PasswordStrengthIndicator } from '@/components/PasswordStrengthIndicator';
 
 const DevBypassModal = lazy(() => import('@/components/DevBypassModal').then(module => ({ default: module.DevBypassModal })));
 
@@ -309,7 +310,7 @@ const Auth = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                         placeholder="••••••••"
-                        minLength={6}
+                        minLength={8}
                       />
                       <Button
                         type="button"
@@ -325,6 +326,7 @@ const Auth = () => {
                         )}
                       </Button>
                     </div>
+                    <PasswordStrengthIndicator password={password} />
                   </div>
 
                   <Button type="submit" className="w-full" disabled={loading}>
@@ -379,21 +381,23 @@ const Auth = () => {
               </div>
             )}
 
-            {/* Dev Bypass Button */}
-            <div className="pt-4 border-t">
-              <Button
-                variant="secondary"
-                onClick={() => setShowDevModal(true)}
-                disabled={loading}
-                className="w-full bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border-yellow-300"
-              >
-                <Code className="w-4 h-4 mr-2" />
-                Dev Bypass (Skip Login)
-              </Button>
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                For development purposes only
-              </p>
-            </div>
+            {/* Dev Bypass Button - Only shown in development */}
+            {import.meta.env.DEV && (
+              <div className="pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDevModal(true)}
+                  disabled={loading}
+                  className="w-full border-warning bg-warning/10 text-warning-foreground hover:bg-warning/20"
+                >
+                  <Code className="w-4 h-4 mr-2" />
+                  Dev Bypass (Skip Login)
+                </Button>
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  For development purposes only
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
         

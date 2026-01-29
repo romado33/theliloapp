@@ -1,11 +1,11 @@
 {
   "name": "Lilo - Live Local",
   "short_name": "Lilo",
-  "description": "Discover unique local experiences in your neighborhood",
+  "description": "Discover and book unique family-friendly experiences in Ottawa. Connect with local hosts and create unforgettable memories.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#3b82f6",
+  "theme_color": "#2D5A27",
   "orientation": "portrait-primary",
   "icons": [
     {
@@ -21,13 +21,14 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["travel", "lifestyle", "social"],
+  "categories": ["lifestyle", "travel", "social"],
   "screenshots": [
     {
-      "src": "/lovable-uploads/6dfadda4-fb06-470c-940d-2bccb95a8f8f.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
+      "src": "/og-image.jpg",
+      "sizes": "1200x630",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Lilo - Live Local community experiences"
     }
   ],
   "prefer_related_applications": false,
@@ -39,5 +40,9 @@
       "text": "text",
       "url": "url"
     }
-  }
+  },
+  "lang": "en-CA",
+  "dir": "ltr",
+  "scope": "/",
+  "id": "lilo-app"
 }
