@@ -158,7 +158,7 @@ const TermsOfService = () => {
             <h2 className="text-2xl font-semibold mb-4">14. Governing Law</h2>
             <p className="text-muted-foreground">
               These Terms shall be governed by and construed in accordance with the laws of 
-              [Your Jurisdiction], without regard to its conflict of law provisions.
+              the Province of Ontario, Canada, without regard to its conflict of law provisions.
             </p>
           </section>
 
@@ -169,7 +169,7 @@ const TermsOfService = () => {
             </p>
             <ul className="list-none text-muted-foreground mt-2">
               <li>Email: legal@lilo.app</li>
-              <li>Address: [Your Business Address]</li>
+              <li>Address: Ottawa, Ontario, Canada</li>
             </ul>
           </section>
         </div>

@@ -143,7 +143,7 @@ const PrivacyPolicy = () => {
             </p>
             <ul className="list-none text-muted-foreground mt-2">
               <li>Email: privacy@lilo.app</li>
-              <li>Address: [Your Business Address]</li>
+              <li>Address: Ottawa, Ontario, Canada</li>
             </ul>
           </section>
         </div>
