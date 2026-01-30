@@ -23,6 +23,7 @@ import PaymentCanceled from "./pages/PaymentCanceled";
 import Pricing from "./pages/Pricing";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import TestingPlan from "./pages/TestingPlan";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -85,6 +86,7 @@ const App = () => (
                   
                   {/* Legal Pages */}
                   <Route path="/privacy" element={<PrivacyPolicy />} />
+                  <Route path="/testing-plan" element={<TestingPlan />} />
                   <Route path="/terms" element={<TermsOfService />} />
                   
                   <Route path="*" element={<NotFound />} />
