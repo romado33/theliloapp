@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { RoleSwitcher } from '@/components/RoleSwitcher';
@@ -11,6 +11,7 @@ import { NotificationCenter } from '@/components/NotificationCenter';
 import { DevBypassModal } from '@/components/DevBypassModal';
 
 const Header = () => {
+  const [searchQuery, setSearchQuery] = useState('');
   const { user, profile, signOut, currentRole, switchRole, devBypass } = useAuth();
   const navigate = useNavigate();
   const [showDevModal, setShowDevModal] = useState(false);
@@ -26,6 +27,28 @@ const Header = () => {
   const handleDevBypass = async (role: 'user' | 'host') => {
     await devBypass(role);
     navigate('/');
+  };
+
+  const handleSearchSubmit = () => {
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate('/search');
+    }
+  };
+
+  const handleSearchKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearchSubmit();
+    }
+  };
+
+  const handleHostClick = () => {
+    if (user) {
+      navigate('/host-dashboard');
+    } else {
+      navigate('/auth');
+    }
   };
 
   return (
@@ -56,17 +79,30 @@ const Header = () => {
               <Input 
                 placeholder="Find local experiences..." 
                 className="pl-10 bg-background/80 border-lilo-green/30 focus:border-lilo-green"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearchKeyPress}
               />
             </div>
-            <Button variant="outline" size="sm" className="gap-2 border-lilo-blue/40 text-lilo-blue hover:bg-lilo-blue/10">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2 border-lilo-blue/40 text-lilo-blue hover:bg-lilo-blue/10"
+              onClick={handleSearchSubmit}
+            >
               <MapPin className="w-4 h-4" />
-              Location
+              Search
             </Button>
           </div>
 
           {/* User Actions */}
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="hidden md:flex text-lilo-green hover:bg-lilo-green/10 hover:text-lilo-green-dark">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="hidden md:flex text-lilo-green hover:bg-lilo-green/10 hover:text-lilo-green-dark"
+              onClick={handleHostClick}
+            >
               Host an experience
             </Button>
             
@@ -104,12 +140,24 @@ const Header = () => {
 
         {/* Mobile Search */}
         <div className="md:hidden mt-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lilo-green w-4 h-4" />
-            <Input 
-              placeholder="Find local experiences..." 
-              className="pl-10 bg-background/80 border-lilo-green/30 focus:border-lilo-green"
-            />
+          <div className="relative flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-lilo-green w-4 h-4" />
+              <Input 
+                placeholder="Find local experiences..." 
+                className="pl-10 bg-background/80 border-lilo-green/30 focus:border-lilo-green"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearchKeyPress}
+              />
+            </div>
+            <Button 
+              size="sm" 
+              className="shrink-0"
+              onClick={handleSearchSubmit}
+            >
+              <Search className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </div>
