@@ -306,26 +306,29 @@ serve(async (req) => {
     if (results.length === 0 && query.trim()) {
       console.log('Performing text-based search for:', query);
 
+      // Text search using ilike for partial matching
+      const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 2);
+      
       let textQuery = supabase
         .from('experiences')
         .select('*')
         .eq('is_active', true);
 
-      // Text search using ilike for partial matching
-      const searchTerms = query.toLowerCase().split(' ').filter(term => term.length > 2);
-      
       if (searchTerms.length > 0) {
-        // Search in multiple fields
-        const searchCondition = searchTerms.map(term => 
-          `title.ilike.%${term}%,description.ilike.%${term}%,location.ilike.%${term}%,search_terms.ilike.%${term}%`
-        ).join(',');
+        // Build proper OR conditions for each term across multiple fields
+        const orConditions = searchTerms.flatMap(term => [
+          `title.ilike.%${term}%`,
+          `description.ilike.%${term}%`,
+          `location.ilike.%${term}%`,
+          `search_terms.ilike.%${term}%`
+        ]).join(',');
         
-        textQuery = textQuery.or(searchCondition);
+        console.log('Text search OR conditions:', orConditions);
+        textQuery = textQuery.or(orConditions);
       }
 
       // Apply filters
       if (category && category !== 'all') {
-        // This would need category matching logic
         console.log('Category filter for text search:', category);
       }
       if (priceMin !== undefined) {
