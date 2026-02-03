@@ -1,0 +1,3 @@
+-- Add a review for the completed booking
+INSERT INTO reviews (experience_id, guest_id, booking_id, rating, comment, created_at)
+VALUES ('9e9e0898-a745-401b-8cff-79012f1ef0e8', '56b64efe-52ad-4278-8421-1c1786577e0d', '5dbec36a-7d92-4da2-880b-14fce0ec7845', 5, 'Absolutely amazing experience! Marco was an incredible instructor. I learned to make fresh pasta from scratch and the techniques he taught were authentic Italian. The ravioli we made was delicious. Highly recommend for anyone who loves cooking!', now() - interval '1 day');
