@@ -237,6 +237,9 @@ const QuickBookModal = ({
                 ) : (
                   timeSlots.map((slot) => {
                   const { date, time } = formatDateTime(slot.start_time);
+                  const isSoldOut = slot.available_spots <= 0;
+                  const isSelected = selectedSlot === slot.id;
+                  
                   return (
                     <button
                       key={slot.id}
@@ -244,24 +247,32 @@ const QuickBookModal = ({
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        setSelectedSlot(slot.id);
+                        if (!isSoldOut) {
+                          setSelectedSlot(slot.id);
+                        }
                       }}
+                      disabled={isSoldOut}
                       className={`w-full p-3 rounded-lg border text-left transition-colors ${
-                        selectedSlot === slot.id
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border hover:border-primary/50'
+                        isSoldOut
+                          ? 'border-muted bg-muted/50 cursor-not-allowed opacity-60'
+                          : isSelected
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border hover:border-primary/50'
                       }`}
                     >
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="font-medium text-sm">{date}</p>
+                          <p className={`font-medium text-sm ${isSoldOut ? 'text-muted-foreground' : ''}`}>{date}</p>
                           <p className="text-sm text-muted-foreground flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {time}
                           </p>
                         </div>
-                        <Badge variant="secondary" className="text-xs">
-                          {slot.available_spots} spots
+                        <Badge 
+                          variant={isSoldOut ? "destructive" : "secondary"} 
+                          className="text-xs"
+                        >
+                          {isSoldOut ? 'Sold Out' : `${slot.available_spots} spots`}
                         </Badge>
                       </div>
                     </button>

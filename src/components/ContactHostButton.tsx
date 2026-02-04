@@ -26,7 +26,7 @@ const ContactHostButton: FC<ContactHostButtonProps> = ({
 
   const handleContactHost = async () => {
     if (!user) {
-      navigate('/auth');
+      navigate('/auth', { state: { returnTo: window.location.pathname } });
       return;
     }
 

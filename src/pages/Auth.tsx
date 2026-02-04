@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -29,14 +29,18 @@ const Auth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
 
   // Redirect if already authenticated
   useEffect(() => {
     if (user) {
-      const returnTo = searchParams.get('returnTo') || '/';
+      // Check for returnTo in searchParams first, then location.state
+      const returnTo = searchParams.get('returnTo') 
+        || (location.state as { returnTo?: string })?.returnTo 
+        || '/';
       navigate(returnTo, { replace: true });
     }
-  }, [user, navigate, searchParams]);
+  }, [user, navigate, searchParams, location.state]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -382,7 +386,7 @@ const Auth = () => {
             )}
 
             {/* Dev Bypass Button - Only shown in development */}
-            {import.meta.env.DEV && (
+            {import.meta.env.DEV && !window.location.hostname.includes('lovable.app') && (
               <div className="pt-4 border-t">
                 <Button
                   variant="outline"

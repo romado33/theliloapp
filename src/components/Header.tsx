@@ -21,7 +21,7 @@ const Header = () => {
   };
 
   const handleAuthClick = () => {
-    navigate('/auth');
+    navigate('/auth', { state: { returnTo: window.location.pathname } });
   };
 
   const handleDevBypass = async (role: 'user' | 'host') => {
@@ -47,7 +47,7 @@ const Header = () => {
     if (user) {
       navigate('/host-dashboard');
     } else {
-      navigate('/auth');
+      navigate('/auth', { state: { returnTo: '/host-dashboard' } });
     }
   };
 
@@ -106,7 +106,7 @@ const Header = () => {
               Host an experience
             </Button>
             
-            {import.meta.env.DEV && (
+            {import.meta.env.DEV && !window.location.hostname.includes('lovable.app') && (
               <Button 
                 variant="outline" 
                 size="sm" 

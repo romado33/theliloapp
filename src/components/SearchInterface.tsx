@@ -105,7 +105,11 @@ const SearchInterface = ({
     queryFn: async () => {
       const { data, error } = await supabase
         .from('experiences')
-        .select('*')
+        .select(`
+          *,
+          categories (name),
+          profiles:host_id (first_name)
+        `)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(12);
@@ -456,14 +460,14 @@ const SearchInterface = ({
             id={result.id}
             title={result.title}
             image={result.image_urls?.[0] || '/placeholder.svg'}
-            category="Experience"
+            category={result.categories?.name || "Experience"}
             price={result.price}
             duration={`${result.duration_hours} hours`}
-            rating={4.5}
+            rating={0}
             reviewCount={0}
             location={result.location}
-            hostName="Local Host"
-            maxGuests={6}
+            hostName={result.profiles?.first_name || "Local Host"}
+            maxGuests={result.max_guests || 6}
             why={result.why}
             score={result.score}
           />

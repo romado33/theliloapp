@@ -105,9 +105,9 @@ const BookingConfirmation = () => {
 
   useEffect(() => {
     if (!user) {
-      navigate('/auth');
+      navigate('/auth', { state: { returnTo: `/booking-confirmation?bookingId=${bookingId}${sessionId ? `&session_id=${sessionId}` : ''}` } });
     }
-  }, [user, navigate]);
+  }, [user, navigate, bookingId, sessionId]);
 
   const {
     data: booking,

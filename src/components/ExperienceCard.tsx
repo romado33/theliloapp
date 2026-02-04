@@ -92,7 +92,7 @@ const ExperienceCard = ({
   const handleQuickBook = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent navigation when clicking book button
     if (!user) {
-      navigate('/auth');
+      navigate('/auth', { state: { returnTo: `/experience/${id}` } });
       return;
     }
     setShowQuickBook(true);
