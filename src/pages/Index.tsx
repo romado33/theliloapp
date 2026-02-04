@@ -205,13 +205,13 @@ const Index = () => {
                        id={experience.id}
                        title={experience.title}
                        image={getImageFromUrl(experience.image_urls?.[0] || '/placeholder-experience.jpg')}
-                        category="Experience"
+                        category={(experience as any).categories?.name || "Experience"}
                         price={experience.price}
                         duration={`${experience.duration_hours || 2} hours`}
-                        rating={4.5}
+                        rating={0}
                         reviewCount={0}
                         location={experience.location}
-                        hostName="Local Host"
+                        hostName={(experience as any).profiles?.first_name || "Local Host"}
                         maxGuests={experience.max_guests || 6}
                         isNew={false}
                      />

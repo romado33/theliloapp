@@ -32,7 +32,7 @@ const SaveExperienceButton: React.FC<SaveExperienceButtonProps> = ({
     e.stopPropagation();
 
     if (!user) {
-      navigate('/auth');
+      navigate('/auth', { state: { returnTo: window.location.pathname } });
       return;
     }
 

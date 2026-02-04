@@ -14,9 +14,9 @@ export const useSecureAuth = (requireAuth = true, allowedRoles?: string[]) => {
       (window as any).__DEV_BYPASS_ENABLED = false;
     }
 
-    // Redirect unauthenticated users
+    // Redirect unauthenticated users with return path
     if (requireAuth && !auth.loading && !auth.user) {
-      navigate('/auth');
+      navigate('/auth', { state: { returnTo: window.location.pathname + window.location.search } });
       return;
     }
 

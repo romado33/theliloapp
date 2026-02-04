@@ -33,6 +33,7 @@ import { SocialShareButtons } from '@/components/SocialShareButtons';
 import { WaitlistButton } from '@/components/WaitlistButton';
 import { ReportContentButton } from '@/components/ReportContentButton';
 import { MOCK_EXPERIENCES, GALLERY_IMAGES, type MockExperience } from '@/lib/experienceMockData';
+import { useReviews } from '@/hooks/useReviews';
 
 type ExperienceWithRelations = Experience & {
   categories: { name: string };
@@ -57,6 +58,9 @@ const ExperienceDetails = () => {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
   const [guestCount, setGuestCount] = useState(2);
   const [bookingLoading, setBookingLoading] = useState(false);
+  
+  // Fetch real reviews data
+  const { stats: reviewStats, loading: reviewsLoading } = useReviews(id);
 
   useEffect(() => {
     if (!id) return;
@@ -355,11 +359,18 @@ const ExperienceDetails = () => {
                   {experience.title}
                 </h1>
                 <div className="flex items-center gap-4 text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-medium">4.9</span>
-                    <span>(156 reviews)</span>
-                  </div>
+                  {reviewStats.totalReviews > 0 ? (
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="font-medium">{reviewStats.averageRating}</span>
+                      <span>({reviewStats.totalReviews} review{reviewStats.totalReviews !== 1 ? 's' : ''})</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">No reviews yet</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-1">
                     <MapPin className="w-4 h-4" />
                     <span>{experience.location}</span>
@@ -547,19 +558,25 @@ const ExperienceDetails = () => {
                     availability.map((slot) => {
                       const startDate = new Date(slot.start_time);
                       const endDate = new Date(slot.end_time);
+                      const isSoldOut = slot.available_spots <= 0;
+                      const isSelected = selectedTimeSlot === slot.id;
+                      
                       return (
                         <button
                           key={slot.id}
-                          onClick={() => setSelectedTimeSlot(slot.id)}
+                          onClick={() => !isSoldOut && setSelectedTimeSlot(slot.id)}
+                          disabled={isSoldOut}
                           className={`w-full p-3 rounded-lg border text-left transition-colors ${
-                            selectedTimeSlot === slot.id
-                              ? 'border-primary bg-primary/10'
-                              : 'border-border hover:border-primary/50'
+                            isSoldOut
+                              ? 'border-muted bg-muted/50 cursor-not-allowed opacity-60'
+                              : isSelected
+                                ? 'border-primary bg-primary/10'
+                                : 'border-border hover:border-primary/50'
                           }`}
                         >
                           <div className="flex justify-between items-center">
                             <div>
-                              <p className="font-medium text-sm">
+                              <p className={`font-medium text-sm ${isSoldOut ? 'text-muted-foreground' : ''}`}>
                                 {startDate.toLocaleDateString('en-US', { 
                                   weekday: 'long', 
                                   month: 'short', 
@@ -576,8 +593,11 @@ const ExperienceDetails = () => {
                                 })}
                               </p>
                             </div>
-                            <Badge variant="secondary" className="text-xs">
-                              {slot.available_spots} spots left
+                            <Badge 
+                              variant={isSoldOut ? "destructive" : "secondary"} 
+                              className="text-xs"
+                            >
+                              {isSoldOut ? 'Sold Out' : `${slot.available_spots} spots left`}
                             </Badge>
                           </div>
                         </button>
