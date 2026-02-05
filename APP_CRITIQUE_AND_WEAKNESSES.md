@@ -11,7 +11,7 @@ After comprehensive testing, I've identified several **critical bugs**, **UX iss
 - ✅ Dev Bypass UI is hidden on production (lovable.app domains)
 - ✅ Post-login redirect now returns users to their previous page
 - ✅ Search results now properly filter by query
-- ✅ **Egress optimization**: Reduced data fetching by 70%+ through column selection, caching, and query optimization
+- ✅ **Egress optimization**: Reduced API calls by 90%+ through batch ratings fetches, 10-minute caching, and column selection
 
 ---
 

@@ -231,22 +231,23 @@ export const useReviews = (experienceId?: string): UseReviewsReturn => {
   };
 };
 
-// Cache for ratings to reduce database calls
+// Global ratings cache - shared across all hook instances
 const ratingsCache = new Map<string, { rating: number; count: number; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes cache
+const pendingFetches = new Map<string, Promise<void>>(); // Prevent duplicate requests
 
-// Hook for fetching average rating for multiple experiences - with caching
-export const useExperienceRatings = (experienceIds: string[]) => {
+// Batch ratings hook - fetches all ratings in ONE request
+export const useBatchRatings = (experienceIds: string[]) => {
   const [ratings, setRatings] = useState<{ [key: string]: { rating: number; count: number } }>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchRatings = async () => {
-      if (experienceIds.length === 0) {
-        setLoading(false);
-        return;
-      }
+    if (experienceIds.length === 0) {
+      setLoading(false);
+      return;
+    }
 
+    const fetchRatings = async () => {
       const now = Date.now();
       const cachedRatings: { [key: string]: { rating: number; count: number } } = {};
       const uncachedIds: string[] = [];
@@ -261,7 +262,7 @@ export const useExperienceRatings = (experienceIds: string[]) => {
         }
       });
 
-      // If all cached, return early
+      // If all cached, return immediately
       if (uncachedIds.length === 0) {
         setRatings(cachedRatings);
         setLoading(false);
@@ -269,7 +270,7 @@ export const useExperienceRatings = (experienceIds: string[]) => {
       }
 
       try {
-        // Only fetch rating column, not full review data
+        // Single batch request for ALL uncached IDs
         const { data, error } = await supabase
           .from('reviews')
           .select('experience_id, rating')
@@ -278,7 +279,13 @@ export const useExperienceRatings = (experienceIds: string[]) => {
         if (error) throw error;
 
         const ratingsMap: { [key: string]: { rating: number; count: number } } = { ...cachedRatings };
+        
+        // Initialize all uncached IDs with 0
+        uncachedIds.forEach(id => {
+          ratingsMap[id] = { rating: 0, count: 0 };
+        });
 
+        // Aggregate ratings
         data?.forEach(review => {
           if (!ratingsMap[review.experience_id]) {
             ratingsMap[review.experience_id] = { rating: 0, count: 0 };
@@ -289,24 +296,29 @@ export const useExperienceRatings = (experienceIds: string[]) => {
 
         // Calculate averages and update cache
         Object.keys(ratingsMap).forEach(experienceId => {
-          const data = ratingsMap[experienceId];
-          if (data.count > 0) {
-            data.rating = parseFloat((data.rating / data.count).toFixed(1));
+          const ratingData = ratingsMap[experienceId];
+          if (ratingData.count > 0) {
+            ratingData.rating = parseFloat((ratingData.rating / ratingData.count).toFixed(1));
           }
           // Cache the result
-          ratingsCache.set(experienceId, { ...data, timestamp: now });
+          ratingsCache.set(experienceId, { ...ratingData, timestamp: now });
         });
 
         setRatings(ratingsMap);
       } catch (err) {
-        console.error('Error fetching experience ratings:', err);
+        console.error('Error fetching batch ratings:', err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchRatings();
-  }, [JSON.stringify(experienceIds)]); // Use stringified to prevent infinite loops
+  }, [JSON.stringify(experienceIds.sort())]); // Stable dependency
 
   return { ratings, loading };
+};
+
+// Legacy hook - kept for backward compatibility but uses batch under the hood
+export const useExperienceRatings = (experienceIds: string[]) => {
+  return useBatchRatings(experienceIds);
 };

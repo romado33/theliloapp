@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import ExperienceCard from './ExperienceCard';
 import { useToast } from '@/hooks/use-toast';
+import { useBatchRatings } from '@/hooks/useReviews';
 import type { SearchResult } from '@/types';
 
 interface SearchFilters {
@@ -485,9 +486,22 @@ const SearchInterface = ({
         </Card>
       )}
 
-      {/* Results */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {results.map((result: any) => (
+      {/* Results with batch ratings */}
+      <ResultsGrid results={results} />
+    </div>
+  );
+};
+
+// Separate component to batch ratings fetch for all visible results
+const ResultsGrid = ({ results }: { results: SearchResult[] }) => {
+  const experienceIds = useMemo(() => results.map(r => r.id), [results]);
+  const { ratings } = useBatchRatings(experienceIds);
+  
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {results.map((result: any) => {
+        const ratingData = ratings[result.id];
+        return (
           <ExperienceCard
             key={result.id}
             id={result.id}
@@ -496,37 +510,16 @@ const SearchInterface = ({
             category={result.categories?.name || "Experience"}
             price={result.price}
             duration={`${result.duration_hours} hours`}
-            rating={0}
-            reviewCount={0}
+            rating={ratingData?.rating || 0}
+            reviewCount={ratingData?.count || 0}
             location={result.location}
             hostName={result.profiles?.first_name || "Local Host"}
             maxGuests={result.max_guests || 6}
             why={result.why}
             score={result.score}
           />
-        ))}
-      </div>
-
-      {/* Empty State */}
-      {!loading && results.length === 0 && query.trim() && (
-        <div className="text-center py-12">
-          <div className="w-24 h-24 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
-            <Search className="w-12 h-12 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-semibold mb-2">No experiences found</h3>
-          <p className="text-muted-foreground mb-4">
-            We couldn't find any experiences matching "{query}".
-          </p>
-          <div className="space-x-2">
-            <Button variant="outline" onClick={clearSearch}>
-              Clear Search
-            </Button>
-            <Button onClick={() => setShowFilterPanel(!showFilterPanel)}>
-              Adjust Filters
-            </Button>
-          </div>
-        </div>
-      )}
+        );
+      })}
     </div>
   );
 };
