@@ -231,7 +231,11 @@ export const useReviews = (experienceId?: string): UseReviewsReturn => {
   };
 };
 
-// Hook for fetching average rating for multiple experiences
+// Cache for ratings to reduce database calls
+const ratingsCache = new Map<string, { rating: number; count: number; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+// Hook for fetching average rating for multiple experiences - with caching
 export const useExperienceRatings = (experienceIds: string[]) => {
   const [ratings, setRatings] = useState<{ [key: string]: { rating: number; count: number } }>({});
   const [loading, setLoading] = useState(true);
@@ -243,15 +247,37 @@ export const useExperienceRatings = (experienceIds: string[]) => {
         return;
       }
 
+      const now = Date.now();
+      const cachedRatings: { [key: string]: { rating: number; count: number } } = {};
+      const uncachedIds: string[] = [];
+
+      // Check cache first
+      experienceIds.forEach(id => {
+        const cached = ratingsCache.get(id);
+        if (cached && (now - cached.timestamp) < CACHE_TTL) {
+          cachedRatings[id] = { rating: cached.rating, count: cached.count };
+        } else {
+          uncachedIds.push(id);
+        }
+      });
+
+      // If all cached, return early
+      if (uncachedIds.length === 0) {
+        setRatings(cachedRatings);
+        setLoading(false);
+        return;
+      }
+
       try {
+        // Only fetch rating column, not full review data
         const { data, error } = await supabase
           .from('reviews')
           .select('experience_id, rating')
-          .in('experience_id', experienceIds);
+          .in('experience_id', uncachedIds);
 
         if (error) throw error;
 
-        const ratingsMap: { [key: string]: { rating: number; count: number } } = {};
+        const ratingsMap: { [key: string]: { rating: number; count: number } } = { ...cachedRatings };
 
         data?.forEach(review => {
           if (!ratingsMap[review.experience_id]) {
@@ -261,10 +287,14 @@ export const useExperienceRatings = (experienceIds: string[]) => {
           ratingsMap[review.experience_id].count++;
         });
 
-        // Calculate averages
+        // Calculate averages and update cache
         Object.keys(ratingsMap).forEach(experienceId => {
           const data = ratingsMap[experienceId];
-          data.rating = parseFloat((data.rating / data.count).toFixed(1));
+          if (data.count > 0) {
+            data.rating = parseFloat((data.rating / data.count).toFixed(1));
+          }
+          // Cache the result
+          ratingsCache.set(experienceId, { ...data, timestamp: now });
         });
 
         setRatings(ratingsMap);
@@ -276,7 +306,7 @@ export const useExperienceRatings = (experienceIds: string[]) => {
     };
 
     fetchRatings();
-  }, [experienceIds]);
+  }, [JSON.stringify(experienceIds)]); // Use stringified to prevent infinite loops
 
   return { ratings, loading };
 };

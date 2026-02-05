@@ -19,11 +19,12 @@ export const useNotifications = () => {
     if (!user) return;
 
     try {
+      // Select only needed columns to reduce egress
       const { data, error } = await supabase
         .from('notifications')
-        .select('*')
+        .select('id, type, title, message, data, read, created_at, updated_at')
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(20);
 
       if (error) throw error;
 
