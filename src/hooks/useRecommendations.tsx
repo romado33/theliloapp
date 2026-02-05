@@ -82,16 +82,26 @@ export const useRecommendations = () => {
         `)
         .eq('user_id', user.id);
 
-      // Get all active experiences
+      // Get active experiences with only essential columns (reduces egress)
       const { data: allExperiences } = await supabase
         .from('experiences')
         .select(`
-          *,
-          profiles!experiences_host_id_fkey (
-            first_name
-          )
+          id,
+          title,
+          description,
+          location,
+          price,
+          duration_hours,
+          max_guests,
+          image_urls,
+          host_id,
+          category_id,
+          latitude,
+          longitude,
+          created_at
         `)
-        .eq('is_active', true);
+        .eq('is_active', true)
+        .limit(50);
 
       if (!allExperiences) return;
 

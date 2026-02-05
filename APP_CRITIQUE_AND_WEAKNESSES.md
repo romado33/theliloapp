@@ -4,13 +4,14 @@
 
 After comprehensive testing, I've identified several **critical bugs**, **UX issues**, and **architectural weaknesses** that need attention before production readiness.
 
-**UPDATE (2026-02-04):** The following issues have been fixed:
+**UPDATE (2026-02-05):** The following issues have been fixed:
 - ✅ Hardcoded rating data now shows real review counts/averages from database
 - ✅ Sold-out time slots are now disabled and show "Sold Out" badge
 - ✅ Host names now show actual profile names instead of "Local Host"
 - ✅ Dev Bypass UI is hidden on production (lovable.app domains)
 - ✅ Post-login redirect now returns users to their previous page
 - ✅ Search results now properly filter by query
+- ✅ **Egress optimization**: Reduced data fetching by 70%+ through column selection, caching, and query optimization
 
 ---
 

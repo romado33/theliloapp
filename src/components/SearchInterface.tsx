@@ -99,22 +99,55 @@ const SearchInterface = ({
     refetch: refetchDefault,
   } = useQuery<SearchResult[]>({
     queryKey: ['default-experiences'],
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 10, // 10 min stale time - reduces refetches
+    gcTime: 1000 * 60 * 60, // 1 hour cache - keeps data longer
     retry: 1,
-    queryFn: async () => {
+    refetchOnWindowFocus: false, // Prevent refetch on tab switch
+    queryFn: async (): Promise<SearchResult[]> => {
+      // Select only needed columns to reduce egress
       const { data, error } = await supabase
         .from('experiences')
         .select(`
-          *,
-          categories (name),
-          profiles:host_id (first_name)
+          id,
+          title,
+          description,
+          location,
+          price,
+          duration_hours,
+          max_guests,
+          image_urls,
+          host_id,
+          category_id,
+          is_active,
+          created_at,
+          categories (name)
         `)
         .eq('is_active', true)
         .order('created_at', { ascending: false })
         .limit(12);
       if (error) throw error;
-      return data ?? [];
+      
+      // Get host profiles separately to avoid ambiguous join
+      const hostIds = [...new Set((data || []).map(e => e.host_id))];
+      const hostMap = new Map<string, string>();
+      
+      if (hostIds.length > 0) {
+        const hostPromises = hostIds.map(id => 
+          supabase.rpc('get_public_host_profile', { host_user_id: id })
+        );
+        const hostResults = await Promise.all(hostPromises);
+        hostResults.forEach((result, idx) => {
+          if (result.data && result.data.length > 0) {
+            hostMap.set(hostIds[idx], result.data[0].first_name || 'Host');
+          }
+        });
+      }
+      
+      // Transform to SearchResult with minimal data
+      return (data || []).map(exp => ({
+        ...exp,
+        profiles: { first_name: hostMap.get(exp.host_id) || 'Local Host' }
+      })) as unknown as SearchResult[];
     },
   });
 
