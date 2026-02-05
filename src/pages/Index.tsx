@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import Header from "@/components/Header";
 import { RecommendationCard } from "@/components/RecommendationCard";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { useRecommendations } from "@/hooks/useRecommendations";
+import { useBatchRatings } from "@/hooks/useReviews";
 import { TrendingUp, Heart, Database } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
 import potteryClass from "@/assets/pottery-class.jpg";
@@ -193,48 +194,11 @@ const Index = () => {
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 px-4">
-              {searchResults.length > 0 ? (
-                searchResults.map((experience, index) => (
-                  <div 
-                    key={experience.id}
-                    className="animate-fade-in"
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                     <ExperienceCard 
-                       id={experience.id}
-                       title={experience.title}
-                       image={getImageFromUrl(experience.image_urls?.[0] || '/placeholder-experience.jpg')}
-                        category={(experience as any).categories?.name || "Experience"}
-                        price={experience.price}
-                        duration={`${experience.duration_hours || 2} hours`}
-                        rating={0}
-                        reviewCount={0}
-                        location={experience.location}
-                        hostName={(experience as any).profiles?.first_name || "Local Host"}
-                        maxGuests={experience.max_guests || 6}
-                        isNew={false}
-                     />
-                   </div>
-                ))
-              ) : (
-                mockExperiences
-                  .filter(experience => {
-                    const matchesCategory = selectedCategory === "all" || 
-                      experience.category.toLowerCase().includes(selectedCategory);
-                    return matchesCategory;
-                  })
-                  .map((experience, index) => (
-                    <div 
-                      key={experience.id}
-                      className="animate-fade-in"
-                      style={{ animationDelay: `${index * 0.1}s` }}
-                    >
-                      <ExperienceCard {...experience} />
-                    </div>
-                  ))
-              )}
-            </div>
+            <FeaturedExperiencesGrid 
+              searchResults={searchResults}
+              mockExperiences={mockExperiences}
+              selectedCategory={selectedCategory}
+            />
             
             {searchResults.length === 0 && selectedCategory !== "all" && (
               <div className="text-center py-12">
@@ -289,6 +253,85 @@ const Index = () => {
           </div>
         </div>
       </footer>
+    </div>
+  );
+};
+
+// Separate component for featured experiences - batches all ratings in ONE request
+interface FeaturedExperiencesGridProps {
+  searchResults: SearchResult[];
+  mockExperiences: typeof mockExperiences;
+  selectedCategory: string;
+}
+
+const FeaturedExperiencesGrid = ({ searchResults, mockExperiences, selectedCategory }: FeaturedExperiencesGridProps) => {
+  // Get all experience IDs to batch-fetch ratings
+  const experienceIds = useMemo(() => {
+    if (searchResults.length > 0) {
+      return searchResults.map(e => e.id);
+    }
+    return mockExperiences
+      .filter(e => selectedCategory === "all" || e.category.toLowerCase().includes(selectedCategory))
+      .map(e => e.id);
+  }, [searchResults, mockExperiences, selectedCategory]);
+
+  // Single batch request for ALL ratings
+  const { ratings } = useBatchRatings(experienceIds);
+
+  if (searchResults.length > 0) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 px-4">
+        {searchResults.map((experience, index) => {
+          const ratingData = ratings[experience.id];
+          return (
+            <div 
+              key={experience.id}
+              className="animate-fade-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <ExperienceCard 
+                id={experience.id}
+                title={experience.title}
+                image={getImageFromUrl(experience.image_urls?.[0] || '/placeholder-experience.jpg')}
+                category={(experience as any).categories?.name || "Experience"}
+                price={experience.price}
+                duration={`${experience.duration_hours || 2} hours`}
+                rating={ratingData?.rating || 0}
+                reviewCount={ratingData?.count || 0}
+                location={experience.location}
+                hostName={(experience as any).profiles?.first_name || "Local Host"}
+                maxGuests={experience.max_guests || 6}
+                isNew={false}
+              />
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  const filteredMock = mockExperiences.filter(experience => 
+    selectedCategory === "all" || experience.category.toLowerCase().includes(selectedCategory)
+  );
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 px-4">
+      {filteredMock.map((experience, index) => {
+        const ratingData = ratings[experience.id];
+        return (
+          <div 
+            key={experience.id}
+            className="animate-fade-in"
+            style={{ animationDelay: `${index * 0.1}s` }}
+          >
+            <ExperienceCard 
+              {...experience}
+              rating={ratingData?.rating || experience.rating}
+              reviewCount={ratingData?.count || experience.reviewCount}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 };

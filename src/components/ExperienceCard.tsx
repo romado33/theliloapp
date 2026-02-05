@@ -8,7 +8,6 @@ import { useAuth } from "@/hooks/useAuth";
 import QuickBookModal from "@/components/QuickBookModal";
 import SaveExperienceButton from './SaveExperienceButton';
 import { getImageFromUrl } from '@/lib/imageMap';
-import { useExperienceRatings } from '@/hooks/useReviews';
 
 interface ExperienceCardProps {
   id: string;
@@ -48,13 +47,9 @@ const ExperienceCard = ({
   const [showQuickBook, setShowQuickBook] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   
-  // Get real ratings data
-  const { ratings, loading: ratingsLoading } = useExperienceRatings([id]);
-  const experienceRating = ratings[id];
-  
-  // Use real data if available, otherwise fallback to props
-  const displayRating = experienceRating?.rating || rating;
-  const displayReviewCount = experienceRating?.count || reviewCount;
+  // Use props directly - ratings are now passed from parent
+  const displayRating = rating;
+  const displayReviewCount = reviewCount;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
