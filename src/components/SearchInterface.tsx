@@ -152,11 +152,15 @@ const SearchInterface = ({
     },
   });
 
+  // Only set default experiences on initial load, not after every render
   useEffect(() => {
-    setResults(defaultExperiences);
-    onResultsChange?.(defaultExperiences);
-    setSearchType('text');
-  }, [defaultExperiences, onResultsChange]);
+    if (!searchMutation.data && !searchMutation.isPending) {
+      setResults(defaultExperiences);
+      onResultsChange?.(defaultExperiences);
+      setSearchType('text');
+    }
+  }, [defaultExperiences]);
+  // eslint-disable-next-line -- intentionally excluding onResultsChange and searchMutation to avoid overwriting search results
 
   useEffect(() => {
     if (defaultError) {
