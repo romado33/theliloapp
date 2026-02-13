@@ -134,7 +134,8 @@ export const usePWA = () => {
 
     try {
       const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.subscribe({
+      const reg = registration as ServiceWorkerRegistration & { pushManager: PushManager };
+      const subscription = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: null // Add your VAPID key here if you implement push server
       });
