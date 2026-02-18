@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
@@ -152,15 +152,7 @@ const SearchInterface = ({
     },
   });
 
-  // Only set default experiences on initial load, not after every render
-  useEffect(() => {
-    if (!searchMutation.data && !searchMutation.isPending) {
-      setResults(defaultExperiences);
-      onResultsChange?.(defaultExperiences);
-      setSearchType('text');
-    }
-  }, [defaultExperiences]);
-  // eslint-disable-next-line -- intentionally excluding onResultsChange and searchMutation to avoid overwriting search results
+  // Default experiences effect is below searchMutation declaration
 
   useEffect(() => {
     if (defaultError) {
@@ -236,6 +228,22 @@ const SearchInterface = ({
       refetchDefault();
     },
   });
+
+  // Only set default experiences on initial load, not after search
+  const defaultExpRef = useRef<SearchResult[] | null>(null);
+  useEffect(() => {
+    if (
+      defaultExperiences.length > 0 &&
+      !searchMutation.data &&
+      !searchMutation.isPending &&
+      defaultExpRef.current !== defaultExperiences
+    ) {
+      defaultExpRef.current = defaultExperiences;
+      setResults(defaultExperiences);
+      onResultsChange?.(defaultExperiences);
+      setSearchType('text');
+    }
+  }, [defaultExperiences, searchMutation.data, searchMutation.isPending]);
 
   const loading = searchMutation.isPending || defaultLoading;
 
