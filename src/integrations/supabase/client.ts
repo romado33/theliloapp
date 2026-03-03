@@ -2,8 +2,16 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`;
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const SUPABASE_PROJECT_ID = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'baigglncdwirfwlxagcl';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || `https://${SUPABASE_PROJECT_ID}.supabase.co`;
+const SUPABASE_PUBLISHABLE_KEY =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  (import.meta.env['VITE_SUPABASE_ANON_KEY'] as string | undefined) ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhaWdnbG5jZHdpcmZ3bHhhZ2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MzA0MjEsImV4cCI6MjA3MjUwNjQyMX0.xC31gmu9kL5mGGiKXwEHC0TfGYOOcq2bGYjhWNdXLKk';
+
+if (import.meta.env.DEV && !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+  console.warn('[supabase] Missing VITE_SUPABASE_PUBLISHABLE_KEY, using fallback publishable key.');
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
