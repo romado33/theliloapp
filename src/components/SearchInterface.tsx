@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,23 @@ import { useToast } from '@/hooks/use-toast';
 import { useBatchRatings } from '@/hooks/useReviews';
 import type { SearchResult } from '@/types';
 
+// Debounce hook for search input
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
 interface SearchFilters {
   category: string;
   priceMin: number;
@@ -57,6 +74,9 @@ const SearchInterface = ({
   const [queryUnderstanding, setQueryUnderstanding] = useState<any>(null);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const { toast } = useToast();
+  
+  // Debounce search query to reduce API calls
+  const debouncedQuery = useDebounce(query, 500);
 
   // Get user location for distance-based search
   useEffect(() => {
@@ -246,6 +266,13 @@ const SearchInterface = ({
   }, [defaultExperiences, searchMutation.data, searchMutation.isPending]);
 
   const loading = searchMutation.isPending || defaultLoading;
+
+  // Auto-search when debounced query changes
+  useEffect(() => {
+    if (debouncedQuery.trim() || filters.category !== 'all' || filters.location) {
+      searchMutation.mutate({ searchQuery: debouncedQuery, searchFilters: filters });
+    }
+  }, [debouncedQuery]);
 
   const handleSearch = () => {
     if (!query.trim() && filters.category === 'all' && !filters.location) {

@@ -32,7 +32,7 @@ import ContactHostButton from '@/components/ContactHostButton';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
 import { WaitlistButton } from '@/components/WaitlistButton';
 import { ReportContentButton } from '@/components/ReportContentButton';
-import { MOCK_EXPERIENCES, GALLERY_IMAGES, type MockExperience } from '@/lib/experienceMockData';
+import { MOCK_EXPERIENCES, type MockExperience } from '@/lib/experienceMockData';
 import { useReviews } from '@/hooks/useReviews';
 
 type ExperienceWithRelations = Experience & {
@@ -107,34 +107,52 @@ const ExperienceDetails = () => {
           }
           setExperience(data);
         } else {
-          // Fallback to mock data if experience not found in database
-          const mockExperience = MOCK_EXPERIENCES[id as string];
-          if (mockExperience) {
-            setExperience(mockExperience as unknown as ExperienceWithRelations);
-          } else {
-            setError('Experience not found');
-            return;
+          // Experience not found in database - try mock data for development/testing
+          if (import.meta.env.DEV) {
+            const mockExperience = MOCK_EXPERIENCES[id as string];
+            if (mockExperience) {
+              logger.info('Using mock experience data for development:', id);
+              setExperience(mockExperience as unknown as ExperienceWithRelations);
+              toast({
+                title: "Development Mode",
+                description: "Using mock data for this experience",
+                variant: "default"
+              });
+              return;
+            }
           }
+          
+          setError('Experience not found. This experience may have been removed or is no longer available.');
+          return;
         }
         } catch (error: unknown) {
           logger.error('Error fetching experience:', error);
-        
-        // Try fallback to mock data on database error too
-        const mockExperience = MOCK_EXPERIENCES[id as string];
-        if (mockExperience) {
-          setExperience(mockExperience as unknown as ExperienceWithRelations);
-        } else {
+          
+          // In development, fall back to mock data if database is unavailable
+          if (import.meta.env.DEV) {
+            const mockExperience = MOCK_EXPERIENCES[id as string];
+            if (mockExperience) {
+              logger.info('Database error - using mock experience data:', id);
+              setExperience(mockExperience as unknown as ExperienceWithRelations);
+              toast({
+                title: "Development Mode - Database Error",
+                description: "Using mock data. Check console for details.",
+                variant: "default"
+              });
+              return;
+            }
+          }
+          
           setError(error instanceof Error ? error.message : "Unknown error");
           toast({
             title: "Error loading experience",
             description: error instanceof Error ? error.message : "Unknown error",
             variant: "destructive"
           });
+        } finally {
+          setLoading(false);
         }
-      } finally {
-        setLoading(false);
-      }
-    };
+      };
 
     fetchExperience();
   }, [id, toast]);

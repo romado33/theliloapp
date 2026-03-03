@@ -150,6 +150,49 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 
+  /* Accessibility: Focus styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+
+  /* Ensure buttons and interactive elements have visible focus */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply ring-2 ring-primary ring-offset-2;
+  }
+
+  /* Screen reader only content */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Skip to main content link for keyboard users */
+  .skip-to-main {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    padding: 8px 16px;
+    text-decoration: none;
+    z-index: 9999;
+  }
+
+  .skip-to-main:focus {
+    top: 0;
+  }
+
   /* Custom scrollbar styling */
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -160,7 +203,7 @@ All colors MUST be HSL.
     display: none;
   }
 
-  /* Ensure animations work properly */
+  /* Ensure animations work properly - respect user preferences */
   @media (prefers-reduced-motion: no-preference) {
     .animate-fade-in {
       animation: fade-in 0.6s ease-out forwards;
@@ -172,6 +215,17 @@ All colors MUST be HSL.
     
     .animate-bounce-soft {
       animation: bounce-soft 0.8s ease-out forwards;
+    }
+  }
+
+  /* Disable animations for users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
     }
   }
 }

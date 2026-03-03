@@ -16,6 +16,14 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    headers: {
+      // Security headers for development
+      'X-Frame-Options': 'DENY',
+      'X-Content-Type-Options': 'nosniff',
+      'X-XSS-Protection': '1; mode=block',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Permissions-Policy': 'geolocation=(self), microphone=(), camera=()',
+    },
   },
   plugins: [
     react(),
@@ -41,7 +49,24 @@ export default defineConfig(({ mode }) => ({
         chunkFileNames: `assets/[name]-${buildId}-[hash].js`,
         entryFileNames: `assets/[name]-${buildId}-[hash].js`,
         assetFileNames: `assets/[name]-${buildId}-[hash].[ext]`,
+        // Manual chunking for better code splitting
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select'],
+          'query-vendor': ['@tanstack/react-query'],
+          'supabase-vendor': ['@supabase/supabase-js'],
+        },
       },
     },
+    // Optimize build
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: mode === 'production',
+        drop_debugger: mode === 'production',
+      },
+    },
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 1000,
   },
 }));

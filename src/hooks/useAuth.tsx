@@ -213,9 +213,24 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     }
   };
 
-  const devBypass = import.meta.env.MODE === 'development'
+  const devBypass = (import.meta.env.MODE === 'development' && 
+                     !window.location.hostname.includes('lovable.app') &&
+                     !window.location.hostname.includes('vercel.app') &&
+                     import.meta.env.VITE_DEV_BYPASS_PASSWORD)
     ? async (role: 'user' | 'host') => {
         try {
+          // Additional security check: require password in localStorage or prompt
+          const savedPassword = localStorage.getItem('__DEV_BYPASS_PASSWORD');
+          const envPassword = import.meta.env.VITE_DEV_BYPASS_PASSWORD;
+          
+          if (savedPassword !== envPassword) {
+            const userPassword = prompt('Enter dev bypass password:');
+            if (userPassword !== envPassword) {
+              throw new Error('Invalid dev bypass password');
+            }
+            localStorage.setItem('__DEV_BYPASS_PASSWORD', userPassword);
+          }
+          
           // Set dev bypass flag in window and localStorage
           (window as any).__DEV_BYPASS_ENABLED = true;
           localStorage.setItem('__DEV_BYPASS_ROLE', role);
@@ -276,7 +291,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
         }
       }
     : async () => {
-        throw new Error('Dev bypass is only available in development');
+        throw new Error('Dev bypass is only available in local development');
       };
 
   const value = useMemo(() => ({

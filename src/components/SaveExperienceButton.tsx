@@ -5,6 +5,7 @@ import { useSavedExperiences } from '@/hooks/useSavedExperiences';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { ARIA_LABELS } from '@/lib/accessibility';
 
 interface SaveExperienceButtonProps {
   experienceId: string;
@@ -44,8 +45,10 @@ const SaveExperienceButton: React.FC<SaveExperienceButtonProps> = ({
       variant={variant}
       size={size}
       onClick={handleClick}
+      aria-label={isSaved ? ARIA_LABELS.removeSaved : ARIA_LABELS.saveExperience}
+      aria-pressed={isSaved}
       className={cn(
-        'transition-colors',
+        'transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2',
         isSaved && 'text-red-500 border-red-500 hover:bg-red-50',
         className
       )}
@@ -55,7 +58,8 @@ const SaveExperienceButton: React.FC<SaveExperienceButtonProps> = ({
           'w-4 h-4',
           showLabel && 'mr-2',
           isSaved && 'fill-current'
-        )} 
+        )}
+        aria-hidden="true"
       />
       {showLabel && (isSaved ? 'Saved' : 'Save')}
     </Button>
