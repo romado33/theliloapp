@@ -32,7 +32,7 @@ import ContactHostButton from '@/components/ContactHostButton';
 import { SocialShareButtons } from '@/components/SocialShareButtons';
 import { WaitlistButton } from '@/components/WaitlistButton';
 import { ReportContentButton } from '@/components/ReportContentButton';
-import { MOCK_EXPERIENCES, type MockExperience } from '@/lib/experienceMockData';
+import { MOCK_EXPERIENCES, GALLERY_IMAGES, type MockExperience } from '@/lib/experienceMockData';
 import { useReviews } from '@/hooks/useReviews';
 
 type ExperienceWithRelations = Experience & {
@@ -426,7 +426,7 @@ const ExperienceDetails = () => {
               </div>
               {images.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto">
-                  {images.map((image, index) => (
+                  {images.map((image: string, index: number) => (
                     <button
                       key={index}
                       onClick={() => setSelectedImage(index)}
