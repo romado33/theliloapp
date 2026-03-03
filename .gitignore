@@ -23,8 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment files (never commit these!)
-.env
+# Environment files
+# Note: .env is committed for Lovable compatibility (contains public anon keys only)
+# Never commit .env.local or files with actual secrets
 .env.local
 .env.development
 .env.production
@@ -32,7 +33,7 @@ dist-ssr
 .env.test
 .env*.local
 
-# Keep only .env.example for reference
+# Keep .env.example for reference
 
 # Duplicate/backup directories
 theliloapp/
