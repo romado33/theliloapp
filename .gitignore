@@ -33,3 +33,6 @@ dist-ssr
 .env*.local
 
 # Keep only .env.example for reference
+
+# Duplicate/backup directories
+theliloapp/
