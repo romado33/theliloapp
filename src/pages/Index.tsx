@@ -13,81 +13,60 @@ import { useRecommendations } from "@/hooks/useRecommendations";
 import { useBatchRatings } from "@/hooks/useReviews";
 import { TrendingUp, Heart, Database } from "lucide-react";
 import heroImage from "@/assets/hero-image.jpg";
-import potteryClass from "@/assets/pottery-class.jpg";
-import farmersMarket from "@/assets/farmers-market.jpg";
-import cookingClass from "@/assets/cooking-class.jpg";
 import type { SearchResult } from "@/types";
 import { getImageFromUrl } from "@/lib/imageMap";
-
-// Mock experiences using imported assets
-const mockExperiences = [
-  {
-    id: "550e8400-e29b-41d4-a716-446655440001",
-    title: "Feed Animals & Learn About Farm Life",
-    image: potteryClass,
-    category: "Farm & Animals",
-    price: 35,
-    duration: "2 hours",
-    rating: 4.9,
-    reviewCount: 47,
-    location: "Manotick",
-    hostName: "Sarah & Family Farm",
-    maxGuests: 6,
-    isNew: true,
-  },
-  {
-    id: "550e8400-e29b-41d4-a716-446655440002",
-    title: "Backyard Beekeeping Experience",
-    image: farmersMarket,
-    category: "Nature & Learning",
-    price: 25,
-    duration: "1.5 hours",
-    rating: 4.9,
-    reviewCount: 38,
-    location: "Kanata",
-    hostName: "The Johnson Family",
-    maxGuests: 4,
-  },
-  {
-    id: "550e8400-e29b-41d4-a716-446655440003",
-    title: "Kids Pottery & Clay Making",
-    image: cookingClass,
-    category: "Arts & Crafts",
-    price: 40,
-    duration: "2 hours",
-    rating: 4.8,
-    reviewCount: 62,
-    location: "Westboro",
-    hostName: "Maya's Art Studio",
-    maxGuests: 8,
-  },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [showHostForm, setShowHostForm] = useState(false);
   const { user, profile, loading, currentRole } = useAuth();
   const { recommendations, loading: recommendationsLoading } = useRecommendations();
+
+  // Fetch real experiences from DB
+  const [experiences, setExperiences] = useState<any[]>([]);
+  const [experiencesLoading, setExperiencesLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchExperiences = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('experiences')
+          .select(`
+            id, title, location, price, duration_hours, max_guests, image_urls,
+            categories ( name ),
+            profiles ( first_name )
+          `)
+          .eq('is_active', true)
+          .limit(12);
+
+        if (!error && data) {
+          setExperiences(data);
+        }
+      } catch (e) {
+        console.error('Failed to fetch experiences:', e);
+      } finally {
+        setExperiencesLoading(false);
+      }
+    };
+    fetchExperiences();
+  }, []);
 
   const handleSearchResults = (results: SearchResult[]) => {
     setSearchResults(results);
   };
 
-  // Handle redirects in useEffect to avoid early hook calls
   useEffect(() => {
     if (user && profile && currentRole === 'host') {
       navigate('/host');
     }
   }, [user, profile, currentRole, navigate]);
 
-  // Show welcome screen for logged-in non-host users who haven't onboarded
   if (user && profile && !profile.onboarded && !profile.is_host) {
     return <WelcomeScreen onComplete={() => navigate(0)} />;
   }
 
-  // Show loading screen while auth is loading
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-lilo-green/20 via-background to-lilo-blue/20 flex items-center justify-center">
@@ -96,7 +75,6 @@ const Index = () => {
     );
   }
 
-  // Guest view - regular home page
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -121,7 +99,6 @@ const Index = () => {
               Connect with Ottawa neighbors who share authentic, family-friendly experiences. From local farms to artisan workshops.
             </p>
             
-            {/* Hero Search */}
             <SearchInterface 
               onResultsChange={handleSearchResults}
               showFilters={false}
@@ -196,21 +173,11 @@ const Index = () => {
             
             <FeaturedExperiencesGrid 
               searchResults={searchResults}
-              mockExperiences={mockExperiences}
+              dbExperiences={experiences}
               selectedCategory={selectedCategory}
+              isLoading={experiencesLoading}
             />
-            
-            {searchResults.length === 0 && selectedCategory !== "all" && (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground text-lg">
-                  No experiences found for the selected category. Try a different search or category.
-                </p>
-              </div>
-            )}
           </div>
-
-          {/* Developer Data Seeder - Temporarily disabled due to module cache issues */}
-          {/* Will be re-enabled after cache clears */}
 
           {/* CTA Section */}
           <div className="bg-gradient-brand rounded-2xl p-8 md:p-12 text-center text-white animate-fade-in shadow-strong">
@@ -260,23 +227,32 @@ const Index = () => {
 // Separate component for featured experiences - batches all ratings in ONE request
 interface FeaturedExperiencesGridProps {
   searchResults: SearchResult[];
-  mockExperiences: typeof mockExperiences;
+  dbExperiences: any[];
   selectedCategory: string;
+  isLoading: boolean;
 }
 
-const FeaturedExperiencesGrid = ({ searchResults, mockExperiences, selectedCategory }: FeaturedExperiencesGridProps) => {
-  // Get all experience IDs to batch-fetch ratings
+const FeaturedExperiencesGrid = ({ searchResults, dbExperiences, selectedCategory, isLoading }: FeaturedExperiencesGridProps) => {
   const experienceIds = useMemo(() => {
     if (searchResults.length > 0) {
       return searchResults.map(e => e.id);
     }
-    return mockExperiences
-      .filter(e => selectedCategory === "all" || e.category.toLowerCase().includes(selectedCategory))
+    return dbExperiences
+      .filter(e => selectedCategory === "all" || (e.categories?.name || '').toLowerCase().includes(selectedCategory))
       .map(e => e.id);
-  }, [searchResults, mockExperiences, selectedCategory]);
+  }, [searchResults, dbExperiences, selectedCategory]);
 
-  // Single batch request for ALL ratings
   const { ratings } = useBatchRatings(experienceIds);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="animate-pulse bg-muted rounded-lg h-72"></div>
+        ))}
+      </div>
+    );
+  }
 
   if (searchResults.length > 0) {
     return (
@@ -310,13 +286,25 @@ const FeaturedExperiencesGrid = ({ searchResults, mockExperiences, selectedCateg
     );
   }
 
-  const filteredMock = mockExperiences.filter(experience => 
-    selectedCategory === "all" || experience.category.toLowerCase().includes(selectedCategory)
+  const filtered = dbExperiences.filter(experience => 
+    selectedCategory === "all" || (experience.categories?.name || '').toLowerCase().includes(selectedCategory)
   );
+
+  if (filtered.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground text-lg">
+          {selectedCategory !== "all" 
+            ? "No experiences found for the selected category. Try a different search or category."
+            : "No experiences available yet. Check back soon!"}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 px-4">
-      {filteredMock.map((experience, index) => {
+      {filtered.map((experience, index) => {
         const ratingData = ratings[experience.id];
         return (
           <div 
@@ -325,9 +313,17 @@ const FeaturedExperiencesGrid = ({ searchResults, mockExperiences, selectedCateg
             style={{ animationDelay: `${index * 0.1}s` }}
           >
             <ExperienceCard 
-              {...experience}
-              rating={ratingData?.rating || experience.rating}
-              reviewCount={ratingData?.count || experience.reviewCount}
+              id={experience.id}
+              title={experience.title}
+              image={getImageFromUrl(experience.image_urls?.[0] || '/placeholder.svg')}
+              category={experience.categories?.name || "Experience"}
+              price={experience.price}
+              duration={`${experience.duration_hours} hours`}
+              rating={ratingData?.rating || 0}
+              reviewCount={ratingData?.count || 0}
+              location={experience.location}
+              hostName={experience.profiles?.first_name || "Local Host"}
+              maxGuests={experience.max_guests}
             />
           </div>
         );
