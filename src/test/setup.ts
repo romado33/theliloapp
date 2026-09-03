@@ -1,4 +1,6 @@
 import '@testing-library/jest-dom';
+
+declare const global: typeof globalThis & Record<string, any>;
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi, beforeAll, afterAll } from 'vitest';
 

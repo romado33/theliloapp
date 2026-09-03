@@ -485,7 +485,7 @@ serve(async (req) => {
     }
 
     // Remove embedding data from results to reduce response size
-    const cleanResults = shapedResults.map(({ embedding, ...rest }) => rest);
+    const cleanResults = shapedResults.map(({ embedding, ...rest }: SearchResult & { embedding?: number[] }) => rest);
 
     return new Response(
       JSON.stringify({ 

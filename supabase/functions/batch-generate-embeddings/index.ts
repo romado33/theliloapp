@@ -110,7 +110,7 @@ serve(async (req) => {
           
         } catch (error) {
           console.error(`Error processing experience ${experience.id}:`, error);
-          return { success: false, id: experience.id, error: error.message };
+          return { success: false, id: experience.id, error: (error as Error).message };
         }
       });
 
