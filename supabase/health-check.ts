@@ -8,7 +8,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://baigglncdwirfwlxagcl.supabase.co';
-const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhaWdnbG5jZHdpcmZ3bHhhZ2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MzA0MjEsImV4cCI6MjA3MjUwNjQyMX0.xC31gmu9kL5mGGiKXwEHC0TfGYOOcq2bGYjhWNdXLKk';
+const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhaWdnbG5jZHdpcmZ3bHhhZ2NsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MzA0MjEsImV4cCI6MjA3MjUwNjQyMX0.xC31gmu9kL5mGGiKXwEHC0TfGYOOcq2bGYjhWNdXLKk';  // gitleaks:allow
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
